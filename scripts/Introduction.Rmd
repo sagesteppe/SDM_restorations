@@ -41,11 +41,24 @@ The former are to assist in challenges of finding populations and restoration ef
 In attempts to reduce the discrepancies between the fundamental and realized niche, to assist field workers in finding populations, known occurrences are combined with cost-surfaces and predictions of suitability models to provide a consensus surface and emulate the restrictions of dispersal to species distributions. 
 Finally, cell statistics are used to create aggregate scores for patches of suitable habitat which have been shown to correlate with abundance. 
 
+```{r}
+library(terra)
+library(tidyverse)
+r <- rast(nrows=18, ncols=36, xmin=0)
+r[1:2, 5:8] <- 1.1
+r[5:8, 2:6] <- 1.2
+r[7:12, 22:36] <- 1.3
+r[15:16, 18:29] <- 1.4
+p <- patches(r)
 
-Distance = aggregate 
+plot(p)
 
-% Species Cover on plot = sum(aggregate suitable cells)
-% Species Cover on plot = sqrt(sum(aggregate suitable cells))
-% Species Cover on plot = log(sum(aggregate suitable cells))
+tibble(
+  Patch = values(p)[!is.na(values(p))],
+  Suitability = values(r)[!is.na(values(p))]
+) %>% 
+  sample_n(10)
+```
+
 
 

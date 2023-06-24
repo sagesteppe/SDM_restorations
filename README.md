@@ -75,8 +75,19 @@ Variables indicated by a '*' exist only for taxa which have evident adaptions to
 
 # Correlation between patch habitat suitable and abundance
 
-AIM and FIA data, perhaps merge the total intersects, to use as a predictor of the the total score of adjacent suitable cells. 
+Assess, Inventory, and Monitor data can be used to test the relationship between modelled habitat suitability and field measured abundance. Rather than simple relating the value of modelled suitability at a single cell, we can sum the modelled suitability of multiple cells, which together theoretically form a population. Patches may be identified using terras 'get_patches' function. 
 
-% Species Cover on plot ~ sum(aggregate suitable cells) | species  
-% Species Cover on plot ~ sqrt(sum(aggregate suitable cells)) | species    
-% Species Cover on plot ~ log(sum(aggregate suitable cells)) | species  
+
+
+Thereafter, 
+The suitability of any discrete patch of cells can be defined as: 
+
+$$ \sum_{\text{i = 1}}^{n} {x_{i}} $$
+Where *n* represents each cell in a patch. Hence it is a summation of total suitability across the range. I anticipate this value best be transformed to reduce
+
+$$ \text{% Cover ~} sqrt{ \sum_{\text{Suitability Score}}^{\text{Patch}}} $$
+$$ \text{cover} = sqrt{ \sum(suitability scores)} $$
+
+% Cover ~ sum(suitable cells)
+% Cover ~ sqrt(sum(aggregate suitable cells)) 
+% Cover ~ log(sum(aggregate suitable cells))
