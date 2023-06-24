@@ -1,0 +1,34 @@
+
+# Introduction 
+
+Arid and semi-arid lands constitute the plurality of earths terrestrial surface. 
+These areas are used extensively for raising agricultural animals, such as cattle and sheep, without wholesale conversion of the land to agronomic settings, i.e. pastoral or rangelands. 
+Accordingly arid lands represent an enormous proportion of Earth's natural areas.
+However agricultural related use of these land have often lead to degradation of them
+Historic actions and phenomena such as fire suppression, shrub encroachment, and overgrazing, in combination with climate change and drought are resulting in wildfires and their subsequent burns scars which are often dominated by just a handful of invasive species.
+The prevalence of these invasive species decrease the ability of the land to serve multiple ecosystem services, such as to foster both wildlife and pastoral goals, and in extreme cases may preclude uses of the land by both wildlife and humans. 
+
+In order to maintain the ecosystem services of burned areas restoration plantings have long been used. 
+More recently a focus on utilizing native species, and now locally adapted genotypes, has been adopted as these species and populations have been shown to provide ecosystem services to a variety of wildlife and stakeholders, and they are often more capable of establishing at sites. 
+However, the acquisition of native plant materials in the volumes required for restoration, especially in fire prone years, is not yet feasible. 
+In an attempt to provide for the demand of locally adapted native plant materials partnerships with farmers who are planting wild harvested seeds, and harvesting their seed for sale to restoration performing agencies has increased. However, the implementation of these goals still face significant challenges.
+
+We anticipate that three particular challenges which are currently being faced in developing and delivering a native seed supply in the Great Basin Ecoregion are ubiquitous to all supply chains. 
+1) Locating populations of adequate size that they can have enough viable seed collected from that that it is economically viable for farmers to grow out from the seed lots while not adversely affecting the demographic vital rates of the population. 
+2) Minimizing the adverse affects of artificial selection of these seed lines while being increased in agricultural settings. 
+3) Ensuring that farmed seeds are applied to the areas in burn scars which they have the highest probability of success. 
+We posit that Species Distribution Modelling (SDMs) (or Environmental Niche Modelling (ENM)) may be used as an heuristic to increase the probability of success at each of these stages, and the development of these models are markedly cheaper than purely empirical approaches. 
+
+Locating populations of native species which are large enough to support a seed collection which is large enough to establish an agricultural lot is difficult. 
+The areas over which native seed may feasibly be collected in semi-arid areas, which often times have higher proportion of natural areas relative to other settings, are enormous and have generally had their floras coarsely mapped. 
+Restoration approaches for sourcing locally adapted seed such as Seed Transfer Zones (STZ's), predictive provincing, or Omernik Level 4 ecoregions, increase the relevancy of identifying many populations of suitable for collections across ranges. 
+Locating such populations is difficult given the lengths of growing seasons, human resources, and the length of time required to collect enough viable seed. 
+
+Agricultural cultivation presents multiple steps which alter the frequency of gene forms (alleles) within the seed lots via unintentional artificial selection.
+It is theorized that reducing these effects will result in seed lots with a proportion of more individuals with gene forms more typical of the wild population (F~0~), than the F1, and hence have more individuals likely to establish in a restoration. 
+A method to reduce the demographic bottlenecks associated with recruitment of an individual, and to reduce over-representation of seed from species which are more fit in cultivated settings than the wild may be to reduce the environmental dissimilarity between the wild and cultivated settings. 
+These models may also help farmers prioritize which species to grow to have the most successful crops, and to help recruit new farmers to dedicate portions of there fields to developing native plant materials. 
+
+Planning a restoration following a wildfire is a difficult process, due to limitations of both fiscal budget, time, human resources, and knowledge of the heterogeneity of the affected areas. 
+Species Distribution Models offer a line of evidence which practitioners may use to identify species which are most suitable for the burned areas in a simple readily query friendly format. 
+The utilization of them 

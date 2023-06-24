@@ -56,27 +56,5 @@ d) flag all records which are located within a burn scar, which occurred after t
 d1) for that species, use plot based occurrence data, and years since burn interacting with cover of invasive annual grasses to model probability of an extant population at the site.   
 d2) randomly sample flagged records with probabilities defined in d1.   
 
-# Background 
-
-Arid and semi-arid lands constitute the plurality of earths terrestrial surface. 
-These areas have been used both historically and currently for raising animals, such as cattle and sheep, without wholesale conversion of the land to agronomic settings, i.e. pastoral or rangelands.
-These agricultural related uses of land have often lead to degradation of these areas.
-Historic actions and phenomena such as fire suppression, shrub encroachment, over grazing, in combination with climate change and droughts are resulting in wildfires and there subsequent burns scars which are often dominated by a handful of invasive species.
-These invasive species decrease the ability of the land to serve the natural wildlife, and human uses of the land, and in extreme cases preclude uses of the land by both wildlife and humans. 
-
-In order to prevent the degradation of burned areas into stands of invasive species, restoration plantings have long been used. 
-More recently a focus on utilizing native species, and now locally adapted genotypes, has been adopted as these species and populations have been shown to provide ecosystem services to a variety of wildlife and stakeholders, and they are often more capable of establishing at sites. 
-However, the acquisition of native plant materials in the volumes required for restoration, especially in fire prone years, is not yet feasible. 
-In an attempt to provide for the demand of locally adapted native plant materials partnerships with farmers who are planting wild harvested seeds, and harvesting their seed for sale to restoration performing agencies has increased. 
-
-This solution still faces three challenging steps. 
-1) Locating populations of adequate size that they can have enough viable seed collected from that that it is  economically viable for farmers to grow out from the seed lots while not adversely affecting the demographic vital rates of the population. 
-2) Minimizing the adverse affects of artificial selection of these seed lines while being increased in agricultural settings. 
-3) Ensuring that farmed seeds are applied to the areas in burn scars which they have the highest probability of success. 
-We posit that Species Distribution Modelling (SDMs) (or Environmental Niche Modelling (ENM)) may be used as an heuristic to increase the probability of success for each challenge. 
-
-The areas over which native seed may feasibly be collected in semi-arid areas, which often times have higher proportion of natural areas relative to other settings, are enormous and have generally had their floras coarsely mapped. 
-Restoration approaches for sourcing locally adapted seed such as Seed Transfer Zones (STZ's), predictive provincing, or Omernik Level 4 ecoregions, increase the relevancy of identifying many populations of suitable for collections across ranges. 
-Locating such populations is difficult given the lengths of growing seasons, human resources, and 
 
 
