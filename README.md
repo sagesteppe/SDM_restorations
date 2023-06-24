@@ -13,7 +13,7 @@ Two major models are created, one which focuses on identifying areas of fundamen
 |  6.   |        Mean Temperature of Coldest Quarter (BIO11)      |        PRISM / CLIMATENA / DISMO      |     both     |
 |  7.   |              Mean annual precipitation (BIO12)          |        PRISM / CLIMATENA / DISMO      |     both     |
 |  8.   |         Precipitation of Warmest Quarter (BIO18)        |        PRISM / CLIMATENA / DISMO      |     both     |
-|  9.   |        Precipitation of Colest Quarter (BIO19)          |        PRISM / CLIMATENA / DISMO      |     both     |
+|  9.   |        Precipitation of Coldest Quarter (BIO19)         |        PRISM / CLIMATENA / DISMO      |     both     |
 | 10.   |                Mean annual cloudiness - MODIS           |          Wilson et al. 2016           |     both     |
 | 12.   |         Beginning of the frost-free period (gdgfgd0)    |              Wang et al.              |     both     |
 | 12.   |                   Climatic moisture deficit             |              Wang et al.              |     both     |
@@ -57,4 +57,26 @@ d1) for that species, use plot based occurrence data, and years since burn inter
 d2) randomly sample flagged records with probabilities defined in d1.   
 
 
+# Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
 
+Cost surfaces reflect historic connectivity of locations prior to European settlement.
+
+|  Layer  |                       Description                       |              Source                   |    Effect      |
+| :-----: | :-----------------------------------------------------: | :-----------------------------------: | :------------: |
+|   1.    |                 Terrain Ruggedness Index                |             Geomorpho90               |    negative    |
+|   2.    |        Log-transformed distance to surface water        |     Global Surface Water Explorer     |    negative    |
+|   3.    |      Log-transformed distance to perennial streams      |     National Hydrography Dataset      |    negative    |
+|   4.    |                      Percent Barren                     |              EarthEnv                 |    negative    |
+|   5.    |          Max Temperature of Warmest Month (BIO5)        |        PRISM / CLIMATENA / DISMO      |    negative    |
+|   6.    |                     Wind Direction*                     |              rWind/GFS                |   anisotropic  |
+|   7.    |                       Wind Speed*                       |              rWind/GFS                |    positive    |
+
+Variables indicated by a '*' exist only for taxa which have evident adaptions to wind dispersal, notably those of the Asteraceae.
+
+# Correlation between patch habitat suitable and abundance
+
+AIM and FIA data, perhaps merge the total intersects, to use as a predictor of the the total score of adjacent suitable cells. 
+
+% Species Cover on plot ~ sum(aggregate suitable cells) | species  
+% Species Cover on plot ~ sqrt(sum(aggregate suitable cells)) | species    
+% Species Cover on plot ~ log(sum(aggregate suitable cells)) | species  

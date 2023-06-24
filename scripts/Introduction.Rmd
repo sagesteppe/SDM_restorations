@@ -1,12 +1,14 @@
+---
+title: "Introduction"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: html_document
+---
 
-# Introduction 
-
-Arid and semi-arid lands constitute the plurality of earths terrestrial surface. 
-These areas are used extensively for raising agricultural animals, such as cattle and sheep, without wholesale conversion of the land to agronomic settings, i.e. pastoral or rangelands. 
-Accordingly arid lands represent an enormous proportion of Earth's natural areas.
-However agricultural related use of these land have often lead to degradation of them
-Historic actions and phenomena such as fire suppression, shrub encroachment, and overgrazing, in combination with climate change and drought are resulting in wildfires and their subsequent burns scars which are often dominated by just a handful of invasive species.
-The prevalence of these invasive species decrease the ability of the land to serve multiple ecosystem services, such as to foster both wildlife and pastoral goals, and in extreme cases may preclude uses of the land by both wildlife and humans. 
+Drylands constitute roughly ~45% of earths surface (@pruavualie2016drylands). 
+These water-limited areas are commonly used as range or pasture lands, hence much of the land is maintained in natural or semi-natural conditions (@reynolds2007globa, @asner2004grazingl). 
+Accordingly drylands lands represent an enormous proportion of Earth's remaining natural areas, while fostering roughly 2.5 billion persons, however many of these areas are in ecological states which do not maximize their ecosystem services to either human or wildlife (@reynolds2007global, @bestelmeyer2015desertification).
+Historic actions and phenomena such as fire suppression, shrub encroachment, and overgrazing, in combination with climate change and drought are resulting in severe wildfires and their subsequent burns scars which may lead to a regime shifts wherein invasive species dominate burned sites for the foreseeable future (@bestelmeyer2015desertification).
+The prevalence of these invasive species decrease the ability of the land to serve multiple ecosystem services, such as to foster both wildlife and pastoral goals, and in extreme cases may preclude uses of the land by both wildlife and humans, and may have require high fiscal costs to return to a more desirable state.
 
 In order to maintain the ecosystem services of burned areas restoration plantings have long been used. 
 More recently a focus on utilizing native species, and now locally adapted genotypes, has been adopted as these species and populations have been shown to provide ecosystem services to a variety of wildlife and stakeholders, and they are often more capable of establishing at sites. 
@@ -21,14 +23,29 @@ We posit that Species Distribution Modelling (SDMs) (or Environmental Niche Mode
 
 Locating populations of native species which are large enough to support a seed collection which is large enough to establish an agricultural lot is difficult. 
 The areas over which native seed may feasibly be collected in semi-arid areas, which often times have higher proportion of natural areas relative to other settings, are enormous and have generally had their floras coarsely mapped. 
-Restoration approaches for sourcing locally adapted seed such as Seed Transfer Zones (STZ's), predictive provincing, or Omernik Level 4 ecoregions, increase the relevancy of identifying many populations of suitable for collections across ranges. 
+Restoration approaches for sourcing locally adapted seed such as Seed Transfer Zones (STZ's), predictive provincing, or Omernik Level 4 ecoregions, increase the relevancy of identifying many populations suitable for collections across a species range. 
 Locating such populations is difficult given the lengths of growing seasons, human resources, and the length of time required to collect enough viable seed. 
 
-Agricultural cultivation presents multiple steps which alter the frequency of gene forms (alleles) within the seed lots via unintentional artificial selection.
-It is theorized that reducing these effects will result in seed lots with a proportion of more individuals with gene forms more typical of the wild population (F~0~), than the F1, and hence have more individuals likely to establish in a restoration. 
+Agricultural cultivation presents multiple steps which may alter the frequency of gene forms (alleles) within the seed lots via unintentional artificial selection.
+It is theorized that reducing these effects will result in seed lots with a proportion of more individuals with gene forms more typical of the planted wild population, than the offspring derived from it, and hence have more individuals likely to establish in a restoration. 
 A method to reduce the demographic bottlenecks associated with recruitment of an individual, and to reduce over-representation of seed from species which are more fit in cultivated settings than the wild may be to reduce the environmental dissimilarity between the wild and cultivated settings. 
 These models may also help farmers prioritize which species to grow to have the most successful crops, and to help recruit new farmers to dedicate portions of there fields to developing native plant materials. 
 
 Planning a restoration following a wildfire is a difficult process, due to limitations of both fiscal budget, time, human resources, and knowledge of the heterogeneity of the affected areas. 
 Species Distribution Models offer a line of evidence which practitioners may use to identify species which are most suitable for the burned areas in a simple readily query friendly format. 
-The utilization of them 
+The utilization of them ...
+
+Herein we develop simple Species Distribution Models, using a variety of predictors which are global in coverage - or for which global analogs exist, and species occurrences from publicly available and rangeland monitoring datasets, to assist in an ongoing effort to develop native plant materials in the Great Basin Ecoregion (U.S.A.). 
+Two sets of models are generated for each species, one set which reflects the natural, in particular biophysical the settings of the species, and another set which more closely reflects the climatic envelope and soil properties of the species. 
+The former are to assist in challenges of finding populations and restoration efforts while the latter is to support seed increase endeavors.
+In attempts to reduce the discrepancies between the fundamental and realized niche, to assist field workers in finding populations, known occurrences are combined with cost-surfaces and predictions of suitability models to provide a consensus surface and emulate the restrictions of dispersal to species distributions. 
+Finally, cell statistics are used to create aggregate scores for patches of suitable habitat which have been shown to correlate with abundance. 
+
+
+Distance = aggregate 
+
+% Species Cover on plot = sum(aggregate suitable cells)
+% Species Cover on plot = sqrt(sum(aggregate suitable cells))
+% Species Cover on plot = log(sum(aggregate suitable cells))
+
+
