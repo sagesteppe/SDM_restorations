@@ -77,17 +77,28 @@ Variables indicated by a '*' exist only for taxa which have evident adaptions to
 
 Assess, Inventory, and Monitor data can be used to test the relationship between modelled habitat suitability and field measured abundance. Rather than simple relating the value of modelled suitability at a single cell, we can sum the modelled suitability of multiple cells, which together theoretically form a population. Patches may be identified using terras 'get_patches' function. 
 
-
-
 Thereafter, 
 The suitability of any discrete patch of cells can be defined as: 
 
-$$ \sum_{\text{i = 1}}^{n} {x_{i}} $$
-Where *n* represents each cell in a patch. Hence it is a summation of total suitability across the range. I anticipate this value best be transformed to reduce
+$$ PS =  \sum_{\text{i = 1}}^{n} {x_{i}} $$
+Where *n* represents each cell in a patch. Hence it is a summation of total suitability across the patch to create *PS*, patch suitability. I anticipate this value best be transformed to reduce the variation between large and small events, by either $\log(PS)$ or $\sqrt{PS}$. Subsequently, each species should be tested as an effect, wherein under the maximal model they are treated as a fixed effect. 
 
-$$ \text{% Cover ~} sqrt{ \sum_{\text{Suitability Score}}^{\text{Patch}}} $$
-$$ \text{cover} = sqrt{ \sum(suitability scores)} $$
+These steps would develop this set of candidate models
 
-% Cover ~ sum(suitable cells)
-% Cover ~ sqrt(sum(aggregate suitable cells)) 
-% Cover ~ log(sum(aggregate suitable cells))
+<center>
+% Cover ~ PS | species  
+% Cover ~ sqrt(PS) | species  
+% Cover ~ log(PS) | species  
+
+% Cover ~ PS * species  
+% Cover ~ sqrt(PS) * species  
+% Cover ~ log(PS) * species  
+
+% Cover ~ PS + species  
+% Cover ~ sqrt(PS) + species  
+% Cover ~ log(PS) + species  
+</center>
+
+The model with the highest correlation coefficient to the occurrence data would be the final model indicating the strength of correlation between the SDM's and in field measured occurrence.
+
+In instances where multiple field observations exist per patch, patches will be decomposed so that the cells closest to the plots become the unit at which PS is calculated.

@@ -631,6 +631,8 @@ d1.</li>
 <div id="better-matching-the-fundamental-niche-to-population-occurrence-via-cost-surfaces" class="section level1">
 <h1>Better matching the Fundamental Niche to Population Occurrence via
 Cost Surfaces</h1>
+<p>Cost surfaces reflect historic connectivity of locations prior to
+European settlement.</p>
 <table>
 <colgroup>
 <col width="6%" />
@@ -649,54 +651,42 @@ Cost Surfaces</h1>
 <tbody>
 <tr class="odd">
 <td align="center">1.</td>
-<td align="center">Slope</td>
-<td align="center">Geomorpho90</td>
-<td align="center">anisotropic</td>
-</tr>
-<tr class="even">
-<td align="center">2.</td>
-<td align="center">Terrain ruggedness Index</td>
+<td align="center">Terrain Ruggedness Index</td>
 <td align="center">Geomorpho90</td>
 <td align="center">negative</td>
 </tr>
-<tr class="odd">
-<td align="center">3.</td>
+<tr class="even">
+<td align="center">2.</td>
 <td align="center">Log-transformed distance to surface water</td>
 <td align="center">Global Surface Water Explorer</td>
 <td align="center">negative</td>
 </tr>
-<tr class="even">
-<td align="center">4.</td>
+<tr class="odd">
+<td align="center">3.</td>
 <td align="center">Log-transformed distance to perennial streams</td>
 <td align="center">National Hydrography Dataset</td>
 <td align="center">negative</td>
 </tr>
-<tr class="odd">
-<td align="center">5.</td>
+<tr class="even">
+<td align="center">4.</td>
 <td align="center">Percent Barren</td>
 <td align="center">EarthEnv</td>
 <td align="center">negative</td>
 </tr>
-<tr class="even">
-<td align="center">6.</td>
-<td align="center">Surface (0-5 cm) soil % clay</td>
-<td align="center">SoilGrids</td>
-<td align="center">positive</td>
-</tr>
 <tr class="odd">
-<td align="center">7.</td>
+<td align="center">5.</td>
 <td align="center">Max Temperature of Warmest Month (BIO5)</td>
 <td align="center">PRISM / CLIMATENA / DISMO</td>
 <td align="center">negative</td>
 </tr>
 <tr class="even">
-<td align="center">8.</td>
+<td align="center">6.</td>
 <td align="center">Wind Direction*</td>
 <td align="center">rWind/GFS</td>
 <td align="center">anisotropic</td>
 </tr>
 <tr class="odd">
-<td align="center">9.</td>
+<td align="center">7.</td>
 <td align="center">Wind Speed*</td>
 <td align="center">rWind/GFS</td>
 <td align="center">positive</td>
@@ -708,11 +698,36 @@ adaptions to wind dispersal, notably those of the Asteraceae.</p>
 </div>
 <div id="correlation-between-patch-habitat-suitable-and-abundance" class="section level1">
 <h1>Correlation between patch habitat suitable and abundance</h1>
-<p>AIM and FIA data, perhaps merge the total intersects, to use as a
-predictor of the the total score of adjacent suitable cells.</p>
-<p>% Species Cover on plot ~ sum(aggregate suitable cells) | species %
-Species Cover on plot ~ sqrt(sum(aggregate suitable cells)) | species %
-Species Cover on plot ~ log(sum(aggregate suitable cells)) | species</p>
+<p>Assess, Inventory, and Monitor data can be used to test the
+relationship between modelled habitat suitability and field measured
+abundance. Rather than simple relating the value of modelled suitability
+at a single cell, we can sum the modelled suitability of multiple cells,
+which together theoretically form a population. Patches may be
+identified using terras ‘get_patches’ function.</p>
+<p>Thereafter, The suitability of any discrete patch of cells can be
+defined as:</p>
+<p><span class="math display">\[ PS =  \sum_{\text{i = 1}}^{n} {x_{i}}
+\]</span> Where <em>n</em> represents each cell in a patch. Hence it is
+a summation of total suitability across the patch to create <em>PS</em>,
+patch suitability. I anticipate this value best be transformed to reduce
+the variation between large and small events, by either <span class="math inline">\(\log(PS)\)</span> or <span class="math inline">\(\sqrt{PS}\)</span>. Subsequently, each species
+should be tested as an effect, wherein under the maximal model they are
+treated as a fixed effect.</p>
+<p>These steps would develop this set of candidate models</p>
+<center>
+<p>% Cover ~ PS | species<br />
+% Cover ~ sqrt(PS) | species<br />
+% Cover ~ log(PS) | species</p>
+<p>% Cover ~ PS * species<br />
+% Cover ~ sqrt(PS) * species<br />
+% Cover ~ log(PS) * species</p>
+% Cover ~ PS + species<br />
+% Cover ~ sqrt(PS) + species<br />
+% Cover ~ log(PS) + species
+</center>
+<p>The model with the highest correlation coefficient to the occurrence
+data would be the final model indicating the strength of correlation
+between the SDM’s and in field measured occurrence.</p>
 </div>
 
 
