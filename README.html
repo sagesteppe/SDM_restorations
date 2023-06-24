@@ -706,11 +706,12 @@ which together theoretically form a population. Patches may be
 identified using terras ‘get_patches’ function.</p>
 <p>Thereafter, The suitability of any discrete patch of cells can be
 defined as:</p>
-<p><span class="math display">\[ PS =  \sum_{\text{i = 1}}^{n} {x_{i}}
-\]</span> Where <em>n</em> represents each cell in a patch. Hence it is
-a summation of total suitability across the patch to create <em>PS</em>,
-patch suitability. I anticipate this value best be transformed to reduce
-the variation between large and small events, by either <span class="math inline">\(\log(PS)\)</span> or <span class="math inline">\(\sqrt{PS}\)</span>. Subsequently, each species
+<p><span class="math display">\[PS =  \sum_{\text{i = 1}}^{n}
+{x_{i}}\]</span> Where <em>n</em> represents each cell in a patch. Hence
+it is a summation of total suitability across the patch to create
+<em>PS</em>, patch suitability. I anticipate this value best be
+transformed to reduce the variation between large and small events, by
+either <span class="math inline">\(\log(PS)\)</span> or <span class="math inline">\(\sqrt{PS}\)</span>. Subsequently, each species
 should be tested as an effect, wherein under the maximal model they are
 treated as a fixed effect.</p>
 <p>These steps would develop this set of candidate models</p>
@@ -728,6 +729,9 @@ treated as a fixed effect.</p>
 <p>The model with the highest correlation coefficient to the occurrence
 data would be the final model indicating the strength of correlation
 between the SDM’s and in field measured occurrence.</p>
+<p>In instances where multiple field observations exist per patch,
+patches will be decomposed so that the cells closest to the plots become
+the unit at which PS is calculated.</p>
 </div>
 
 

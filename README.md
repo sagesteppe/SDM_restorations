@@ -80,7 +80,7 @@ Assess, Inventory, and Monitor data can be used to test the relationship between
 Thereafter, 
 The suitability of any discrete patch of cells can be defined as: 
 
-$$ PS =  \sum_{\text{i = 1}}^{n} {x_{i}} $$
+$$PS =  \sum_{\text{i = 1}}^{n} {x_{i}}$$
 Where *n* represents each cell in a patch. Hence it is a summation of total suitability across the patch to create *PS*, patch suitability. I anticipate this value best be transformed to reduce the variation between large and small events, by either $\log(PS)$ or $\sqrt{PS}$. Subsequently, each species should be tested as an effect, wherein under the maximal model they are treated as a fixed effect. 
 
 These steps would develop this set of candidate models
