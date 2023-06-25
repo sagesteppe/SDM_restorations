@@ -1,6 +1,6 @@
 ## Variables and Sources for Environmental Niche Models
 
-Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms sites areas which the species has considerable niche overlap with. 
+Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms which the species has considerable niche overlap with. The full 'wild' models feature up to 38 variables, while the 'farm' models features ca. 26 variables. Both endeavors run step wise. 
 
 
 | Layer |                       Description                       |              Source                   |     Model    |      
@@ -44,20 +44,29 @@ Two major models are created, one which focuses on identifying areas of fundamen
 | 37.   |        Log-transformed distance to surface water        |     Global Surface Water Explorer     |     both     |
 | 38.   |                   Human Influence Index                 | TIGRIS/ BTS NARN/ HDX/ NLCD/ NASA     |     wild     |
 
-Some workflows for dealing with temporal mismatch between environmental variables and species occurrence records. 
+
+## Workflow for Presence/Absence generation and cleaning  
+
+Some considerations for dealing with temporal mismatch between environmental variables and species occurrence records. 
 
 In order to reduce the number of records which have questionable geographic integrity, no records before 1950 were acquired. 
 
-1) Reducing Historic Records  
-a) remove records with noted accuracy > 250 m  
-b) if multiple records exist per raster cell, reduce to most recent record.
-c) remove records on county centroids  
-d) flag all records which are located within a burn scar, which occurred after the date of observation.   
-d1) for that species, use plot based occurrence data, and years since burn interacting with cover of invasive annual grasses to model probability of an extant population at the site.   
-d2) randomly sample flagged records with probabilities defined in d1.   
+### Thinning Historic Records  
+a) remove records with noted coordinate uncertainty of > 270m  
+b) remove records on county centroids  
+c) if multiple records exist per raster cell, reduce to that with the lowest coordinate uncertainty, or the most recent
 
+### Processing Post Burn Records
+a) flag all historic records which are located within a burn scar, which occurred after the date of observation.    
+b) for that species, use plot based occurrence data, and years since burn interacting with cover of invasive annual grasses to model probability of an extant population at the site.  $\text{occurrence ~ year since fire * modelled invasive annual grass cover}$    
+c) randomly sample flagged records with probabilities defined in *b*  
 
-# Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
+### Processing Records in Sites Invaded by Invasive Annual Grasses
+a) flag all historic records which are located within an area with greater >10% invasive annual grass cover    
+b) for that species, use plot based occurrence data, and cover of invasive annual grasses to model probability of an extant population at the site.  $\text{occurrence ~ modelled invasive annual grass cover}$     
+c) randomly sample flagged records with probabilities defined in *b*  
+
+## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
 
 Cost surfaces reflect historic connectivity of locations prior to European settlement.
 
@@ -73,7 +82,7 @@ Cost surfaces reflect historic connectivity of locations prior to European settl
 
 Variables indicated by a '*' exist only for taxa which have evident adaptions to wind dispersal, notably those of the Asteraceae.
 
-# Correlation between patch habitat suitable and abundance
+## Correlation between patch habitat suitable and abundance
 
 Assess, Inventory, and Monitor data can be used to test the relationship between modelled habitat suitability and field measured abundance. Rather than simple relating the value of modelled suitability at a single cell, we can sum the modelled suitability of multiple cells, which together theoretically form a population. Patches may be identified using terras 'get_patches' function. 
 
@@ -86,18 +95,18 @@ Where *n* represents each cell in a patch. Hence it is a summation of total suit
 These steps would develop this set of candidate models
 
 <center>
-% Cover ~ PS | species  
-% Cover ~ sqrt(PS) | species  
-% Cover ~ log(PS) | species  
+% Cover ~ PS | species   
+% Cover ~ sqrt(PS) | species   
+% Cover ~ log(PS) | species   
 
-% Cover ~ PS * species  
-% Cover ~ sqrt(PS) * species  
-% Cover ~ log(PS) * species  
+% Cover ~ PS * species   
+% Cover ~ sqrt(PS) * species   
+% Cover ~ log(PS) * species   
 
-% Cover ~ PS + species  
-% Cover ~ sqrt(PS) + species  
-% Cover ~ log(PS) + species  
-</center>
+% Cover ~ PS + species   
+% Cover ~ sqrt(PS) + species   
+% Cover ~ log(PS) + species   
+</center> 
 
 The model with the highest correlation coefficient to the occurrence data would be the final model indicating the strength of correlation between the SDM's and in field measured occurrence.
 

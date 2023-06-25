@@ -356,8 +356,10 @@ display: none;
 <h2>Variables and Sources for Environmental Niche Models</h2>
 <p>Two major models are created, one which focuses on identifying areas
 of fundamental environmental niches in the wild, and a second which
-focuses on identifying farms sites areas which the species has
-considerable niche overlap with.</p>
+focuses on identifying farms which the species has considerable niche
+overlap with. The full ‘wild’ models feature up to 38 variables, while
+the ‘farm’ models features ca. 26 variables. Both endeavors run step
+wise.</p>
 <table>
 <colgroup>
 <col width="4%" />
@@ -604,33 +606,58 @@ considerable niche overlap with.</p>
 </tr>
 </tbody>
 </table>
-<p>Some workflows for dealing with temporal mismatch between
+</div>
+<div id="workflow-for-presenceabsence-generation-and-cleaning" class="section level2">
+<h2>Workflow for Presence/Absence generation and cleaning</h2>
+<p>Some considerations for dealing with temporal mismatch between
 environmental variables and species occurrence records.</p>
 <p>In order to reduce the number of records which have questionable
 geographic integrity, no records before 1950 were acquired.</p>
-<ol style="list-style-type: decimal">
-<li>Reducing Historic Records<br />
-</li>
-</ol>
+<div id="thinning-historic-records" class="section level3">
+<h3>Thinning Historic Records</h3>
 <ol style="list-style-type: lower-alpha">
-<li>remove records with noted accuracy &gt; 250 m<br />
+<li>remove records with noted coordinate uncertainty of &gt; 270m<br />
 </li>
-<li>if multiple records exist per raster cell, reduce to most recent
-record.</li>
 <li>remove records on county centroids<br />
 </li>
-<li>flag all records which are located within a burn scar, which
-occurred after the date of observation.<br />
-d1) for that species, use plot based occurrence data, and years since
-burn interacting with cover of invasive annual grasses to model
-probability of an extant population at the site.<br />
-d2) randomly sample flagged records with probabilities defined in
-d1.</li>
+<li>if multiple records exist per raster cell, reduce to that with the
+lowest coordinate uncertainty, or the most recent</li>
 </ol>
 </div>
-<div id="better-matching-the-fundamental-niche-to-population-occurrence-via-cost-surfaces" class="section level1">
-<h1>Better matching the Fundamental Niche to Population Occurrence via
-Cost Surfaces</h1>
+<div id="processing-post-burn-records" class="section level3">
+<h3>Processing Post Burn Records</h3>
+<ol style="list-style-type: lower-alpha">
+<li>flag all historic records which are located within a burn scar,
+which occurred after the date of observation.<br />
+</li>
+<li>for that species, use plot based occurrence data, and years since
+burn interacting with cover of invasive annual grasses to model
+probability of an extant population at the site. <span class="math inline">\(\text{occurrence ~ year since fire * modelled
+invasive annual grass cover}\)</span><br />
+</li>
+<li>randomly sample flagged records with probabilities defined in
+<em>b</em></li>
+</ol>
+</div>
+<div id="processing-records-in-sites-invaded-by-invasive-annual-grasses" class="section level3">
+<h3>Processing Records in Sites Invaded by Invasive Annual Grasses</h3>
+<ol style="list-style-type: lower-alpha">
+<li>flag all historic records which are located within an area with
+greater &gt;10% invasive annual grass cover<br />
+</li>
+<li>for that species, use plot based occurrence data, and cover of
+invasive annual grasses to model probability of an extant population at
+the site. <span class="math inline">\(\text{occurrence ~ modelled
+invasive annual grass cover}\)</span><br />
+</li>
+<li>randomly sample flagged records with probabilities defined in
+<em>b</em></li>
+</ol>
+</div>
+</div>
+<div id="better-matching-the-fundamental-niche-to-population-occurrence-via-cost-surfaces" class="section level2">
+<h2>Better matching the Fundamental Niche to Population Occurrence via
+Cost Surfaces</h2>
 <p>Cost surfaces reflect historic connectivity of locations prior to
 European settlement.</p>
 <table>
@@ -696,8 +723,8 @@ European settlement.</p>
 <p>Variables indicated by a ’*’ exist only for taxa which have evident
 adaptions to wind dispersal, notably those of the Asteraceae.</p>
 </div>
-<div id="correlation-between-patch-habitat-suitable-and-abundance" class="section level1">
-<h1>Correlation between patch habitat suitable and abundance</h1>
+<div id="correlation-between-patch-habitat-suitable-and-abundance" class="section level2">
+<h2>Correlation between patch habitat suitable and abundance</h2>
 <p>Assess, Inventory, and Monitor data can be used to test the
 relationship between modelled habitat suitability and field measured
 abundance. Rather than simple relating the value of modelled suitability
