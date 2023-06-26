@@ -120,9 +120,9 @@ These steps would develop this set of candidate models
 % Cover ~ sqrt(PS) + species   
 % Cover ~ log(PS) + species   
 
-% Cover ~ PS
-% Cover ~ sqrt(PS)
-% Cover ~ log(PS)
+% Cover ~ PS  
+% Cover ~ sqrt(PS)  
+% Cover ~ log(PS)  
 
 </center> 
 
