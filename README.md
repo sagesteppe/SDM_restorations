@@ -78,6 +78,8 @@ In order to generate test sets which may most accurately evaluate ensembled pred
 
 ## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
 
+Discrepancies exist between the niche which a species is capable of establishing a poopulation in, and it's existence there. These mismatches are due to dispersal limitations. In order to identify areas which have fundamental niche, but may not have extent populations the distance between the nearest known population and suitable patches of habitat. 
+
 Cost surfaces reflect historic connectivity of locations prior to European settlement.
 
 |  Layer  |                       Description                       |              Source                   |    Effect      |
