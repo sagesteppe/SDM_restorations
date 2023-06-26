@@ -66,6 +66,14 @@ a) flag all historic records which are located within an area with greater >10% 
 b) for that species, use plot based occurrence data, and cover of invasive annual grasses to model probability of an extant population at the site.  $\text{occurrence ~ modelled invasive annual grass cover}$     
 c) randomly sample flagged records with probabilities defined in *b*  
 
+### Identifying Infraspecies Records
+
+Many collectors of field data do not match taxa to infraspecies due to sampling at times when the population lacks the appropriate character states. Some of these records may be recoverable by identifying their 1) nearest neighbors 2) whethery they lay within the n-dimensional convex hulls of hypervolumes generated from unambigiously identified records.
+
+## A Better Test Set of Ensembled Predictions
+
+
+
 ## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
 
 Cost surfaces reflect historic connectivity of locations prior to European settlement.
@@ -95,6 +103,7 @@ Where *n* represents each cell in a patch. Hence it is a summation of total suit
 These steps would develop this set of candidate models
 
 <center>
+  
 % Cover ~ PS | species   
 % Cover ~ sqrt(PS) | species   
 % Cover ~ log(PS) | species   
@@ -106,6 +115,7 @@ These steps would develop this set of candidate models
 % Cover ~ PS + species   
 % Cover ~ sqrt(PS) + species   
 % Cover ~ log(PS) + species   
+
 </center> 
 
 The model with the highest correlation coefficient to the occurrence data would be the final model indicating the strength of correlation between the SDM's and in field measured occurrence.
