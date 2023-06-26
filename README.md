@@ -68,11 +68,13 @@ c) randomly sample flagged records with probabilities defined in *b*
 
 ### Identifying Infraspecies Records
 
-Many collectors of field data do not match taxa to infraspecies due to sampling at times when the population lacks the appropriate character states. Some of these records may be recoverable by identifying their 1) nearest neighbors 2) whethery they lay within the n-dimensional convex hulls of hypervolumes generated from unambigiously identified records.
+Many collectors of field data do not match taxa to infraspecies due to sampling at times when the population lacks the appropriate character states. Some of these records may be recoverable by identifying their:
+1) nearest neighbors  
+2) whethery they lay within the n-dimensional convex hulls of hypervolumes generated from unambigiously identified records.  
 
 ## A Better Test Set of Ensembled Predictions
 
-
+In order to generate test sets which may most accurately evaluate ensembled predictions of SDM's stratitied sapmling sampling of a reduced set hypervolume is used to identify 100 occurrence and 100 absence records. 
 
 ## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
 
