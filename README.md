@@ -74,7 +74,7 @@ Many collectors of field data do not match taxa to infraspecies due to sampling 
 
 ## A Better Test Set of Ensembled Predictions
 
-In order to generate test sets which may most accurately evaluate ensembled predictions of SDM's stratitied sapmling sampling of a reduced set hypervolume is used to identify 100 occurrence and 100 absence records. 
+In order to generate test sets which may most accurately evaluate ensembled predictions of SDM's stratitied sampling of a reduced set hypervolume is used to identify 100 occurrence and 100 absence records. 
 
 ## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
 
