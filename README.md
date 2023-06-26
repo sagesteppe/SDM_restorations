@@ -120,6 +120,10 @@ These steps would develop this set of candidate models
 % Cover ~ sqrt(PS) + species   
 % Cover ~ log(PS) + species   
 
+% Cover ~ PS
+% Cover ~ sqrt(PS)
+% Cover ~ log(PS)
+
 </center> 
 
 The model with the highest correlation coefficient to the occurrence data would be the final model indicating the strength of correlation between the SDM's and in field measured occurrence.
