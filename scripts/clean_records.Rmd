@@ -41,3 +41,16 @@ We then (2) combine the plot based and plot-free occurrence data to create occur
 ```{r model}
 
 ```
+
+```{r evaluate models}
+
+```
+
+```{r export model summaries}
+
+```
+
+```{r subset occurrence records to reflect fire history}
+
+```
+

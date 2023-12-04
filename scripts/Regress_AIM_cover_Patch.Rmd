@@ -8,4 +8,11 @@ output: html_document
 Species Distribution Models have been shown to be semi-quantitative, i.e. be able to predict species abundance from suitability scores,  under various scenarios.
 Here we determine whether a positive relationship exists between the mean predicted habitat suitability of a patch, or a sector of large patches, and the percent aerial cover of the taxon on an AIM plot.  
 
+```{r identify relevant AIM Plots}
+ 
+```
+
+```{r extract AIM percent covers}
+```
+
 
