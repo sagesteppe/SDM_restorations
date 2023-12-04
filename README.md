@@ -77,7 +77,16 @@ c) randomly sample flagged records with probabilities defined in *b*
 
 Many collectors of field data do not match taxa to infraspecies due to sampling at times when the population lacks the appropriate character states. Some of these records may be recoverable by identifying their:
 1) nearest neighbors  
-2) whethery they lay within the n-dimensional convex hulls of hypervolumes generated from unambigiously identified records.
+2) whether they lay within the n-dimensional convex hulls of hyper volumes generated from unambiguously identified records.
+
+## Modelling
+
+### Ensemble learning methods
+
+Boosted Regression Trees, and Random Forests models will be generated for each species. \
+The Boruta algorithm will be applied to the full stack of predictor variables to remove un-informative predictors, to reduce the costs associated with overfitting, but largely in an effort to speed up projecting models onto gridded surfaces. 
+The projection of models onto raster surfaces has been identified as the rate limiting step in performing species distribution modelling using my setup. 
+Subsequent to the thinning of un-informative variables via the boruta algorithm, groups of variables with high degrees of multicollinearity (e.g. % soil textural components at varying depths), will be thinned by selection of a single variable per group which *appeared* to have the highest variable importance via boruta analysis. 
 
 ## A Better Test Set of Ensembled Predictions
 

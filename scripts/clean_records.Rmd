@@ -1,0 +1,43 @@
+---
+title: "Clean Records"
+author: "steppe"
+date: "2023-12-04"
+output: html_document
+---
+
+Here we perform a number of steps which we use to ensure that the records going into the modelling process are as clean as can be. 
+
+
+Species vary in their responses to disturbances such as fire. 
+More importantly, ecosystems differ in their responses to fire based both upon intrinisic characteristics, but especially land management history. 
+Many species are unable to recover post wildfire in the West due to the rapid increase in cover of inasive annuals, especially grasses such as Cheatgrass and Medusa-Head. 
+Using the NFIC fire perimeters data set, we flag each record which has experienced a wild lands burn, and determine which AIM plots have been located in burn scars.
+
+To do this, we first (1) identify all AIM plots with presences of the species. 
+We then (2) combine the plot based and plot-free occurrence data to create occurrence data set. 
+3) All remaining AIM plots within 5 miles of the occurrence data set, and within 10% of the range of all environmental variables are identified. 
+4) These remaining AIM plots without presences are coded as absences, and used as '0' for the records. 
+
+```{r load occurrence records}
+
+```
+
+```{r load nifc}
+
+```
+
+```{r extract most recent fire}
+
+```
+
+```{r identify similar plots}
+
+```
+
+```{r prepare data for modelling}
+
+```
+
+```{r model}
+
+```

@@ -1,0 +1,103 @@
+---
+title: "Download data"
+author: "steppe"
+date: "2023-10-14"
+output: html_document
+---
+
+```{r load packages}
+library(tidyverse)
+library(BIEN)
+library(ridigbio)
+library(rgbif)
+source('functions.R')
+```
+
+```{r import and clean target species}
+targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
+  filter(species != 'tridentata') # purshia, artemisia, and larrea !
+
+target_taxa <- unite(targets, 'taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% 
+  pull(taxon) %>% 
+  unique() # 293 species. 
+
+## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources. 
+```
+
+```{r Perform gbif queries, eval = F}
+user <- "steppe" # your gbif.org username 
+pwd <- "blmquery" # your gbif.org password # this one is now old and serves as an example
+email <- "reedbenkendorf27@gmail.com" # your email 
+
+gbif_taxon_keys <- target_taxa %>% 
+  name_backbone_checklist()  %>% 
+  filter(!matchType == "NONE") %>% 
+  pull(usageKey)
+
+dl_key <- occ_download(
+  pred_in("taxonKey", gbif_taxon_keys),
+  user=user, pwd=pwd, email=email,
+  pred("country", "US"),
+  pred("hasCoordinate", TRUE),
+  pred("hasGeospatialIssue", FALSE),
+  pred_gte("year", 1900)
+)
+
+occ_download_wait(dl_key)
+occ_download_get( dl_key )
+
+rm(user, pwd, email, gbif_taxon_keys, dl_key)
+```
+
+```{r Perform bien queries, eval = F}
+
+bien_recs <- lapply(target_taxa, BIEN_occurrence_species, collection.info = TRUE,
+                    observation.type = TRUE, new.world = TRUE)
+
+```
+
+```{r Perform idigbio queries, eval = F}
+
+ob <- lapply(target_taxa, idig_records)
+t <- bind_rows(ob)
+
+```
+
+```{r Import and Query AIM data, eval = F}
+
+
+file.path(p, list.files(p, pattern = 'gdb$', recursive = T))
+# for some strange reason this not exactly working! a weird /gdb is being tagged
+# onto the end of it... we can manually specify the data beneath
+st_layers(dsn = '../data/2022_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb')
+
+AIM_points <- st_read(dsn = '../data/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb', 
+        layer = 'TerrADat', quiet = T) %>%
+  filter(State %in% c('NV', 'OR', 'CA', 'ID', 'UT')) %>% 
+  select(PrimaryKey, geometry = Shape) %>% 
+  st_transform(5070) 
+
+AIM_points <- AIM_points[st_covered_by(AIM_points, field_off) %>% lengths > 0,]
+
+spp_richness <- st_read(dsn = '../data/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb', 
+        layer = 'tblSpecRichDetail', quiet = T) %>% 
+  select(SpeciesList, PrimaryKey) %>% 
+  right_join(AIM_points, by = 'PrimaryKey')
+
+
+spp_found <- inner_join(target_taxa_lkp, spp_richness, 
+                        by = c('USDA.Code' = 'SpeciesList')) %>% 
+  select(species, PrimaryKey, geometry) %>% 
+  st_as_sf()
+
+spp_occurrences <- bind_rows(spp_found, pub_presence) %>% 
+  arrange(species) %>% 
+  relocate(c('year', 'date'), .before = geometry) %>% 
+  mutate(species = str_trim(species)) %>% 
+  filter(!species %in% c('Artemisia tridentata',
+                         'Elymus elymoides',
+                         'Poa secunda'))
+
+```
+
+
