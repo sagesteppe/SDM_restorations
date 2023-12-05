@@ -16,16 +16,18 @@ source('functions.R')
 
 ```{r import and clean target species}
 targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
-  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) # purshia, artemisia, and larrea !
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') # artemisia, and larrea !
 
-target_taxa <- unite(targets, 'taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% 
+target_taxa <- targets %>% 
   pull(taxon) %>% 
   unique() # 293 species. 
 
 ## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
 
 ## we will add on USDA codes so we can interface with AIM data. 
-
+symbols <- read.csv('../data/raw/USDA_PLANTS.csv') %>% 
+  right_join(., targets, by = c('' = 'taxon'))
 
 ```
 
