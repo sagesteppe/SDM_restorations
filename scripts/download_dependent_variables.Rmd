@@ -10,18 +10,23 @@ library(tidyverse)
 library(BIEN)
 library(ridigbio)
 library(rgbif)
+library(sf)
 source('functions.R')
 ```
 
 ```{r import and clean target species}
 targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
-  filter(species != 'tridentata') # purshia, artemisia, and larrea !
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) # purshia, artemisia, and larrea !
 
 target_taxa <- unite(targets, 'taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% 
   pull(taxon) %>% 
   unique() # 293 species. 
 
-## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources. 
+## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
+
+## we will add on USDA codes so we can interface with AIM data. 
+
+
 ```
 
 ```{r Perform gbif queries, eval = F}
@@ -29,7 +34,7 @@ user <- "steppe" # your gbif.org username
 pwd <- "blmquery" # your gbif.org password # this one is now old and serves as an example
 email <- "reedbenkendorf27@gmail.com" # your email 
 
-gbif_taxon_keys <- target_taxa %>% 
+gbif_taxon_keys <- target_taxa[294:364] %>% 
   name_backbone_checklist()  %>% 
   filter(!matchType == "NONE") %>% 
   pull(usageKey)
@@ -49,37 +54,61 @@ occ_download_get( dl_key )
 rm(user, pwd, email, gbif_taxon_keys, dl_key)
 ```
 
+
+BIEN is pretty finicky these days and is prone to crashing. There is a paper by Maitner with Enquist, Wilson, Merow etc. about the need for open source devs to be rewarded academically, I take that has a sign of Brian stepping away from it. We will use a for loop to download from BIEN. 
 ```{r Perform bien queries, eval = F}
 
-bien_recs <- lapply(target_taxa, BIEN_occurrence_species, collection.info = TRUE,
-                    observation.type = TRUE, new.world = TRUE)
-
+for(i in seq_along(target_taxa)){
+  print(target_taxa[i])
+  dl <- BIEN_occurrence_species(target_taxa[i], collection.info = TRUE, observation.type = TRUE, new.world = TRUE)
+  write.csv(dl, file.path('../data/raw/occurrence/bien', paste0(gsub(' ', '_', target_taxa[i]), '.csv')) )#, row.names = FALSE)
+}
 ```
+
+```{r stitch together BIEN queries}
+
+p <- '../data/raw/occurrence/bien'
+files <- file.path(p, list.files(p))
+
+lapply(Filter(function(x) R.utils::countLines(x)==1, files), unlink) # delete empty CSV's in directory
+files <- file.path(p, list.files(p))
+
+bien_data <-  do.call(rbind, lapply(files, read.csv)) %>% 
+  filter(datasource != 'GBIF' & date_collected > '1950-01-01', ! scrubbed_species_binomial %in% c('Acer negundo', 'Prosopis glandulosa')) %>% 
+  drop_na(date_collected, latitude) %>% 
+  select(scrubbed_species_binomial:datasource, observation_type)
+
+write.csv(bien_data, '../data/raw/occurrence/BIEN_records.csv', row.names = FALSE)
+```
+
 
 ```{r Perform idigbio queries, eval = F}
 
 ob <- lapply(target_taxa, idig_records)
-t <- bind_rows(ob)
+idig <- bind_rows(ob) %>% 
+  filter(datecollected > '1950-01-01')
+
+write.csv(idig, '../data/raw/occurrence/IDIG.csv')
 
 ```
 
 ```{r Import and Query AIM data, eval = F}
 
+p1 <- '../data/raw/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb'
 
-file.path(p, list.files(p, pattern = 'gdb$', recursive = T))
 # for some strange reason this not exactly working! a weird /gdb is being tagged
 # onto the end of it... we can manually specify the data beneath
-st_layers(dsn = '../data/2022_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb')
+st_layers(dsn = p1)
 
-AIM_points <- st_read(dsn = '../data/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb', 
+AIM_points <- st_read(dsn = p1, 
         layer = 'TerrADat', quiet = T) %>%
-  filter(State %in% c('NV', 'OR', 'CA', 'ID', 'UT')) %>% 
+#  filter(State %in% c('NV', 'OR', 'CA', 'ID', 'UT')) %>% 
   select(PrimaryKey, geometry = Shape) %>% 
   st_transform(5070) 
 
-AIM_points <- AIM_points[st_covered_by(AIM_points, field_off) %>% lengths > 0,]
+# AIM_points <- AIM_points[st_covered_by(AIM_points, field_off) %>% lengths > 0,]
 
-spp_richness <- st_read(dsn = '../data/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb', 
+spp_richness <- st_read(dsn = p1, 
         layer = 'tblSpecRichDetail', quiet = T) %>% 
   select(SpeciesList, PrimaryKey) %>% 
   right_join(AIM_points, by = 'PrimaryKey')
