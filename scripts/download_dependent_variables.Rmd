@@ -19,15 +19,20 @@ targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>%
   filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
   unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') # artemisia, and larrea !
 
+
+targets %>% 
+  group_by(symbol, taxon) %>% 
+  count()
+
 target_taxa <- targets %>% 
   pull(taxon) %>% 
   unique() # 293 species. 
 
-## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
+target_symbols <- targets %>% 
+  pull(symbol) %>% 
+  unique()
 
-## we will add on USDA codes so we can interface with AIM data. 
-symbols <- read.csv('../data/raw/USDA_PLANTS.csv') %>% 
-  right_join(., targets, by = c('' = 'taxon'))
+## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
 
 ```
 
@@ -98,37 +103,28 @@ write.csv(idig, '../data/raw/occurrence/IDIG.csv')
 
 p1 <- '../data/raw/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb'
 
-# for some strange reason this not exactly working! a weird /gdb is being tagged
-# onto the end of it... we can manually specify the data beneath
 st_layers(dsn = p1)
 
 AIM_points <- st_read(dsn = p1, 
         layer = 'TerrADat', quiet = T) %>%
-#  filter(State %in% c('NV', 'OR', 'CA', 'ID', 'UT')) %>% 
-  select(PrimaryKey, geometry = Shape) %>% 
+  select(PrimaryKey, DateVisited, geometry = Shape) %>% 
   st_transform(5070) 
-
-# AIM_points <- AIM_points[st_covered_by(AIM_points, field_off) %>% lengths > 0,]
 
 spp_richness <- st_read(dsn = p1, 
         layer = 'tblSpecRichDetail', quiet = T) %>% 
   select(SpeciesList, PrimaryKey) %>% 
-  right_join(AIM_points, by = 'PrimaryKey')
+  filter(SpeciesList %in% target_symbols) %>% 
+  right_join(AIM_points, by = 'PrimaryKey') %>% 
+  st_as_sf()  %>% 
+  mutate(YearSampled = gsub('-.*$', '', DateVisited), .before = geometry) %>% 
+  select(-DateVisited) %>% 
+  arrange(SpeciesList) %>% 
+  right_join(., select(targets, taxon, symbol) %>% 
+               distinct(), by = c('SpeciesList' = 'symbol' ))
 
+st_write(spp_richness, '../data/raw/occurrence/AIM/AIM_records.shp')
 
-spp_found <- inner_join(target_taxa_lkp, spp_richness, 
-                        by = c('USDA.Code' = 'SpeciesList')) %>% 
-  select(species, PrimaryKey, geometry) %>% 
-  st_as_sf()
-
-spp_occurrences <- bind_rows(spp_found, pub_presence) %>% 
-  arrange(species) %>% 
-  relocate(c('year', 'date'), .before = geometry) %>% 
-  mutate(species = str_trim(species)) %>% 
-  filter(!species %in% c('Artemisia tridentata',
-                         'Elymus elymoides',
-                         'Poa secunda'))
-
+rm(p1, AIM_points)
 ```
 
 
