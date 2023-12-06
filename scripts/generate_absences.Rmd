@@ -32,23 +32,17 @@ st_write(ag, dsn = paste0(pout, 'coarse_surface.shp'))
 We use absences while creating species distribution models. 
 Both true absences, acquired from vegetation monitoring plots, and pseudo absences generated via geographic and environmental space are used. 
 
-```{r load aim data for absences}
+```{r load aim data for absences, eval = F}
 
-
+p  <- '../data/raw/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb'
 AIM_points <- st_read(dsn = p, layer = 'TerrADat', quiet = T) %>%
   select(PrimaryKey, DateVisited, geometry = Shape) %>% 
   st_transform(5070) 
 
-spp_richness <- st_read(dsn = p1, 
-        layer = 'tblSpecRichDetail', quiet = T) %>% 
-  select(SpeciesList, PrimaryKey) %>% 
-  filter(SpeciesList %in% target_symbols) %>% 
-  right_join(AIM_points, by = 'PrimaryKey') %>% 
-  st_as_sf()
-
 pout <- '/media/steppe/hdd/SDM_restorations/data/raw/coarse_blm/'
 blm_surf <- st_read(paste0(pout, 'coarse_surface.shp'))
 blm_surf <- st_simplify(blm_surf, dTolerance = 500) # just make it a bit smaller. 
+blm_surf <- st_make_valid(blm_surf)
 ```
 
 ```{r}
@@ -56,16 +50,8 @@ blm_surf <- st_simplify(blm_surf, dTolerance = 500) # just make it a bit smaller
 aim <- st_read('../data/raw/occurrence/AIM/AIM_records.shp') %>% 
   filter(SpcsLst == 'ACHY')
 
-ob_hull <- absence_drawer(aim, bg_abs = 0.15)
-buf_hull <- absence_drawer(aim, bg_abs = 0.15)
-box_hull <- absence_drawer(aim, bg_abs = 0.15)
 bbox <- absence_drawer(aim, bg_abs = 0.15)
 
-ggplot() +
- # geom_sf(data = ob_hull, fill = NA) + 
-#  geom_sf(data = buf_hull, fill = NA) + 
- # geom_sf(data = box_hull, fill = NA) +
-  geom_sf(data = bbox, fill = 'red')
 
 
 ```
