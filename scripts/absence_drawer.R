@@ -68,7 +68,8 @@ absence_drawer <- function(x, bg_abs){
     sf::st_transform(sf::st_crs(x)) |>
     dplyr::rename(geometry = x)
   
-  absences <- bind_rows(reg_pts, AIM_absence, random_samples)
+  absences <- dplyr::bind_rows(reg_pts, AIM_absence, random_samples) |>
+    dplyr::mutate(Taxon = unique(x$taxon), .before = 'geometry')
   
   return(absences)
   

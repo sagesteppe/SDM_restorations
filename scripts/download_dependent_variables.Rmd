@@ -72,7 +72,7 @@ for(i in seq_along(target_taxa)){
 }
 ```
 
-```{r stitch together BIEN queries}
+```{r stitch together BIEN queries, eval = F}
 
 p <- '../data/raw/occurrence/bien'
 files <- file.path(p, list.files(p))
@@ -116,15 +116,90 @@ spp_richness <- st_read(dsn = p1,
   filter(SpeciesList %in% target_symbols) %>% 
   right_join(AIM_points, by = 'PrimaryKey') %>% 
   st_as_sf()  %>% 
-  mutate(YearSampled = gsub('-.*$', '', DateVisited), .before = geometry) %>% 
-  select(-DateVisited) %>% 
+  mutate(DateVisited = as.Date(DateVisited), .before = geometry) %>% 
   arrange(SpeciesList) %>% 
   right_join(., select(targets, taxon, symbol) %>% 
                distinct(), by = c('SpeciesList' = 'symbol' ))
 
-st_write(spp_richness, '../data/raw/occurrence/AIM/AIM_records.shp')
+st_write(spp_richness, '../data/raw/occurrence/AIM/AIM_records.shp', append = F)
 
 rm(p1, AIM_points)
+```
+
+
+```{r}
+rm(idig_records, target_symbols, target_taxa)
+```
+
+```{r Create consensus presence records}
+
+base_p <- '../data/raw/occurrence'
+
+bien <- read.csv(file.path(base_p, 'BIEN_records.csv')) %>% 
+  st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>% 
+  mutate(date = as.Date(date_collected)) %>% 
+  select(taxon = scrubbed_species_binomial, date)
+
+idig <- read.csv(file.path(base_p, 'IDIG.csv')) %>% 
+  st_as_sf(coords = c('geopoint.lon', 'geopoint.lat'), crs = 4326) %>% 
+  mutate(date = as.Date(datecollected)) %>% 
+  select(taxon = scientificname)
+
+aim <- st_read(file.path(base_p, 'AIM', 'AIM_records.shp')) %>% 
+  mutate(date = as.Date(DatVstd)) %>% 
+  select(taxon, date) %>% 
+  st_transform(4326)
+
+gbif1 <- read.delim(file.path(base_p, 'gbif1', 'occurrence.txt'), na.strings = "") # %>% 
+  drop_na(decimalLongitude, decimalLatitude) %>% 
+  filter(str_detect(decimalLatitude, '[A-Z]|[a-z]', negate = T)) %>% 
+  st_as_sf(coords = c('decimalLongitude', 'decimalLatitude'), crs = 4326) %>% 
+  mutate(date = as.Date(eventDate), .before = geometry, 
+         coordinateUncertaintyInMeters = as.numeric(coordinateUncertaintyInMeters)) %>% 
+  filter(coordinateUncertaintyInMeters <= 250) %>% 
+  select(taxon = species, date)
+  
+gbif2 <- read.delim(file.path(base_p, 'gbif2', 'occurrence.txt'), na.strings = '')%>% 
+  drop_na(decimalLongitude, decimalLatitude) %>% 
+  filter(str_detect(decimalLatitude, '[A-Z]|[a-z]', negate = T)) %>% 
+  st_as_sf(coords = c('decimalLongitude', 'decimalLatitude'), crs = 4326) %>% 
+  mutate(date = as.Date(eventDate), .before = geometry, 
+         coordinateUncertaintyInMeters = as.numeric(coordinateUncertaintyInMeters)) %>% 
+  filter(coordinateUncertaintyInMeters <= 250) %>% 
+  select(taxon = species, date)
+
+records <- bind_rows(aim, bien, gbif1, gbif2, idig) %>% 
+  mutate(taxon = str_to_sentence(taxon)) %>% 
+  arrange(taxon) # recs need be > 90 m from each other
+
+records <- st_transform(records, 5070)
+splicies <- split(records, records$taxon)[1:2]
+
+splicies <- lapply(splicies, st_buffer, dist = 90)
+st_buffer(x, dist = 90)
+
+ONEperCELL <- function(x){
+  
+  dists <- sf::st_distance(x)
+}
+
+test <- st_intersects(splicies[[1]])
+
+test1 <- test[ lengths(test) > 1 ]
+untest <- unique(test1)
+
+sum( lengths(test)  > 1 ) # 637 records
+sum( lengths(test) == 2 ) # 285 records dupe in paired, 142 records...
+sum( lengths(test)  > 3 ) 
+
+test <- test[sum(lengths(test)  > 1 )]
+
+out <- unique(test)
+
+# identify each 
+
+# find records < 90m distance 
+
 ```
 
 
