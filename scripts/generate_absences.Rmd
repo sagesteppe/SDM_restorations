@@ -1,0 +1,29 @@
+---
+title: "Generate Real and Pseudo-absences"
+author: "steppe"
+date: "2023-12-06"
+output: html_document
+---
+
+```{r load packages}
+library(tidyverse)
+library(sf)
+source('functions.R')
+```
+
+We use absences while creating species distribution models. 
+Both true absences, acquired from vegetation monitoring plots, and pseudo absences generated via geographic and environmental space are used. 
+
+```{r Create simplified BLM surface management}
+
+```
+
+
+```{r}
+library(geosphere)
+
+st_area(x, ...)
+
+```
+
+
