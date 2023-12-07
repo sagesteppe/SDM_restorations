@@ -17,8 +17,8 @@ source('functions.R')
 ```{r import and clean target species}
 targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
   filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
-  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') # artemisia, and larrea !
-
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon))
 
 targets %>% 
   group_by(symbol, taxon) %>% 
@@ -169,56 +169,23 @@ gbif2 <- read.delim(file.path(base_p, 'gbif2', 'occurrence.txt'), na.strings = '
   select(taxon = species, date)
 
 records <- bind_rows(aim, bien, gbif1, gbif2, idig) %>% 
-  mutate(taxon = str_to_sentence(taxon)) %>% 
+  mutate(taxon = str_to_sentence(taxon), 
+         taxon = str_squish(taxon)) %>% 
+  filter(taxon %in% unique(targets$taxon)) %>% 
   arrange(taxon) # recs need be > 90 m from each other
 
-splicies <- split(records, records$taxon)[1:10]
+rm(aim, bien, gbif1, gbif2, idig)
 
-ONEperCELL <- function(x){
-  
-  records <- sf::st_transform(x, 5070) |>
-    sf::st_buffer( dist = 90)
-  
-  intersects <- sf::st_intersects(records)
-  intersect_sets <- unique(intersects) # identify intersected points
-  
-  records_list <- vector(mode = 'list', length = length(intersect_sets))
-  for (i in seq_along(intersect_sets)){
-    records_list[[i]] <- records[unlist((intersect_sets[i])),]
-  }
-  
-  records_list <- bind_rows(
-    lapply(records_list, function(x) x[which.max(x$date),])
-  )
-  
-  return(records_list)
-  
-}
+splicies <- split(records, records$taxon)
 
-out <- lapply(splicies, ONEperCELL)
+thinned <- lapply(splicies, ONEperCELL)
+thinned <- bind_rows(thinned)
+write.csv(thinned, '../data/raw/occurrence/thinned_occurrences.csv', row.names = F)
+repeated_occurrences <- lapply(splicies, multiplesPERcell)
+repeated_occurrences <- purrr::discard(repeated_occurrences, ~nrow(.) < 2)
+repeated_occurrences <- bind_rows(repeated_occurrences)
+write.csv(repeated_occurrences, '../data/raw/occurrence/repeated_occurrences.csv', row.names = F)
 
-
-```
-
-
-```{r}
-multiplesPERcell <- function(x){
-  
-  records <- sf::st_transform(x, 5070) |>
-    sf::st_buffer( dist = 90)
-  
-  intersects <- sf::st_intersects(records)
-  intersect_sets <- unique(intersects) # identify intersected points
-  
-  records_list <- vector(mode = 'list', length = length(intersect_sets))
-  for (i in seq_along(intersect_sets)){
-    records_list[[i]] <- records[unlist((intersect_sets[i])),]
-  }
-  
-  max <- bind_rows(
-    lapply(records_list, function(x) x[which.max(x$date),])
-  )
-  
-}
+rm(ONEperCELL, multiplesPERcell, records, splicies, repeated_occurrences, base_p)
 ```
 
