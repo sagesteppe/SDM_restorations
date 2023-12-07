@@ -40,20 +40,22 @@ AIM_points <- st_read(dsn = p, layer = 'TerrADat', quiet = T) %>%
   st_transform(5070) 
 
 pout <- '/media/steppe/hdd/SDM_restorations/data/raw/coarse_blm/'
-blm_surf <- st_read(paste0(pout, 'coarse_surface.shp'))
+blm_surf <- st_read(paste0(pout, 'coarse_surface.shp'), quiet = TRUE)
 blm_surf <- st_simplify(blm_surf, dTolerance = 500) # just make it a bit smaller. 
 blm_surf <- st_make_valid(blm_surf)
 ```
 
-```{r}
+```{r generate raw absences, eval = F}
 
-aim <- st_read('../data/raw/occurrence/AIM/AIM_records.shp') %>% 
-  filter(SpcsLst == 'ACHY')
+records <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
+records <- records %>% 
+  group_by(taxon) %>% 
+  filter(n() >= 15)
+records <- split(records, f = records$taxon)
 
-bbox <- absence_drawer(aim, bg_abs = 0.15)
-
-
-
+out <- lapply(records, absence_drawer, bg_abs = 0.15)
+out <- bind_rows(out)
+st_write(out, '../data/raw/occurrence/absences.shp')
 ```
 
 

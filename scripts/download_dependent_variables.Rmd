@@ -147,7 +147,7 @@ idig <- read.csv(file.path(base_p, 'IDIG.csv')) %>%
 
 aim <- st_read(file.path(base_p, 'AIM', 'AIM_records.shp'), quiet = TRUE) %>% 
   mutate(date = as.Date(DatVstd)) %>% 
-  select(taxon, date) %>% 
+  select(taxon, date, PrmryKy) %>% 
   st_transform(4326)
 
 gbif1 <- read.delim(file.path(base_p, 'gbif1', 'occurrence.txt'), na.strings = "") %>% 
@@ -180,12 +180,32 @@ splicies <- split(records, records$taxon)
 
 thinned <- lapply(splicies, ONEperCELL)
 thinned <- bind_rows(thinned)
-write.csv(thinned, '../data/raw/occurrence/thinned_occurrences.csv', row.names = F)
+st_write(thinned, '../data/raw/occurrence/thinned/thinned_occurrences.shp', append = F)
 repeated_occurrences <- lapply(splicies, multiplesPERcell)
 repeated_occurrences <- purrr::discard(repeated_occurrences, ~nrow(.) < 2)
 repeated_occurrences <- bind_rows(repeated_occurrences)
-write.csv(repeated_occurrences, '../data/raw/occurrence/repeated_occurrences.csv', row.names = F)
+st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurrences.shp', append = F)
 
 rm(ONEperCELL, multiplesPERcell, records, splicies, repeated_occurrences, base_p)
+```
+
+
+```{r remove points outside analytical area}
+library(terra)
+domain <- rast(nrows = 1, ncols = 1) # create a big empty raster, you can go in through sf too. 
+ext(domain) <- c( -125.5, -100, 27,  50) # set the extent
+crs(domain) <- "EPSG:4326" # define the projection
+
+domain <- as.polygons(domain) |>  # convert to vector data
+  st_as_sf() |> # convert to simple feature
+  st_transform(5070) 
+
+thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
+thinned <- thinned[lengths(st_disjoint(thinned, domain)) ==  0, ]
+st_write(thinned, '../data/raw/occurrence/thinned/thinned_occurrences.shp', append = FALSE)
+
+repeated_occurrences <- st_read('../data/raw/occurrence/repeated/repeated_occurrences.shp', quiet = TRUE)
+repeated_occurrences <- thinned[lengths(st_disjoint(repeated_occurrences, domain)) ==  0, ]
+st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurrences.shp', append = FALSE)
 ```
 
