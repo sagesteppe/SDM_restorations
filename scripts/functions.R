@@ -150,10 +150,56 @@ absence_drawer <- function(x, bg_abs){
 
 
 
-### calculate distances between records
 
-recordDist <- function(x){
+quantile_flagger <- function(x, quant, flag_threshold){
   
-  st_distance(pts, circles[nearest], by_element = TRUE)
+  if(missing(quant)){quant <- 0.025}
+  if(missing(flag_threshold)){flag_threshold <- 0.2}
+  
+  # perform calculations# 
+  quant_horse <- function(x, quant){
+    lwr <- quantile(x, quant, na.rm = TRUE)
+    upr <- quantile(x, 1 - quant, na.rm = TRUE)
+    
+    lwr_flag <- which(x <= lwr)
+    upr_flag <- which(x >= upr)
+    flags <- c(lwr_flag, upr_flag)
+    
+    return(list(flags))
+  }
+  x_ng <- sf::st_drop_geometry(x)
+  flagged_vals <- apply(x_ng[, grepl(pattern = 'bio*', colnames(x_ng))], MARGIN = 2, 
+                        FUN = quant_horse, quant)
+  
+  nvars <- ncol(x[, grepl(pattern = 'bio*', colnames(x))])
+  colsReq2flag <- round(flag_threshold * nvars, 0)
+  if(colsReq2flag < 2){colsReq2flag <- 2}
+  
+  counts <- table(unlist(flagged_vals)) >= colsReq2flag
+  flagged <- as.numeric(names(counts[counts == TRUE]))
+  
+  x['EnvFlag'] <- FALSE
+  x[flagged,'EnvFlag'] <- TRUE
+  
+  # now flag geographically farflung records
+  
+  dist <- as.numeric(
+    sf::st_distance(x, x[sf::st_nearest_feature(x),], by_element = TRUE)
+  )
+  
+  ub_geo <- quantile(dist, (1 - quant) ) 
+  x_out <- dplyr::mutate(x, distance = dist, 
+                         DistFlag = dplyr::if_else(dist > ub_geo, T, F),
+                         OutlierFlag = dplyr::case_when(
+                           DistFlag == T & EnvFlag == T ~ 'Dist-Env',
+                           DistFlag == T & EnvFlag == F ~ 'Dist',
+                           DistFlag == F & EnvFlag == T ~ 'Env',
+                           .default = NA,
+                         ),
+                         .before = geometry) |>
+    dplyr::select(-EnvFlag, DistFlag)
+  
+  return(x_out)
   
 }
+

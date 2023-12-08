@@ -22,6 +22,7 @@ We then (2) combine the plot based and plot-free occurrence data to create occur
 library(tidyverse)
 library(sf)
 library(terra)
+source('functions.R')
 ```
 
 
@@ -45,59 +46,63 @@ names(bio19) <- 'bio19'
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 bio
 
-pts1 <- filter(thinned, taxon == 'Abronia villosa')
+table(thinned$taxon)
+
+pts1 <- filter(thinned, taxon == 'Acamptopappus sphaerocephalus')
 bio_v <- extract(bio, pts1)
+bio_v <- bind_cols(bio_v, pts1) %>% 
+  st_as_sf()
 
 # for each BIO Indicator, flag records in the percentiles. 
-
-quantile_flagger <- function(x, quant, flag_threshold){
-  
-  if(missing(quant)){quant <- 0.025}
-  if(missing(flag_threshold)){flag_threshold <- 0.2}
-  
-  # perform calculations# 
-  
-  
-  quant_horse <- function(x, quant){
-    lwr <- quantile(x, quant, na.rm = TRUE)
-    upr <- quantile(x, 1 - quant, na.rm = TRUE)
-  
-    lwr_flag <- which(x <= lwr)
-    upr_flag <- which(x >= upr)
-    flags <- c(lwr_flag, upr_flag)
-  
-    return(list(flags))
-  }
-  
-  flagged_vals <- apply(x[, grepl(pattern = 'bio*', colnames(x))], MARGIN = 2, 
-        FUN = quant_horse, quant)
-  
-  nvars <- ncol(x[, grepl(pattern = 'bio*', colnames(x))])
-  colsReq2flag <- round(flag_threshold * nvars, 0)
-  if(colsReq2flag < 2){colsReq2flag <- 2}
-  
-  counts <- table(unlist(flagged_vals)) >= colsReq2flag
-  flagged <- as.numeric(names(counts[counts == TRUE]))
-  
-  x['OutlierFlag'] <- NA
-  x[flagged,'OutlierFlag'] <- TRUE
-  return(x)
-  
-}
-
-
 OUTPUT <- quantile_flagger(bio_v, 0.015, flag_threshold = 0.2)
+# OUTPUT <- filter(OUTPUT, !ID %in% c(370, 42, 46, 57, 58, 80:92, 76, 75, 470))
+#out <- st_intersection(OUTPUT, st_transform(st, 5070))
+#filter(out, STUSPS == 'AZ')
 
-testy <- bind_cols(OUTPUT, pts1)
+ggplot(OUTPUT) +
+  geom_sf(aes(color = OutlierFlag)) + 
+  geom_sf_text(aes(label = ID)) +
+ # geom_sf(data = mexico, fill = NA) + 
+  geom_sf(data = st, fill = NA)
 
+table(thinned$taxon)
 ```
+
+Every single taxon was individually mapped, and had there records investigated
+
+```{r Inspect Records for Each Taxon}
+# Abronia villosa c(718, 662, 1103, 1047)
+# Acamptopappus sphaerocephalus c(370, 42, 46, 57, 58, 80:92, 76, 75, 470)
+# Asclepias albicans c(1, 50, 265, 284)
+# Asclepias cordifolia c(2, 3, 5, 609)
+# Asclepias cryptoceras, c(238, 303, 35:49)
+# A. eriocarpa c(788, 920, 857, 289, 639)
+# Asclepias fascicularis c(1813, 21, 26, 17, 22, 31, 25, 19)
+# Asclepias erosa c(2)
+# A. solanoana # NO ERRORS
+# A. subulata c(9, 12, 515)
+# A. speciosa # NO ERRORS
+
+# Astragalus didymocarpus c(158)
+# Astragalus eremiticus c(275, 280)
+# A. filipes c(1703, 773, 1281, 1029:1031, )
+# Astragalus layneae c(2, 7, 107, 265)
+# A. iodanthus # NO ERRORS
+# A. lonchocarpus c(9, 128, 372)
+# A. whitneyi c(19, 36, 29)
+
+# Dasyochloa pulchella c(1231)
+
+# Triteleia laxa C(2016)
+```
+
 
 
 
 ```{r load occurrence records}
 thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
 
-pts1 <- filter(thinned, taxon == 'Abronia villosa')
+pts1 <- filter(thinned, taxon == 'Wyethia angustifolia')
 
 
 ## flag the most disjunct records ##
