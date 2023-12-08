@@ -18,7 +18,56 @@ We then (2) combine the plot based and plot-free occurrence data to create occur
 3) All remaining AIM plots within 5 miles of the occurrence data set, and within 10% of the range of all environmental variables are identified. 
 4) These remaining AIM plots without presences are coded as absences, and used as '0' for the records. 
 
+```{r load libraries}
+library(tidyverse)
+library(sf)
+library(terra)
+```
+
+
+```{r Import Predictor Stack}
+
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio10'
+files <- file.path(p, list.files(p, recursive = TRUE))
+
+preds <- mosaic(sprc(files))
+
+
+
+pts1 <- filter(thinned, taxon == 'Abronia villosa')
+
+
+shapiro.test(my_data$len)
+```
+
+
+
 ```{r load occurrence records}
+thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
+
+pts1 <- filter(thinned, taxon == 'Abronia villosa')
+
+
+## flag the most disjunct records ##
+
+dist <- as.numeric(
+  sf::st_distance(pts1, pts1[sf::st_nearest_feature(pts1),], by_element = TRUE)
+)
+
+upper_bound <- quantile(dist, 0.985) # find the most extreme 2.5% of records.
+pts1 <- mutate(pts1, distance = dist, 
+               dist_flag = if_else(dist > upper_bound, T, F),
+               .before = geometry)
+
+st <- tigris::states() %>% 
+  filter(DIVISION %in% c(4, 8, 9), ! NAME %in% c('Hawaii', 'Alaska'))
+
+
+dotchart(dist)
+ggplot() +
+  geom_sf(data = pts1, aes(color = dist_flag)) +
+  geom_sf(data = st, fill = NA)
+
 
 ```
 

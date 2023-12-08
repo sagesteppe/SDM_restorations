@@ -10,7 +10,7 @@ library(tidyverse)
 ```
 
 The main bioclim variables can be found at the [link here](https://envicloud.wsl.ch/#/?bucket=https%3A%2F%2Fos.zhdk.cloud.switch.ch%2Fenvicloud%2F&prefix=chelsa%2Fchelsa_V2%2FGLOBAL%2Fclimatologies%2F1981-2010%2Fbio%2F) an S3 bucket for CHELS*A* (not the neighborhood!).
-All files can be downloaded as a textfile for further use with wget. 
+All files can be downloaded as a textile for further use with wget. 
 We will subset these files to only download the layers of interest.
 
 ```{r Subset Chelsea bioclim layers}
@@ -129,7 +129,6 @@ var <- 'soc'  # these only have these depths downloaded
 depth <- c('0-5')
 
 #### salinity ####
-
 
 
 ```

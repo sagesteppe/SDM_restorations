@@ -146,3 +146,14 @@ absence_drawer <- function(x, bg_abs){
   return(absences)
   
 }
+
+
+
+
+### calculate distances between records
+
+recordDist <- function(x){
+  
+  st_distance(pts, circles[nearest], by_element = TRUE)
+  
+}
