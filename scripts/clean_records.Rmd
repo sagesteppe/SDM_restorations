@@ -27,17 +27,69 @@ library(terra)
 
 ```{r Import Predictor Stack}
 
-p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio10'
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio19'
 files <- file.path(p, list.files(p, recursive = TRUE))
 
-preds <- mosaic(sprc(files))
+# bio10 <- mosaic(sprc(files))
+# bio1 <- mosaic(sprc(files))
+# bio12 <- mosaic(sprc(files))
+# bio4 <- mosaic(sprc(files))
+bio19 <- mosaic(sprc(files))
 
+names(bio1) <- 'bio1'
+names(bio10) <- 'bio10'
+names(bio12) <- 'bio12'
+names(bio4) <- 'bio4'
+names(bio19) <- 'bio19'
 
+bio <- c(bio1, bio10, bio12, bio4, bio19)
+bio
 
 pts1 <- filter(thinned, taxon == 'Abronia villosa')
+bio_v <- extract(bio, pts1)
+
+# for each BIO Indicator, flag records in the percentiles. 
+
+quantile_flagger <- function(x, quant, flag_threshold){
+  
+  if(missing(quant)){quant <- 0.025}
+  if(missing(flag_threshold)){flag_threshold <- 0.2}
+  
+  # perform calculations# 
+  
+  
+  quant_horse <- function(x, quant){
+    lwr <- quantile(x, quant, na.rm = TRUE)
+    upr <- quantile(x, 1 - quant, na.rm = TRUE)
+  
+    lwr_flag <- which(x <= lwr)
+    upr_flag <- which(x >= upr)
+    flags <- c(lwr_flag, upr_flag)
+  
+    return(list(flags))
+  }
+  
+  flagged_vals <- apply(x[, grepl(pattern = 'bio*', colnames(x))], MARGIN = 2, 
+        FUN = quant_horse, quant)
+  
+  nvars <- ncol(x[, grepl(pattern = 'bio*', colnames(x))])
+  colsReq2flag <- round(flag_threshold * nvars, 0)
+  if(colsReq2flag < 2){colsReq2flag <- 2}
+  
+  counts <- table(unlist(flagged_vals)) >= colsReq2flag
+  flagged <- as.numeric(names(counts[counts == TRUE]))
+  
+  x['OutlierFlag'] <- NA
+  x[flagged,'OutlierFlag'] <- TRUE
+  return(x)
+  
+}
 
 
-shapiro.test(my_data$len)
+OUTPUT <- quantile_flagger(bio_v, 0.015, flag_threshold = 0.2)
+
+testy <- bind_cols(OUTPUT, pts1)
+
 ```
 
 
