@@ -22,20 +22,21 @@ We then (2) combine the plot based and plot-free occurrence data to create occur
 library(tidyverse)
 library(sf)
 library(terra)
+library(leaflet)
 source('functions.R')
 ```
 
 
 ```{r Import Predictor Stack}
 
-p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio19'
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio10'
 files <- file.path(p, list.files(p, recursive = TRUE))
 
-# bio10 <- mosaic(sprc(files))
-# bio1 <- mosaic(sprc(files))
-# bio12 <- mosaic(sprc(files))
-# bio4 <- mosaic(sprc(files))
-bio19 <- mosaic(sprc(files))
+# bio10 <- vrt(files)
+# bio1 <- vrt(files)
+# bio12 <- vrt(files)
+# bio4 <- vrt(files)
+# bio19 <- vrt(files)
 
 names(bio1) <- 'bio1'
 names(bio10) <- 'bio10'
@@ -44,28 +45,44 @@ names(bio4) <- 'bio4'
 names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
-bio
 
-table(thinned$taxon)
+unique(thinned$taxon)
 
-pts1 <- filter(thinned, taxon == 'Acamptopappus sphaerocephalus')
+pts1 <- filter(thinned, taxon == 'Chylismia brevipes')
 bio_v <- extract(bio, pts1)
 bio_v <- bind_cols(bio_v, pts1) %>% 
   st_as_sf()
 
+# st <- tigris::states() %>% 
+#   filter(DIVISION %in% c(8, 9), ! STUSPS %in% c('AK', 'HI'))
 # for each BIO Indicator, flag records in the percentiles. 
-OUTPUT <- quantile_flagger(bio_v, 0.015, flag_threshold = 0.2)
-# OUTPUT <- filter(OUTPUT, !ID %in% c(370, 42, 46, 57, 58, 80:92, 76, 75, 470))
+OUTPUT <- quantile_flagger(bio_v, 0.015, flag_threshold = 0.2) %>% 
+  st_transform(4326) %>% 
+  mutate(LONG_WGS = st_coordinates(.)[,1],
+         LAT_WGS = st_coordinates(.)[,2])
+
+OUTPUT <- filter(OUTPUT, !ID %in% c(1, 4, 5, 65, 101, 105, 305, 407))
 #out <- st_intersection(OUTPUT, st_transform(st, 5070))
 #filter(out, STUSPS == 'AZ')
 
-ggplot(OUTPUT) +
-  geom_sf(aes(color = OutlierFlag)) + 
-  geom_sf_text(aes(label = ID)) +
- # geom_sf(data = mexico, fill = NA) + 
-  geom_sf(data = st, fill = NA)
+limits <- st_bbox(st_buffer(st_union(OUTPUT), 1))
 
-table(thinned$taxon)
+ggplot() +
+  geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
+  geom_sf_text(data = OUTPUT, aes(label = ID)) +
+  geom_sf(data = st, fill = NA)  +
+   coord_sf(xlim = c(limits[1], limits[3]), ylim = c(limits[2], limits[4]), expand = FALSE)
+
+#pal <- colorFactor(
+#  palette = c('red', 'yellow', 'orange', 'green'),
+#  domain = 'Dist-Env', 'Env', 'Dist', NA
+#)
+leaflet(data = OUTPUT) %>% 
+   addTiles() %>%
+   addMarkers(~LONG_WGS, ~LAT_WGS, 
+             popup = ~as.character(ID), 
+             label = ~as.character(ID))
+
 ```
 
 Every single taxon was individually mapped, and had there records investigated
@@ -73,6 +90,24 @@ Every single taxon was individually mapped, and had there records investigated
 ```{r Inspect Records for Each Taxon}
 # Abronia villosa c(718, 662, 1103, 1047)
 # Acamptopappus sphaerocephalus c(370, 42, 46, 57, 58, 80:92, 76, 75, 470)
+# Achnatherum aridum c(5, 15)
+# Achnatherum hymenoides # no error 
+# Achnatherum lemmonii c(596, 573)
+# Achnatherum occidentale  # no error
+# Achnatherum speciosum c(118, 745)
+# Achnatherum thurberianum c(3433, 549, 550, 801, 1137, 2811, 2443, 2308, 2020, 2309, 2310, 2312, 3400, 2313, 2442, 2368, 2311, 3261, 2749, 2750)
+# Acmispon americanus # NO ERRORS
+# Acmispon humistratus # need name updating!!!!!!
+# Acmispon rigidus c(385, 55)
+# Acmispon strigosus c(1469)
+# Agoseris glauca # NO ERRORS
+# Agoseris parviflora # NO ERRORS
+# Alisma triviale # NO ERRORS
+# Amaranthus fimbriatus # NO ERRORS
+
+# Anisocoma acaulis c(518)
+# Antirrhinum coulterianum # NO ERROR
+# Agoseris grandiflora c(638, 863)
 # Asclepias albicans c(1, 50, 265, 284)
 # Asclepias cordifolia c(2, 3, 5, 609)
 # Asclepias cryptoceras, c(238, 303, 35:49)
@@ -81,8 +116,7 @@ Every single taxon was individually mapped, and had there records investigated
 # Asclepias erosa c(2)
 # A. solanoana # NO ERRORS
 # A. subulata c(9, 12, 515)
-# A. speciosa # NO ERRORS
-
+# A. speciosa # NO ERROR
 # Astragalus didymocarpus c(158)
 # Astragalus eremiticus c(275, 280)
 # A. filipes c(1703, 773, 1281, 1029:1031, )
@@ -91,6 +125,33 @@ Every single taxon was individually mapped, and had there records investigated
 # A. lonchocarpus c(9, 128, 372)
 # A. whitneyi c(19, 36, 29)
 
+# Atriplex hymenelytra c(20, 506, 558)
+# Atriplex parryi c(5, 87)
+# Atriplex polycarpa c(37, 61, 63, 65:66, 68:70, 72, 91:93, 96, 98, 100, 105, 106, 109, 110, 112, 115:117, 250, 273, 279, 369, 503, 507, 791, 852, 875
+# Baileya multiradiata  c(126, 311, 239, 833, 702, 271, 326, 590, 1023)
+# Balsamorhiza hookeri c(1150)
+# Balsamorhiza sagitatta # NO ERRORS
+# Balsamorhiza serrata c(278)
+# Bebbia juncea c(55)
+# Bidens frondosa # NO ERRORS
+# Bouteloua aristidoides # c(595)
+# Bouteloua barbata # NO ERRORS
+# Bromus sitchensis C(28, 67, 149)
+# Calamagrostis nutkaensis # NO ERRORS
+# Calliandra eriophylla c(903, 811)
+# Calycoseris parryi c(8)
+# Camissonia strigulosa c(349, 538, 274, 495, 770, 145, 722, 29, 561, 418, 577, 656, 351, 662, 306)
+# Carex nebrascensis c(723)
+# Centromadia fitchii c(151, 227)
+# Centromadia pungens c(82, 92, 39, 6, 104, 136, 47) # don't care about WA introduced material
+
+# Cephalanthus occidentalis c(352, 311, 385)
+# Chaenactis fremontii c(1457, 89, 270, 191, 21, 23, 159, 6, 1180, 171, 219:227, 4, 5, 160, 129, 158, 130, 10, 11, 131, 280, 20, 190, 215, 213, 128, 214, 320, 22, 202, 204, 203, 267, 268, 228:232) 
+# Chaenactis glabriuscula c(90)
+# Chaenactis stevioides c(2005, 1869, 1931)
+# Chaenactis xantiana c(81)
+# Chilopsis linearis c(318, 595, 847, 978, 764, 415, 1264, 1256, 910, 592, 866, 560, 172, 767, 547, 1567, 809, 1158, 763, 173, 548, 1155, 162, 1147, 460, 530, 800, 1379, 496, 823, 829, 808, 685, 856, 180, 585, 545, 830, 833, 821, 803, 796, 618, 502, 495, 500, 893, 791, 780, 517, 1377, 1338, 546, 588, 1062, 611, 1611, 1257, 1492, 1311, 867, 1637, 1310, 846, 1372, 968, 1635, 556, 550)
+# Chylismia brevipes c(1, 4, 5, 65, 101, 105, 305, 407)
 # Dasyochloa pulchella c(1231)
 
 # Triteleia laxa C(2016)
@@ -101,30 +162,6 @@ Every single taxon was individually mapped, and had there records investigated
 
 ```{r load occurrence records}
 thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
-
-pts1 <- filter(thinned, taxon == 'Wyethia angustifolia')
-
-
-## flag the most disjunct records ##
-
-dist <- as.numeric(
-  sf::st_distance(pts1, pts1[sf::st_nearest_feature(pts1),], by_element = TRUE)
-)
-
-upper_bound <- quantile(dist, 0.985) # find the most extreme 2.5% of records.
-pts1 <- mutate(pts1, distance = dist, 
-               dist_flag = if_else(dist > upper_bound, T, F),
-               .before = geometry)
-
-st <- tigris::states() %>% 
-  filter(DIVISION %in% c(4, 8, 9), ! NAME %in% c('Hawaii', 'Alaska'))
-
-
-dotchart(dist)
-ggplot() +
-  geom_sf(data = pts1, aes(color = dist_flag)) +
-  geom_sf(data = st, fill = NA)
-
 
 ```
 
