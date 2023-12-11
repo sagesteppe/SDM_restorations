@@ -46,46 +46,51 @@ names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 
-unique(thinned$taxon)
+filter(thinned, str_detect(taxon, '^F')) |>
+  pull(taxon) |>
+  unique()
 
-pts1 <- filter(thinned, taxon == 'Chylismia brevipes')
+rm(bio1, bio10, bio12, bio4, bio19)
+```
+
+```{r}
+pts1 <- filter(thinned, taxon == 'Ferocactus cylindraceus')
 bio_v <- extract(bio, pts1)
-bio_v <- bind_cols(bio_v, pts1) %>% 
+bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf()
 
-# st <- tigris::states() %>% 
-#   filter(DIVISION %in% c(8, 9), ! STUSPS %in% c('AK', 'HI'))
-# for each BIO Indicator, flag records in the percentiles. 
-OUTPUT <- quantile_flagger(bio_v, 0.015, flag_threshold = 0.2) %>% 
+OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>% 
   st_transform(4326) %>% 
   mutate(LONG_WGS = st_coordinates(.)[,1],
          LAT_WGS = st_coordinates(.)[,2])
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(1, 4, 5, 65, 101, 105, 305, 407))
-#out <- st_intersection(OUTPUT, st_transform(st, 5070))
-#filter(out, STUSPS == 'AZ')
+# OUTPUT <- filter(OUTPUT, !ID %in% c(1479, 1416, 1199, 857, 1135))
+# op <- st_intersection(OUTPUT, filter(st, STUSPS == 'MT'))
 
-limits <- st_bbox(st_buffer(st_union(OUTPUT), 1))
-
-ggplot() +
+ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
   geom_sf_text(data = OUTPUT, aes(label = ID)) +
-  geom_sf(data = st, fill = NA)  +
-   coord_sf(xlim = c(limits[1], limits[3]), ylim = c(limits[2], limits[4]), expand = FALSE)
+  geom_sf(data = st, fill = NA) 
 
-#pal <- colorFactor(
-#  palette = c('red', 'yellow', 'orange', 'green'),
-#  domain = 'Dist-Env', 'Env', 'Dist', NA
-#)
 leaflet(data = OUTPUT) %>% 
-   addTiles() %>%
-   addMarkers(~LONG_WGS, ~LAT_WGS, 
-             popup = ~as.character(ID), 
-             label = ~as.character(ID))
-
+    addTiles() %>%
+    addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
 ```
 
 Every single taxon was individually mapped, and had there records investigated
+
+```{r}
+# Ferocactus cylindraceus c(84, 2890)
+```
+
+
+
+
+
+
+
+
+
 
 ```{r Inspect Records for Each Taxon}
 # Abronia villosa c(718, 662, 1103, 1047)
@@ -152,7 +157,90 @@ Every single taxon was individually mapped, and had there records investigated
 # Chaenactis xantiana c(81)
 # Chilopsis linearis c(318, 595, 847, 978, 764, 415, 1264, 1256, 910, 592, 866, 560, 172, 767, 547, 1567, 809, 1158, 763, 173, 548, 1155, 162, 1147, 460, 530, 800, 1379, 496, 823, 829, 808, 685, 856, 180, 585, 545, 830, 833, 821, 803, 796, 618, 502, 495, 500, 893, 791, 780, 517, 1377, 1338, 546, 588, 1062, 611, 1611, 1257, 1492, 1311, 867, 1637, 1310, 846, 1372, 968, 1635, 556, 550)
 # Chylismia brevipes c(1, 4, 5, 65, 101, 105, 305, 407)
+# Chylismia claviformis c(864, 955)
+# Clarkia purpurea c(200, 881)
+# Clarkia rhomboidea # NO ERRORS
+# Cleome lutea c(76, 110, 299, 202)
+# Cleome serrulata # no errors
+# Collinsia concolor # no errors
+# Collinsia grandiflora c(307, 147)
+# Collinsia heterophylla c(1017, 1524, 273, 1567, 1105, 1056, 1504, 275, 1264)
+# Coleogyne ramosissima c(232, 287, 286, 945, 300, 320, 150, 507, 1860, 2015, 467, 747, 2012, 382:389, 148, 149)
+# Condalia globosa var. pubescens # no errors
+# Cordylanthus rigidus c(25, 287, 248)
+# Crepis acuminata c(6612, 6080, 2775, 5027, 5472, 1217, 5434, 6232, 6111, 6424, 5979, 4235, 4217, 6511, 3135,
+                  #   5478, 5979, 2059, 2084:2085, 4784:4785, 5483:5484, 2078, 4793, 4790:5000, 5486, 5116:5121, 5480,
+                  #   5456, 6419, 5481:5482, 5487:5488, 3136, 2070, 3419, 5959, 5479, 6203, 4781:4783, 2090, 5122:5123)
+# Crepis occidentalis c(5663)
+# Croton californicus c(1452, 759, 954, 740)
+# Croton setiger # NO ERROR
+# Cryptantha flavoculata c(25, 430, 431, 672, 587, 555, 303)
+# Cryptantha intermedia c(1062, 81, 35, 995, 762, 1154)
+# Cryptantha micrantha c(26, 411, 213)
+# Crypantha nevadensis c(375, 463, 370, 453, 327)
+# Cryptantha pterocarya c(850, 929)
+# Cylindropuntia acanthocarpa var. acanthocarpa c(3)
+# Cylindropuntia bigelovii c(321, 52, 4, 50, 51)
+# Cylindropuntia ramosissima # NO ERRORS
+# Cymopterus bulbosus c(120, 121, 141)
+# Cymopterus purpureus c(327, 381, 283, 104, 98, 97, 99, 136)
+# Dalea mollis c(591)
+# Dalea ornata # NO ERROR
+# Dalea searlsiae # NO ERROR
+# Danthonia californica # no error
 # Dasyochloa pulchella c(1231)
+# Deschampsia cespitosa # NO ERROR
+# Descurainia pinnata # no error
+# Dichelostemma capitatum c(1, 5, 6, 7, 266)
+# Dieteria canescens # NO ERROR
+# Distichlis spicata # NO ERROR
+# Dudleya cymosa c(745, 862)
+# Dudleya farinosa c(474, 500)
+# Echinocereus engelmannii C(163, 368, 330, 181)
+# Eleocharis macrostachya c(548, 642, 661, 666)
+# Elymus elymoides # no errors
+# Elymus glaucus # no errors
+# Elymus multisetus # no errors
+# Encelia actoni # no errors
+# Encelia virginensis # c(399)
+# Ephedra californica c(581, 583)
+# Ephedra nevadensis c(649, 3319)
+
+# Epilobium brachycarpum # no errors
+# Epilobium ciliatum # no errors
+# Epilobium densiflorum # no errors
+# Eremothera refracta c(74, 321)
+# Ericameria cooperi c(125, 106, 117, 98, 100, 88, 83, 115, 78, 3, 91, 80, 89, 121, 94, 90, 85, 71, 113, 96, 114)
+# Ericameria laricifolia c(5, 62, 11, 177, 459, 266, 314, 494, 575, 495)
+# Ericameria teretifolia c(1, 5:7, 17:18, 23:56, 59:64, 68:79, 272, 160)
+# Erigeron aphanactis c(650, 667, 624, 920, 702, 567)
+# Erigeron bloomeri c(939, 934, 780, 959)
+# Erigeron breweri c(106)
+# Erigeron canadensis # no errors
+# Erigeron divergens # no errors
+# Erigeron linearis c(137, 743:759, 1952, 1206, 741:742, 1048:1050, 1051:1054, 756, 747, 939)
+# Erigeron pumilus c(2344, 2395)
+# Erigeron speciosus c(1609, 23, 1672, 69)
+# Eriogonum cernuum c(737, 315, 940, 874, 795, 538, 861, 863, 316, 654, 982, 974, 887, 758, 970, 426, 994, 815))
+# Eriogonum fasciculatum c(5574, 5312, 172, 3, 256, 524, 4644, 2674)
+# Eriogonum fasciculatum var. polifolium c(781, 232, 991, 856)
+# Eriogonum fusiforme # NO ERRORS
+# Eriogonum heracleoides c(1826, 1644, 1952, 795, 1881, 525, 1157, 1162, 1429, 1428, 1159, 1455, 1457, 1430, 1438,1450, 1458, 1435, 1448, 1443, 1459, 190, 1196, 1444, 1418, 1198, 1203, 1400:1427, 1134:1141, 1144:1149, 1399, 1398, 1144, 1397, 1434, 793, 1707, 1505, 1860, 1206, 1771, 1510, 1478, 1704, 1378)
+# Eriogonum inflatum c(2173, 2263)
+# Eriogonum latifolium c(1, 2, 646, 558, 633, 604, 520, 538, 576, 623, 559, 592, 606, 574, 560, 619, 416)
+# Eriogonum microthecum c(2263, 1516, 1534, 1038, 2462, 2456, 2186, 1513, 1514, 2448)
+# Eriogonum ovalifolium c(4225, 3322, 1421:1428, 4235)
+# Eriogonum shockleyi c(8, 9, 10, 20, 336, 26)
+# Eriogonum strictum c(729, 553, 583, 582, 703, 320, 131)
+# Eriogonum umbellatum c(1071, 1068, 5718)
+# Eriophyllum lanatum c(1925, 1766, 1769, 1102, 625, 636, 648, 39)
+# Eriophyllum wallacei c(496, 515, 862)
+# Eryngium aristulatum c(37, 30, 53)
+# Erythranthe guttata # NO ERRORS
+# Euphorbia albomarginata c(375)
+# Euphorbia micromera c(290, 145, 361)
+# Euphorbia polycarapa c(1479, 1416, 1199, 857, 1135)
+# Euthamia occidentalis c(773)
 
 # Triteleia laxa C(2016)
 ```
@@ -162,7 +250,8 @@ Every single taxon was individually mapped, and had there records investigated
 
 ```{r load occurrence records}
 thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
-
+st <- tigris::states() %>% 
+    filter(DIVISION %in% c(8, 9), ! STUSPS %in% c('AK', 'HI')) %>% st_transform(4326) 
 ```
 
 ```{r load nifc}
