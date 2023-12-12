@@ -29,7 +29,7 @@ source('functions.R')
 
 ```{r Import Predictor Stack}
 
-p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio12'
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio4'
 files <- file.path(p, list.files(p, recursive = TRUE))
 
 # bio10 <- vrt(files)
@@ -53,7 +53,7 @@ rm(bio1, bio10, bio12, bio4, bio19)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Leymus cinereus')
+pts1 <- filter(thinned, taxon == 'Lupinus argenteus')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -63,7 +63,7 @@ OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>%
   mutate(LONG_WGS = st_coordinates(.)[,1], 
          LAT_WGS = st_coordinates(.)[,2]) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(976, 393, 26))
+OUTPUT <- filter(OUTPUT, !ID %in% c())
 # op <- st_intersection(OUTPUT, filter(st, STUSPS == 'MT'))
 
 ggplot() +  
@@ -80,23 +80,16 @@ Every single taxon was individually mapped, and had there records investigated
 
 ```{r}
 
-# Helenium puberulum c(451, 550, 620, 533)
-# Helianthus annuus # no error
-# Heliomeris multiflora c(734, 964, 1016, 970, 996, 339, 342, 247, 341)
-# Heliotropium curassavicum # no error
-# Hemizonia congesta c(446, 365)
-# Heterotheca grandiflora c(1, 2, 2003)
-# Heterotheca villosa c(2720, 2634, 2707, 3528, 2745, 3097, 3321, 3232, 2617, 3452, 2659, 3088, 3495)
-# Hilaria rigida c(399, 506, 1065, 284, 1095, 1036, 345, 253, 248, 255, 254, 241, 1113, 784, 225:226, 285:286, 228, 243, 227, 249, 827, 242, 341, 338, 340, 244, 337, 240)
-# Hordeum brachyantherum # no errors
-# Hymenoclea salsola # no errors
-# Hyptis emoryi c(169, 789, 958, 10, 576, 899, 433)
-# Ionactis alpina c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115)
-# Koeleria macrantha c(4757, 2920, 6612, 6320, 7487, 1153, 8028, 1151)
-# Lasthenia gracilis c(704, 729, 1134, 651, 1109, 992, 562, 406, 537, 644)
-# Layia glandulosa c(830, 1506, 51, 445, 31))
-# Lepdium fremontii c(936, 154, 81, 220, 298, 182, 230, 851, 503, 156, 762, 27, 104:106, 582, 303, 209, 236, 527, 36, 734, 350, 449) 
-# Lepidium lasiocarpum c(976, 393, 26, 27, 1234, 831, 1190, 1793, 733, 506, 1576, 931, 1157, 1283, 1267, 1408, 507, 1159, 859, 505, 642, 103, 25, 143, 145, 146, 395, 28, 392, 50, 51, 1125, 685, 789, 394, 158, 18, 35)
+# Leymus triticoides c(327)
+# Lomatium dissectum c(933, 880, 1075, 1118, 931, 204)
+# Lomatium grayi c(137, 765, 212, 244, 740, 586, 320, 321, 359, 148,312)
+# Lomatium dissectum c(1429, 1831, 819:821, 1143, 2084)
+# Lomatium nevadense c(537, 435, 491, 254, 420)
+# Lomatium nevadense var. nevadense c(153, 171, 28, 159, 14)
+# Lomatium nudiacaule c(1006, 737, 1067, 154, 723, 886, 841) 
+# Lomatium parryi c(57, 161)
+# Lomatium triternatum c(1825, 2225, 2362, 935, 1945, 1875)
+# Lupinus arboreus c(1:22, 987, 1178, 1047, 1227, 471, 1101, 122, 1069, 960, 1060, 1170, 1045, 437, 122, 1160, 1124, 587, 1026, 1020, 1094, 213, 1117, 943, 1004, 1164, 1087, 1000, 537, 1068)
 ```
 
 
@@ -270,6 +263,21 @@ Every single taxon was individually mapped, and had there records investigated
 # Grindelia camporum c(295, 92, 212)
 # Grindelia stricta c(1, 2)
 # Gutierrezia microcephala c(36, 143, 21, 156, 1, 204, 1243, 1127, 762, 551, 975, 157, 7, 894, 153, 251, 53, 2, 250, 6, 914, 634, 1145, 85, 51, 43, 44, 739, 530:531, 714) 
+# Helenium puberulum c(451, 550, 620, 533)
+# Helianthus annuus # no error
+# Heliomeris multiflora c(734, 964, 1016, 970, 996, 339, 342, 247, 341)
+# Heliotropium curassavicum # no error
+# Hemizonia congesta c(446, 365)
+# Heterotheca grandiflora c(1, 2, 2003)
+# Heterotheca villosa c(2720, 2634, 2707, 3528, 2745, 3097, 3321, 3232, 2617, 3452, 2659, 3088, 3495)
+# Hilaria rigida c(399, 506, 1065, 284, 1095, 1036, 345, 253, 248, 255, 254, 241, 1113, 784, 225:226, 285:286, 228, 243, 227, 249, 827, 242, 341, 338, 340, 244, 337, 240)
+# Hordeum brachyantherum # no errors
+# Hymenoclea salsola # no errors
+# Hyptis emoryi c(169, 789, 958, 10, 576, 899, 433)
+# Ionactis alpina c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115)
+# Koeleria macrantha c(4757, 2920, 6612, 6320, 7487, 1153, 8028, 1151)
+# Lasthenia gracilis c(704, 729, 1134, 651, 1109, 992, 562, 406, 537, 644)
+# Layia glandulosa c(830, 1506, 51, 445, 31))
 
 # Triteleia laxa C(2016)
 ```
