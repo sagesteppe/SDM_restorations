@@ -45,7 +45,7 @@ names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 
-filter(thinned, str_detect(taxon, '^M')) |> 
+filter(thinned, str_detect(taxon, '^P')) |> 
   pull(taxon) |> 
   unique() 
 
@@ -53,7 +53,7 @@ rm(bio1, bio10, bio12, bio4, bio19)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Lycium pallidum')
+pts1 <- filter(thinned, taxon == 'Parkinsonia florida')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -63,12 +63,12 @@ OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>%
   mutate(LONG_WGS = st_coordinates(.)[,1], 
          LAT_WGS = st_coordinates(.)[,2]) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(743, 709, 771, 334, 63, 176, 336))
+OUTPUT <- filter(OUTPUT, !ID %in% c(1042, 1008, 936, 901, 721, 907, 791, 282))
 # op <- st_intersection(OUTPUT, filter(st, STUSPS == 'MT'))
 
 ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
-  geom_sf_text(data = OUTPUT, aes(label = ID)) #+
+  geom_sf_text(data = OUTPUT, aes(label = ID))+
   geom_sf(data = st, fill = NA) 
 
 leaflet(data = OUTPUT) %>% 
@@ -80,24 +80,31 @@ Every single taxon was individually mapped, and had there records investigated
 
 ```{r}
 
-# Leymus triticoides c(327)
-# Lomatium dissectum c(933, 880, 1075, 1118, 931, 204)
-# Lomatium grayi c(137, 765, 212, 244, 740, 586, 320, 321, 359, 148,312)
-# Lomatium dissectum c(1429, 1831, 819:821, 1143, 2084)
-# Lomatium nevadense c(537, 435, 491, 254, 420)
-# Lomatium nevadense var. nevadense c(153, 171, 28, 159, 14)
-# Lomatium nudiacaule c(1006, 737, 1067, 154, 723, 886, 841) 
-# Lomatium parryi c(57, 161)
-# Lomatium triternatum c(1825, 2225, 2362, 935, 1945, 1875)
-# Lupinus arboreus c(1:22, 987, 1178, 1047, 1227, 471, 1101, 122, 1069, 960, 1060, 1170, 1045, 437, 122, 1160, 1124, 587, 1026, 1020, 1094, 213, 1117, 943, 1004, 1164, 1087, 1000, 537, 1068)
-# Lupinus argenteus c(4046, 4961, 736, 4712, 4733, 4678, 2773, 4865, 1894, 4368, 4099, 3864, 3941, 4357, 5874, 2773, 4566, 4866, 4790, 4805, 4821, 4743, 5010, 4723, 4710, 4336, 4874)
-# Lupinus arizonicus c(1333, 29, 4:7, 439, 14:16, 870, 896, 1309)
-# Lupinus bicolor c(25:27, 1, 2, 4:5, 3020, 2926, 1313, 1701, 1926, 2671, 2801, 1925, 1673)
-# Lupinus flavoculatus c(7, 47)
-# Lupinus odoratus  c(85, 9, 118, 131, 83, 40))
-# Lycium andersonii c(576, 1311, 1576)
-# Lycium cooperi c(115, 220, 219, 519, 7, 301, 422, 494, 387, 309, 66 )
-# Lycium pallidum c(743, 709, 771, 334, 63, 176, 336)
+# Madia elegans (5, 8, 891, 301, 975, 909, 953, 1186))
+# Madia gracilis # no errors
+# Malacothrix glabrata c(1593, 1878, 1224, 1854, 66, 67, 1723, 2266)
+# Malvella leprosa # no errors
+# Menodora spinescens c(158, 261, 46, 153, 147)
+# Mentha canadensis # no errors
+# Mentzelia affinis c(67, 332, 258, 53, 33, 226, 139)
+# Mentzelia albicaulis c(3629, 3406, 1593, 2207, 3293, 3501, 3268, 2370)
+# Mentzelia laevicaulis c(402, 146, 328, 909, 883, 637, 951)
+# Mentzelia multiflora c(574, 725)
+# Mirabilis laevis c(1760, 123, 1619, 1788, 93)
+# Mirabilis lanata (PROBLEM)
+# Muhlenbergia porteri c(1247, 1458)
+# Muhlenbergia rigens c(615, 285, 634, 829)
+# Nassela pulchra c(1, 689, 523)
+# Nicotiana attenuata c(159, 706, 870, 202, 531, 492, 394, 46, 131)
+# Nicotiana obtusifolia # NO ERRORS
+# Oenothera cespitosa c(699, 522)
+# Oenothera deltoides c(80, 51, 42, 558, 552)
+# Oenothera primiveris c(2, 28, 29, 511, 236, 331, 133, 236, 482)
+# Olneya tesota c(1333, 150, 151, 154:156, 490, 488, 1251, 1307, 157)
+# Opuntia basilaris c(2513, 1749, 373, 345, 344, 360:363, 291)
+# Oxystylis lutea # no errors
+# Packera multilobata c(531, 817:818, 1893, 1899, 1960, 2201, 532)
+# Parkinsonia florida
 ```
 
 
@@ -284,6 +291,25 @@ Every single taxon was individually mapped, and had there records investigated
 # Koeleria macrantha c(4757, 2920, 6612, 6320, 7487, 1153, 8028, 1151)
 # Lasthenia gracilis c(704, 729, 1134, 651, 1109, 992, 562, 406, 537, 644)
 # Layia glandulosa c(830, 1506, 51, 445, 31))
+# Leymus triticoides c(327)
+# Lomatium dissectum c(933, 880, 1075, 1118, 931, 204)
+# Lomatium grayi c(137, 765, 212, 244, 740, 586, 320, 321, 359, 148,312)
+# Lomatium dissectum c(1429, 1831, 819:821, 1143, 2084)
+# Lomatium nevadense c(537, 435, 491, 254, 420)
+# Lomatium nevadense var. nevadense c(153, 171, 28, 159, 14)
+# Lomatium nudiacaule c(1006, 737, 1067, 154, 723, 886, 841) 
+# Lomatium parryi c(57, 161)
+# Lomatium triternatum c(1825, 2225, 2362, 935, 1945, 1875)
+# Lupinus arboreus c(1:22, 987, 1178, 1047, 1227, 471, 1101, 122, 1069, 960, 1060, 1170, 1045, 437, 122, 1160, 1124, 587, 1026, 1020, 1094, 213, 1117, 943, 1004, 1164, 1087, 1000, 537, 1068)
+# Lupinus argenteus c(4046, 4961, 736, 4712, 4733, 4678, 2773, 4865, 1894, 4368, 4099, 3864, 3941, 4357, 5874, 2773, 4566, 4866, 4790, 4805, 4821, 4743, 5010, 4723, 4710, 4336, 4874)
+# Lupinus arizonicus c(1333, 29, 4:7, 439, 14:16, 870, 896, 1309)
+# Lupinus bicolor c(25:27, 1, 2, 4:5, 3020, 2926, 1313, 1701, 1926, 2671, 2801, 1925, 1673)
+# Lupinus flavoculatus c(7, 47)
+# Lupinus odoratus  c(85, 9, 118, 131, 83, 40))
+# Lycium andersonii c(576, 1311, 1576)
+# Lycium cooperi c(115, 220, 219, 519, 7, 301, 422, 494, 387, 309, 66 )
+# Lycium pallidum c(743, 709, 771, 334, 63, 176, 336)
+# Macheranther canescens c(2424)
 
 # Triteleia laxa C(2016)
 ```
