@@ -29,7 +29,7 @@ source('functions.R')
 
 ```{r Import Predictor Stack}
 
-p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio10'
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio12'
 files <- file.path(p, list.files(p, recursive = TRUE))
 
 # bio10 <- vrt(files)
@@ -37,7 +37,6 @@ files <- file.path(p, list.files(p, recursive = TRUE))
 # bio12 <- vrt(files)
 # bio4 <- vrt(files)
 # bio19 <- vrt(files)
-
 names(bio1) <- 'bio1'
 names(bio10) <- 'bio10'
 names(bio12) <- 'bio12'
@@ -46,7 +45,7 @@ names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 
-filter(thinned, str_detect(taxon, '^K')) |> 
+filter(thinned, str_detect(taxon, '^L')) |> 
   pull(taxon) |> 
   unique() 
 
@@ -54,7 +53,7 @@ rm(bio1, bio10, bio12, bio4, bio19)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Koeleria macrantha')
+pts1 <- filter(thinned, taxon == 'Leymus cinereus')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -64,19 +63,17 @@ OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>%
   mutate(LONG_WGS = st_coordinates(.)[,1], 
          LAT_WGS = st_coordinates(.)[,2]) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115))
+OUTPUT <- filter(OUTPUT, !ID %in% c(976, 393, 26))
 # op <- st_intersection(OUTPUT, filter(st, STUSPS == 'MT'))
-
-# 2920, 4757, 1155, 1151, 8028, 
 
 ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
   geom_sf_text(data = OUTPUT, aes(label = ID)) +
   geom_sf(data = st, fill = NA) 
 
-  leaflet(data = OUTPUT) %>% 
-     addTiles() %>%
-      addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
+leaflet(data = OUTPUT) %>% 
+   addTiles() %>%
+   addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
 ```
 
 Every single taxon was individually mapped, and had there records investigated
@@ -95,7 +92,11 @@ Every single taxon was individually mapped, and had there records investigated
 # Hymenoclea salsola # no errors
 # Hyptis emoryi c(169, 789, 958, 10, 576, 899, 433)
 # Ionactis alpina c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115)
-
+# Koeleria macrantha c(4757, 2920, 6612, 6320, 7487, 1153, 8028, 1151)
+# Lasthenia gracilis c(704, 729, 1134, 651, 1109, 992, 562, 406, 537, 644)
+# Layia glandulosa c(830, 1506, 51, 445, 31))
+# Lepdium fremontii c(936, 154, 81, 220, 298, 182, 230, 851, 503, 156, 762, 27, 104:106, 582, 303, 209, 236, 527, 36, 734, 350, 449) 
+# Lepidium lasiocarpum c(976, 393, 26, 27, 1234, 831, 1190, 1793, 733, 506, 1576, 931, 1157, 1283, 1267, 1408, 507, 1159, 859, 505, 642, 103, 25, 143, 145, 146, 395, 28, 392, 50, 51, 1125, 685, 789, 394, 158, 18, 35)
 ```
 
 
