@@ -53,7 +53,7 @@ rm(bio1, bio10, bio12, bio4, bio19)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Parkinsonia florida')
+pts1 <- filter(thinned, taxon == 'Penstemon eatonii')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -63,13 +63,17 @@ OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>%
   mutate(LONG_WGS = st_coordinates(.)[,1], 
          LAT_WGS = st_coordinates(.)[,2]) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(1042, 1008, 936, 901, 721, 907, 791, 282))
+OUTPUT <- filter(OUTPUT, !ID %in% c(360, 213, 1, 507, 765, 618, 337, 851, 576, 815, 193, 465, 525, 169, 394:396, 464, 413, 740, 614, 849, 748, 654, 663, 735, 811, 754, 223, 538, 3, 470, 544, 784, 541, 484))
 # op <- st_intersection(OUTPUT, filter(st, STUSPS == 'MT'))
 
 ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
   geom_sf_text(data = OUTPUT, aes(label = ID))+
   geom_sf(data = st, fill = NA) 
+
+
+OUTPUT <- filter(OUTPUT, !ID %in% c(360, 213, 1, 507, 765, 618, 337, 851, 576, 815, 193, 465, 525, 169, 394:396, 464, 413, 740, 614, 849, 748, 654, 663, 735, 811, 754, 223, 538, 3, 470, 544, 784, 541, 484, 623, 243, 142, 824, 201, 212, 206, 640, 419, 474, 348, 434, 375, 569, 218, 244, 596, 648, 323, 546, 53, 54, 492, 482, 446, 761, ))
+
 
 leaflet(data = OUTPUT) %>% 
    addTiles() %>%
@@ -80,31 +84,10 @@ Every single taxon was individually mapped, and had there records investigated
 
 ```{r}
 
-# Madia elegans (5, 8, 891, 301, 975, 909, 953, 1186))
-# Madia gracilis # no errors
-# Malacothrix glabrata c(1593, 1878, 1224, 1854, 66, 67, 1723, 2266)
-# Malvella leprosa # no errors
-# Menodora spinescens c(158, 261, 46, 153, 147)
-# Mentha canadensis # no errors
-# Mentzelia affinis c(67, 332, 258, 53, 33, 226, 139)
-# Mentzelia albicaulis c(3629, 3406, 1593, 2207, 3293, 3501, 3268, 2370)
-# Mentzelia laevicaulis c(402, 146, 328, 909, 883, 637, 951)
-# Mentzelia multiflora c(574, 725)
-# Mirabilis laevis c(1760, 123, 1619, 1788, 93)
-# Mirabilis lanata (PROBLEM)
-# Muhlenbergia porteri c(1247, 1458)
-# Muhlenbergia rigens c(615, 285, 634, 829)
-# Nassela pulchra c(1, 689, 523)
-# Nicotiana attenuata c(159, 706, 870, 202, 531, 492, 394, 46, 131)
-# Nicotiana obtusifolia # NO ERRORS
-# Oenothera cespitosa c(699, 522)
-# Oenothera deltoides c(80, 51, 42, 558, 552)
-# Oenothera primiveris c(2, 28, 29, 511, 236, 331, 133, 236, 482)
-# Olneya tesota c(1333, 150, 151, 154:156, 490, 488, 1251, 1307, 157)
-# Opuntia basilaris c(2513, 1749, 373, 345, 344, 360:363, 291)
-# Oxystylis lutea # no errors
-# Packera multilobata c(531, 817:818, 1893, 1899, 1960, 2201, 532)
-# Parkinsonia florida
+# Parkinsonia florida c(1042, 1008, 936, 901, 721, 907, 791, 282)
+# Pectis papposa c(26:31, 668, 306, 231, 1053, 118, 25, 186, 1112, 279)
+# Penstemon acuminatus c(15, 160, 78, 212, 168) # too few records in nevada?
+# Penstemon deustus c(680, 836, 251, 228, 321, 661)
 ```
 
 
@@ -309,7 +292,33 @@ Every single taxon was individually mapped, and had there records investigated
 # Lycium andersonii c(576, 1311, 1576)
 # Lycium cooperi c(115, 220, 219, 519, 7, 301, 422, 494, 387, 309, 66 )
 # Lycium pallidum c(743, 709, 771, 334, 63, 176, 336)
-# Macheranther canescens c(2424)
+# Macheranthera canescens c(2424)
+
+
+# Madia elegans (5, 8, 891, 301, 975, 909, 953, 1186))
+# Madia gracilis # no errors
+# Malacothrix glabrata c(1593, 1878, 1224, 1854, 66, 67, 1723, 2266)
+# Malvella leprosa # no errors
+# Menodora spinescens c(158, 261, 46, 153, 147)
+# Mentha canadensis # no errors
+# Mentzelia affinis c(67, 332, 258, 53, 33, 226, 139)
+# Mentzelia albicaulis c(3629, 3406, 1593, 2207, 3293, 3501, 3268, 2370)
+# Mentzelia laevicaulis c(402, 146, 328, 909, 883, 637, 951)
+# Mentzelia multiflora c(574, 725)
+# Mirabilis laevis c(1760, 123, 1619, 1788, 93)
+# Mirabilis lanata (PROBLEM)
+# Muhlenbergia porteri c(1247, 1458)
+# Muhlenbergia rigens c(615, 285, 634, 829)
+# Nassela pulchra c(1, 689, 523)
+# Nicotiana attenuata c(159, 706, 870, 202, 531, 492, 394, 46, 131)
+# Nicotiana obtusifolia # NO ERRORS
+# Oenothera cespitosa c(699, 522)
+# Oenothera deltoides c(80, 51, 42, 558, 552)
+# Oenothera primiveris c(2, 28, 29, 511, 236, 331, 133, 236, 482)
+# Olneya tesota c(1333, 150, 151, 154:156, 490, 488, 1251, 1307, 157)
+# Opuntia basilaris c(2513, 1749, 373, 345, 344, 360:363, 291)
+# Oxystylis lutea # no errors
+# Packera multilobata c(531, 817:818, 1893, 1899, 1960, 2201, 532)
 
 # Triteleia laxa C(2016)
 ```
