@@ -197,7 +197,7 @@ quantile_flagger <- function(x, quant, flag_threshold){
                            .default = NA,
                          ),
                          .before = geometry) |>
-    dplyr::select(-EnvFlag, DistFlag)
+    dplyr::select(-EnvFlag, -DistFlag)
   
   return(x_out)
   

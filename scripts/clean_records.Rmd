@@ -46,41 +46,56 @@ names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 
-filter(thinned, str_detect(taxon, '^F')) |>
-  pull(taxon) |>
-  unique()
+filter(thinned, str_detect(taxon, '^K')) |> 
+  pull(taxon) |> 
+  unique() 
 
 rm(bio1, bio10, bio12, bio4, bio19)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Ferocactus cylindraceus')
+pts1 <- filter(thinned, taxon == 'Koeleria macrantha')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
-  st_as_sf()
+  st_as_sf() 
 
 OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>% 
   st_transform(4326) %>% 
-  mutate(LONG_WGS = st_coordinates(.)[,1],
-         LAT_WGS = st_coordinates(.)[,2])
+  mutate(LONG_WGS = st_coordinates(.)[,1], 
+         LAT_WGS = st_coordinates(.)[,2]) 
 
-# OUTPUT <- filter(OUTPUT, !ID %in% c(1479, 1416, 1199, 857, 1135))
+OUTPUT <- filter(OUTPUT, !ID %in% c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115))
 # op <- st_intersection(OUTPUT, filter(st, STUSPS == 'MT'))
+
+# 2920, 4757, 1155, 1151, 8028, 
 
 ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
   geom_sf_text(data = OUTPUT, aes(label = ID)) +
   geom_sf(data = st, fill = NA) 
 
-leaflet(data = OUTPUT) %>% 
-    addTiles() %>%
-    addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
+  leaflet(data = OUTPUT) %>% 
+     addTiles() %>%
+      addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
 ```
 
 Every single taxon was individually mapped, and had there records investigated
 
 ```{r}
-# Ferocactus cylindraceus c(84, 2890)
+
+# Helenium puberulum c(451, 550, 620, 533)
+# Helianthus annuus # no error
+# Heliomeris multiflora c(734, 964, 1016, 970, 996, 339, 342, 247, 341)
+# Heliotropium curassavicum # no error
+# Hemizonia congesta c(446, 365)
+# Heterotheca grandiflora c(1, 2, 2003)
+# Heterotheca villosa c(2720, 2634, 2707, 3528, 2745, 3097, 3321, 3232, 2617, 3452, 2659, 3088, 3495)
+# Hilaria rigida c(399, 506, 1065, 284, 1095, 1036, 345, 253, 248, 255, 254, 241, 1113, 784, 225:226, 285:286, 228, 243, 227, 249, 827, 242, 341, 338, 340, 244, 337, 240)
+# Hordeum brachyantherum # no errors
+# Hymenoclea salsola # no errors
+# Hyptis emoryi c(169, 789, 958, 10, 576, 899, 433)
+# Ionactis alpina c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115)
+
 ```
 
 
@@ -241,6 +256,19 @@ Every single taxon was individually mapped, and had there records investigated
 # Euphorbia micromera c(290, 145, 361)
 # Euphorbia polycarapa c(1479, 1416, 1199, 857, 1135)
 # Euthamia occidentalis c(773)
+
+# Ferocactus cylindraceus c(84, 2890)
+# Festuca idahoensis c(6333, 3483, 6144, 6077, 6209, 6526, 6103, 6792, 6007, 6298)
+# Fourquieria splendens # no errors
+# Fraxinus anomala c(785, 127)
+# Fraxinus latifolia c(788, 476, 72, 806)
+# Fraxinus velutina c(793, 877, 952, 656, 154, 586, 505, 194, 749, 125, 685, 784, 129, 196, 61, 332, 926, 796, 826, 256, 753, 808, 740, 417, 565, 689)
+# Galium aparine # NO ERRORS
+# Gereae canescens c(247, 45, 46)
+# Glycyrrhiza lepidota # NO ERRORS
+# Grindelia camporum c(295, 92, 212)
+# Grindelia stricta c(1, 2)
+# Gutierrezia microcephala c(36, 143, 21, 156, 1, 204, 1243, 1127, 762, 551, 975, 157, 7, 894, 153, 251, 53, 2, 250, 6, 914, 634, 1145, 85, 51, 43, 44, 739, 530:531, 714) 
 
 # Triteleia laxa C(2016)
 ```
