@@ -45,7 +45,7 @@ names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 
-filter(thinned, str_detect(taxon, '^R')) |> 
+filter(thinned, str_detect(taxon, '^S')) |> 
   pull(taxon) |> 
   unique() 
 
@@ -53,7 +53,7 @@ rm(bio1, bio10, bio12, bio4, bio19, p, files)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Purshia glandulosa')
+pts1 <- filter(thinned, taxon == 'Solanum americanum')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -68,12 +68,13 @@ ggplot() +
   geom_sf_text(data = OUTPUT, aes(label = ID)) +
   geom_sf(data = st, fill = NA) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(174, 198, 259, 24, 231, 242, 260, 92, 41, 324, 18:21))
+OUTPUT <- filter(OUTPUT, !ID %in% c(302, 238, 796, 657))
 
 leaflet(data = OUTPUT) %>% 
    addTiles() %>%
    addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
 ```
+
 
 Every single taxon was individually mapped, and had there records investigated
 
@@ -86,6 +87,21 @@ Every single taxon was individually mapped, and had there records investigated
 # Psorothamnus schottii c(607)
 # Psorothamnus spinosus c(4:6, 8:11, 21:22, 17, 24, 1)
 # Purshia glandulosa c(174, 198, 259, 24, 231, 242, 260, 92, 41, 324, 18:21)
+# Ranunculus californicus c(136, 1064, 1400, 629, 1207, 1166, 1387, 1228, 1390, 1227, 1239, 1484, 3, 708, 594, 256, 650, 554, 1456, 533, 1060, 552, 1371, 1101, 1297)
+# Rhamnus californica c(102)
+# Rosa californica c(11,1368, 1204, 1333, 932, 1191, 200, 745, 358, 912, 1200, 1285, 12, 903, 553, 13, 1032, 775, 1228)
+# Rubus ursinus c(70, 90, 3388)
+# Rumex salicifolius # no errors
+# Sagittaria latifolia # no errors
+# Salazaria mexicana c(329, 700)
+# Salvia columbariae c(4047, 3182, 941, 2611, 2863, 4244, 2685, 3648, 3591, 2988)
+# Sambucus mexicana # NO ERRORS - BUT REVIEW TAXONOMY
+# Senecio integerrimus c(1442, 2630, 2509, 2397)
+# Senecio spartioides c(388, 674, 445)
+# Senegalia greggii c(1517, 930, 1486, 1413, 477, 655)
+# Senna armata c(247)
+# Sisyrnchium bellum c(4418, 1587, 1271, 3864, 4123, 4204)
+# Solanum americanum c(302, 238, 796, 657)
 ```
 
 
