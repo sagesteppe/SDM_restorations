@@ -45,7 +45,7 @@ names(bio19) <- 'bio19'
 
 bio <- c(bio1, bio10, bio12, bio4, bio19)
 
-filter(thinned, str_detect(taxon, '^S')) |> 
+filter(thinned, str_detect(taxon, '^T')) |> 
   pull(taxon) |> 
   unique() 
 
@@ -53,7 +53,7 @@ rm(bio1, bio10, bio12, bio4, bio19, p, files)
 ```
 
 ```{r}
-pts1 <- filter(thinned, taxon == 'Solanum americanum')
+pts1 <- filter(thinned, taxon == 'Syntrichopappus fremontii')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -65,13 +65,12 @@ OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>%
 
 ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
-  geom_sf_text(data = OUTPUT, aes(label = ID)) +
+  geom_sf_text(data = OUTPUT, aes(label = ID)) #+
   geom_sf(data = st, fill = NA) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(302, 238, 796, 657))
+OUTPUT <- filter(OUTPUT, !ID %in% c(296, 167, 286))
 
-leaflet(data = OUTPUT) %>% 
-   addTiles() %>%
+leaflet(data = filter(OUTPUT, ID > 0)) %>%  addTiles() %>%
    addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
 ```
 
@@ -80,28 +79,18 @@ Every single taxon was individually mapped, and had there records investigated
 
 ```{r}
 
-# Prosopis glandulosa c(709, 726, 2368, 1408, 1792, 1472, 907, 2106, 2136, 718)
-# Psathyrotes ramosissima c(64, 278, 125, 231, 240)
-# Pseudoroegneria spicata # no errors
-# Psorothamnus fremontii c(348, 455)
-# Psorothamnus schottii c(607)
-# Psorothamnus spinosus c(4:6, 8:11, 21:22, 17, 24, 1)
-# Purshia glandulosa c(174, 198, 259, 24, 231, 242, 260, 92, 41, 324, 18:21)
-# Ranunculus californicus c(136, 1064, 1400, 629, 1207, 1166, 1387, 1228, 1390, 1227, 1239, 1484, 3, 708, 594, 256, 650, 554, 1456, 533, 1060, 552, 1371, 1101, 1297)
-# Rhamnus californica c(102)
-# Rosa californica c(11,1368, 1204, 1333, 932, 1191, 200, 745, 358, 912, 1200, 1285, 12, 903, 553, 13, 1032, 775, 1228)
-# Rubus ursinus c(70, 90, 3388)
-# Rumex salicifolius # no errors
-# Sagittaria latifolia # no errors
-# Salazaria mexicana c(329, 700)
-# Salvia columbariae c(4047, 3182, 941, 2611, 2863, 4244, 2685, 3648, 3591, 2988)
-# Sambucus mexicana # NO ERRORS - BUT REVIEW TAXONOMY
-# Senecio integerrimus c(1442, 2630, 2509, 2397)
-# Senecio spartioides c(388, 674, 445)
-# Senegalia greggii c(1517, 930, 1486, 1413, 477, 655)
-# Senna armata c(247)
-# Sisyrnchium bellum c(4418, 1587, 1271, 3864, 4123, 4204)
-# Solanum americanum c(302, 238, 796, 657)
+# Sphaeralcea coccinea c(6838, 4563, 4155, 4151, 327, 325, 1972, 4577, 4728, 4153:4155, 2, 3243, 252, 6189, 323:326, 733, 6748, 4436, 4441, 251:255, 6846, 6229, 6304, 6946, 3683, 4470, 6961, 6904, 6510, 7016, 6788, 4472)
+# Sphaeralcea grossulariifolia c(14:17, 4, 22:23, 242, 38, 43:47, 515, 326)
+# Sphaeralcea munroana c(627, 157, 754, 510, 597, 537, 661, 790, 453, 599, 486)
+# Sporobolus airoides c(2350, 1414, 1799)
+# Sporobolus cryptandrus c(2557, 2919, 3133, 3453, 3419, 2760, 3871, 3877, 3597, 2320, 3783, 3966, 3920, 3929, 3783, 3174)
+# Stanleya pinnata c(1022, 849)
+# Stenotus acualis c(2602, 2673, 2516, 1779, 2585, 2273, 344, 1170)
+# Stephanomeria exigua c(164, 774, 1033)
+# Stephanomeria parryi c(110, 63, 144, 26, 55)
+# Stephanomeria pauciflora c(130, 1560, 1274, 1463, 2028, 900, 1296)
+# Symphyotrichum subulatum # no errors
+# Syntrichopappus fremontii c(296, 167, 286)
 ```
 
 
@@ -364,7 +353,30 @@ Every single taxon was individually mapped, and had there records investigated
 # Platanus racemosa c(192, 1135, 918, 947, 1507, 442 )
 # Pleiacanthus spinosus c(603, 928, 820, 951)
 # Pleuraphis jamesii c(3659, 1717, 1742, 1725, 3712)
-
+# Prosopis glandulosa c(709, 726, 2368, 1408, 1792, 1472, 907, 2106, 2136, 718)
+# Psathyrotes ramosissima c(64, 278, 125, 231, 240)
+# Pseudoroegneria spicata # no errors
+# Psorothamnus fremontii c(348, 455)
+# Psorothamnus schottii c(607)
+# Psorothamnus spinosus c(4:6, 8:11, 21:22, 17, 24, 1)
+# Purshia glandulosa c(174, 198, 259, 24, 231, 242, 260, 92, 41, 324, 18:21)
+# Ranunculus californicus c(136, 1064, 1400, 629, 1207, 1166, 1387, 1228, 1390, 1227, 1239, 1484, 3, 708, 594, 256, 650, 554, 1456, 533, 1060, 552, 1371, 1101, 1297)
+# Rhamnus californica c(102)
+# Rosa californica c(11,1368, 1204, 1333, 932, 1191, 200, 745, 358, 912, 1200, 1285, 12, 903, 553, 13, 1032, 775, 1228)
+# Rubus ursinus c(70, 90, 3388)
+# Rumex salicifolius # no errors
+# Sagittaria latifolia # no errors
+# Salazaria mexicana c(329, 700)
+# Salvia columbariae c(4047, 3182, 941, 2611, 2863, 4244, 2685, 3648, 3591, 2988)
+# Sambucus mexicana # NO ERRORS - BUT REVIEW TAXONOMY
+# Senecio integerrimus c(1442, 2630, 2509, 2397)
+# Senecio spartioides c(388, 674, 445)
+# Senegalia greggii c(1517, 930, 1486, 1413, 477, 655)
+# Senna armata c(247)
+# Sisyrnchium bellum c(4418, 1587, 1271, 3864, 4123, 4204)
+# Solanum americanum c(302, 238, 796, 657)
+# Solidago velutina c(101:105, 38, 67, 72, 637, 107:108)
+# Sphaeralcea ambigua c(3332, 2914, 2903, 1813, 2755, 2118, 2919, 2774, 1060, 701, 1116, 2863, 590, 750, 1632, 1049, 702, 3070, 3072, 1050, 1067, 2698, 1117, 1055, 579, 699, 1056, 1122, 1059, 1061, 3224, 3013, 2625, 1975, 2518, 2789, 3281, 1120, 700, 1709, 2615, 1123, 2561, 2759, 2360, 2694, 2927, 3106, 2971, 2778, 2709, 2424, 2535, 2167, 2252, 2660, 2230, 2720, 2271, 2631, 3016, 2228, 2194, 2228, 2194, 2559, 3426, 3502, 2466, 2663,2721, 2146, 2336, 2297, 2422, 2788, 2327, 3144, 2370, 2508, 2597, 2593, 2299, 2873, 2458, 2617, 3464, 2165, 3444, 3169, 3578, 1977, 1701, 1879, 1509, 1621, 1928, 1859, 1770, 1543, 1933, 1691, 1545, 1754, 1684, 1880, 1023, 1025, 1246, 420:422, 870, 1456, 1031, 1475, 1453, 1035, 441, 440, 1032, 1346, 424, 329:332, 1022, 1036, 624, 1455, 658, 1255, 1275, 1385, 1037, 476, 222, 1458, 1470, 333, 221, 793, 610, 32, 368, 599, 1228, 598, 1196, 604, 1212, 600, 910:917, 35:45, 1198, 749, 1210:1215, 602, 1195, 369:371, 367, 1174, 686, 1722, 1634)
 # Triteleia laxa C(2016)
 ```
 
