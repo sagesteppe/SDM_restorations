@@ -17,19 +17,19 @@
 "Agoseris parviflora"  c(0)
 "Alisma triviale" c(0)
 "Amaranthus fimbriatus" c(0)
-"Ambrosia dumosa"
-"Ambrosia psilostachya"
-"Ambrosia salsola"
-"Amsinckia menziesii"
+"Ambrosia dumosa" c(3411, 448, 3189, 2592, 2139, 3559, 3287)
+"Ambrosia psilostachya" c(534, 1116, 156)
+"Ambrosia salsola" c(0)
+"Amsinckia menziesii" c(1, 1451, 1422)
 "Amsinckia menziesii var. intermedia"
-"Amsinckia tessellata"
-"Anaphalis margaritacea"
+"Amsinckia tessellata" c(304, 113:114, 1011, 851, 896, 1017, 719, 1009, 775, 288, 285, 289, 286, 467:469, 287, 870, 868, 733, 821, 795, 2373, 1394, 2332, 338)
+"Anaphalis margaritacea" c(2857, 2905, 2095, 15, 2685, 2948, 2140, 2193, 2386, 2316, 2407)
 "Anisocoma acaulis" c(518)
 "Antirrhinum coulterianum" c(0)
 "Apocynum cannabinum"
-"Arctostaphylos glauca"
+"Arctostaphylos glauca" c(358, 1316, 773, 1037, 1473, 1114, 569, 1048, 1566, 1377, 1252, 1287, 1252, 1253, 1169, 966, 870)
 "Aristida purpurea"
-"Aristolochia californica"
+"Aristolochia californica" c(12, 47, 82, 104, 84, 39)
 "Artemisia douglasiana"
 "Asclepias albicans" c(1, 50, 265, 284)
 "Asclepias cordifolia" c(2, 3, 5, 609)
@@ -76,13 +76,13 @@
 "Carex nebrascensis" c(723)
 "Ceanothus greggii"
 "Ceanothus pauciflorus"
-"Ceanothus perplexans"
+"Ceanothus perplexans" c(259, 355, 335, 407, 261, 179, 267, 452, 224, 356, 353, 401, 432)
 "Centromadia fitchii" c(151, 227)
 "Centromadia pungens" c(82, 92, 39, 6, 104, 136, 47)
 "Cephalanthus occidentalis" c(352, 311, 385)
-"Cercis occidentalis"
-"Cercocarpus ledifolius"
-"Chaenactis douglasii"
+"Cercis occidentalis" c(630, 614, 687, 44, 540, 556)
+"Cercocarpus ledifolius" c(3622, 3108, 1497, 3530, 3616, 3657, 376, 1171, 3512, 3649, 397, 3216, 3792, 1887, 1856, 1829, 1758, 1871, 1790, 2427, 2038, 3552, 902, 917, 103)
+"Chaenactis douglasii" c(3223, 2850, 2969, 2714, 2052)
 "Chaenactis fremontii" c(1457, 89, 270, 191, 21, 23, 159, 6, 1180, 171, 219:227, 4, 5, 160, 129, 158, 130, 10, 11, 131, 280, 20, 190, 215, 213, 128, 214, 320, 22, 202, 204, 203, 267, 268, 228:232)
 "Chaenactis glabriuscula" c(90)
 "Chaenactis stevioides" c(2005, 1869, 1931)
@@ -91,12 +91,12 @@
 "Chylismia brevipes" c(1, 4, 5, 65, 101, 105, 305, 407)
 "Chylismia claviformis" c(864, 955)
 "Cirsium acuminata"
-"Cirsium mohavense"
-"Cirsium occidentale"
+"Cirsium mohavense" c(1:6, 98, 103, 110, 127)
+"Cirsium occidentale" c(3, 13:16, 18:19, 31, 35, 39, 50:61, 64, 66, 247)
 "Clarkia purpurea" c(200, 881)
 "Clarkia rhomboidea" c(0)
-"Claytonia perfoliata"
-"Clematis ligusticifolia"
+"Claytonia perfoliata" c(3223, 2850, 2969, 2714, 2052, 115, 1028, 1993, 1801, 2104, 2616, 2235, 2644, 2757, 3628, 3186, 3870, 4323, 4717, 4505, 3942, 127, 100, 8, 174)
+"Clematis ligusticifolia" c(0)
 "Cleome lutea" c(76, 110, 299, 202)
 "Cleome serrulata" c(0)
 "Coleogyne ramosissima" c(232, 287, 286, 945, 300, 320, 150, 507, 1860, 2015, 467, 747, 2012, 382:389, 148, 149)
@@ -139,7 +139,7 @@
 "Elymus glaucus" c(0)
 "Elymus multisetus" c(0)
 "Encelia actoni" c(0)
-"Encelia farinosa"
+"Encelia farinosa" c(115, 266, 3724, 850, 3342, 3433, 28, 3807, 88:89, 2539, 227, 632, 3245, 3213, 3425)
 "Encelia virginensis" c(399)
 "Ephedra californica" c(581, 583)
 "Ephedra nevadensis" c(649, 3319)
@@ -149,7 +149,7 @@
 "Eremothera refracta" c(74, 321)
 "Ericameria cooperi" c(125, 106, 117, 98, 100, 88, 83, 115, 78, 3, 91, 80, 89, 121, 94, 90, 85, 71, 113, 96, 114)
 "Ericameria laricifolia" c(5, 62, 11, 177, 459, 266, 314, 494, 575, 495)
-"Ericameria linearifolia" 
+"Ericameria linearifolia" c(31, 52, 1346, 1429, 1457, 1583, 1197, 1012, 1426, 1428, 25, 48, 792, 329)
 "Ericameria teretifolia" c(1, 5:7, 17:18, 23:56, 59:64, 68:79, 272, 160)
 "Erigeron aphanactis" c(650, 667, 624, 920, 702, 567)
 "Erigeron bloomeri" c(939, 934, 780, 959)
@@ -196,7 +196,7 @@
 "Heliomeris multiflora" c(734, 964, 1016, 970, 996, 339, 342, 247, 341)
 "Heliotropium curassavicum"
 "Hemizonia congesta" c(446, 365)
-"Hesperostipa comata"
+"Hesperostipa comata" c(7044, 7911)
 "Heterotheca grandiflora" c(1, 2, 2003)
 "Heterotheca villosa" c(2720, 2634, 2707, 3528, 2745, 3097, 3321, 3232, 2617, 3452, 2659, 3088, 3495)
 "Hilaria rigida" c(399, 506, 1065, 284, 1095, 1036, 345, 253, 248, 255, 254, 241, 1113, 784, 225:226, 285:286, 228, 243, 227, 249, 827, 242, 341, 338, 340, 244, 337, 240)
