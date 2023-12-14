@@ -7,10 +7,10 @@
 "Achnatherum speciosum" c(118, 745)
 "Achnatherum thurberianum" c(3433, 549, 550, 801, 1137, 2811, 2443, 2308, 2020, 2309, 2310, 2312, 3400, 2313, 2442, 2368, 2311, 3261, 2749, 2750)
 "Acmispon americanus" c(0)
-"Acmispon humistratus"
+"Acmispon brachycarpus" c(0)
 "Acmispon rigidus" c(385, 55)
 "Acmispon strigosus" c(1469)
-"Adenostoma fasiculatum"
+"Adenostoma fasciculatum" c(5400, 1146, 5341, 4981, 4771)
 "Adenostoma sparsifolium" c(231, 224, 304, 299)
 "Agoseris glauca"  c(0)
 "Agoseris grandiflora" c(638, 863)
@@ -65,7 +65,7 @@
 "Bouteloua aristidoides" c(595)
 "Bouteloua barbata" c(0)
 "Bouteloua gracilis" c(10123, 10723, 11116, 9513, 9871, 9933, 8951, 9323, 11286, 10396, 11140, 11119, 11121, 9473, 9627, 9325, 1652, 11309, 10807, 10235, 10930, 9186, 9514, 9717)
-"Brodiaeae elegans"
+"Brodiaea elegans" c(1:2, 1743, 114, 266, 1137, 1718, 1732)
 "Bromus carinatus" c(1673, 1653, 1119, 1397, 769, 1653, 1305, 636, 350, 615, 345, 1112, 421, 1267, 1813, 1458, 1655, 1196, 1863, 1178, 475, 506, 1913, 1083, 973, 1627, 344, 430, 1541, 1, 946, 1231, 572, 580, 1224, 1039, 141, 1321, 1629, 1214, 1249, 999, 845, 1517, 945, 1757, 1581, 529, 613, 1141, 1008, 553, 333, 814, 938, 1140, 1266, 1767, 943, 440, 488, 429, 868, 416, 731, 487, 48, 1525)
 "Bromus sitchensis" c(28, 67, 149)
 "Calamagrostis nutkaensis" c(0)
@@ -75,7 +75,6 @@
 "Camissonia strigulosa" c(349, 538, 274, 495, 770, 145, 722, 29, 561, 418, 577, 656, 351, 662, 306)
 "Carex nebrascensis" c(723)
 "Ceanothus greggii" c(0)
-"Ceanothus pauciflorus"
 "Ceanothus perplexans" c(259, 355, 335, 407, 261, 179, 267, 452, 224, 356, 353, 401, 432)
 "Centromadia fitchii" c(151, 227)
 "Centromadia pungens" c(82, 92, 39, 6, 104, 136, 47)
@@ -90,7 +89,6 @@
 "Chilopsis linearis" c(318, 595, 847, 978, 764, 415, 1264, 1256, 910, 592, 866, 560, 172, 767, 547, 1567, 809, 1158, 763, 173, 548, 1155, 162, 1147, 460, 530, 800, 1379, 496, 823, 829, 808, 685, 856, 180, 585, 545, 830, 833, 821, 803, 796, 618, 502, 495, 500, 893, 791, 780, 517, 1377, 1338, 546, 588, 1062, 611, 1611, 1257, 1492, 1311, 867, 1637, 1310, 846, 1372, 968, 1635, 556, 550)
 "Chylismia brevipes" c(1, 4, 5, 65, 101, 105, 305, 407)
 "Chylismia claviformis" c(864, 955)
-"Cirsium acuminata"
 "Cirsium mohavense" c(1:6, 98, 103, 110, 127)
 "Cirsium occidentale" c(3, 13:16, 18:19, 31, 35, 39, 50:61, 64, 66, 247)
 "Clarkia purpurea" c(200, 881)
@@ -125,13 +123,13 @@
 "Danthonia californica" c(0)
 "Dasyochloa pulchella" c(1231)
 "Deschampsia cespitosa" c(0)
-"Deschampsia danthonioides"
+"Deschampsia danthonioides" c(561)
 "Descurainia pinnata" c(0)
 "Dichelostemma capitatum" c(1, 5, 6, 7, 266)
 "Dieteria canescens" c(0)
 "Distichlis spicata" c(0)
 "Dudleya cymosa" c(745, 862)
-"Dudleya cymosa ssp. cymosa"
+"Dudleya cymosa ssp. cymosa" c(0)
 "Dudleya farinosa" c(474, 500)
 "Echinocereus engelmannii" c(163, 368, 330, 181)
 "Eleocharis macrostachya" c(548, 642, 661, 666)
@@ -205,8 +203,8 @@
 "Hyptis emoryi" c(169, 789, 958, 10, 576, 899, 433)
 "Ionactis alpina" c(1598, 1665, 404, 738, 112, 110, 1609, 184, 115)
 "Koeleria macrantha" c(4757, 2920, 6612, 6320, 7487, 1153, 8028, 1151)
-"Krameria bicolor"
-"Krameria erecta"
+"Krameria bicolor" c(0)
+"Krameria erecta" c(1284, 320, 1034, 1303, 1696)
 "Krascheninnikovia lanata" c(921, 2675, 2679, 922, 916, 6)
 "Lasthenia gracilis" c(704, 729, 1134, 651, 1109, 992, 562, 406, 537, 644)
 "Layia glandulosa" c(830, 1506, 51, 445, 31)
@@ -216,7 +214,7 @@
 "Leymus triticoides" c(327)
 "Lomatium dissectum" c(933, 880, 1075, 1118, 931, 204)
 "Lomatium grayi" c(137, 765, 212, 244, 740, 586, 320, 321, 359, 148,312)
-"Lomatium macrocarpum" c(1429, 1831, 819:821, 1143, 2084) # check mee
+"Lomatium macrocarpum" c(1429, 1831, 819:821, 1143, 2084)
 "Lomatium nevadense" c(537, 435, 491, 254, 420)
 "Lomatium nevadense var. nevadense" c(153, 171, 28, 159, 14)
 "Lomatium nudicaule" c(1006, 737, 1067, 154, 723, 886, 841) 
@@ -267,13 +265,13 @@
 "Penstemon eatonii" c(360, 213, 1, 507, 765, 618, 337, 851, 576, 815, 193, 465, 525, 169, 394:396, 464, 413, 740, 614, 849, 748, 654, 663, 735, 811, 754, 223, 538, 3, 470, 544, 784, 541, 484, 623, 243, 142, 824, 201, 212, 206, 640, 419, 474, 348, 434, 375, 569, 218, 244, 596, 648, 323, 546, 53, 54, 492, 482, 446, 761, 442, 574, 351, 242, 5376, 415, 167, 417, 382, 688, 423, 215, 389, 528, 732)
 "Penstemon incertus" c(105, 87, 101)
 "Penstemon pachyphyllus" c(136:137, 174, 249, 362)
-"Penstemon palmeri"
+"Penstemon palmeri" c(3:8, 26, 34:35, 47:55, 73:77, 92:94, 98:99, 102:103, 115, 122, 129, 139, 143, 149, 168, 195, 199, 209, 214, 216, 232, 236, 247, 256, 264, 267, 268, 273, 281, 284, 285, 297, 302:303, 305, 312, 318, 326:327, 333, 343, 348, 349:350, 360, 373, 390, 399, 404, 406, 419, 423, 437:438, 447, 454, 458, 462, 470, 472, 474, 494, 509, 511, 514, 536, 539, 544, 558, 570, 572, 573, 576, 610, 611, 616, 623, 629, 632:633, 635, 651, 663, 684, 696, 711, 732, 733, 757, 767, 812, 814, 816, 819, 821, 828, 836, 849, 850, 856, 858, 874, 890, 901, 910, 939, 946, 958, 962, 966:967, 971, 981, 989, 997, 1007, 1010, 1016, 1020, 1031, 1054)
 "Penstemon speciosus" c(1679:1201, 1715, 1012, 1084, 193, 1004, 1109, 1727)
 "Perideridia bolanderi" c(205, 334, 320, 426, 372)
 "Peritoma arborea" c(86, 132, 99)
 "Persicaria amphibia" c(0)
 "Persicaria lapathifolia" c(0)
-"Peucephyllum schottii" (410, 584, 591, 220, 841, 775)
+"Peucephyllum schottii" c(410, 584, 591, 220, 841, 775)
 "Phacelia bicolor var. bicolor"
 "Phacelia crenulata" c(1765, 1433, 440, 1773, 2039, 346, 2029)
 "Phacelia distans" c(4:5, 78, 3366)
@@ -293,7 +291,7 @@
 "Pleuraphis jamesii" c(3659, 1717, 1742, 1725, 3712)
 "Poa secunda" c(0)
 "Prosopis glandulosa" c(709, 726, 2368, 1408, 1792, 1472, 907, 2106, 2136, 718)
-"Prosopis glandulosa var. torreyana"c(440, 404, 142, 353, 492, 421, 153, 308, 115, 294, 181, 209, 582, 464, 111, 151, 174, 331, 178, 477)
+"Prosopis glandulosa var. torreyana" c(440, 404, 142, 353, 492, 421, 153, 308, 115, 294, 181, 209, 582, 464, 111, 151, 174, 331, 178, 477)
 "Prosopis pubescens"  c(661, 646, 598, 211, 670, 723, 698)
 "Psathyrotes ramosissima" c(64, 278, 125, 231, 240)
 "Pseudoroegneria spicata" c(4233, 11693, 11538, 11503, 11754, 11642)

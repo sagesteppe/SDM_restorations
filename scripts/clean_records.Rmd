@@ -52,21 +52,24 @@ bio <- c(bio1, bio10, bio12, bio4, bio19)
 rm(bio1, bio10, bio12, bio4, bio19, p, files)
 ```
 
-```{r}
+```{r manually review outliers,  eval = F}
 
-# need new download Brodiaea elegans 
-# krameria bicolor
-# krameria erecta
-# Lotus humistratus
-# Adenostoma fasciculatum
+st <- tigris::states() %>% 
+    filter(DIVISION %in% c(8, 9), ! STUSPS %in% c('AK', 'HI')) %>% 
+  st_transform(4326) 
 
+st_crs(thinned)
 
-# Mirabilis lanata, Cirsium acuminata are both transciption errors and can be delete 
-# ceanothus pauciflorus is covered in greegii. 
+fk <- st_intersection(filter(st, STUSPS %in% c('OR', 'ID', 'WY', 'CO', 'WA')) %>% 
+                  st_transform(5070),  bio_v1) %>% 
+  pull(ID)
+
+paste0(fk, collapse = "", sep = ', ')
 
 # merge all stephanomeria subspecies with species
+# Dudleya cymosa ssp. cymosa merge with parent
 
-pts1 <- filter(thinned, taxon == 'Artemisia douglasiana')
+pts1 <- filter(thinned, taxon == 'Penstemon palmeri')
 bio_v <- extract(bio, pts1)
 bio_v1 <- bind_cols(bio_v, pts1) %>% 
   st_as_sf() 
@@ -76,31 +79,46 @@ OUTPUT <- quantile_flagger(bio_v1, 0.015, flag_threshold = 0.2) %>%
   mutate(LONG_WGS = st_coordinates(.)[,1], 
          LAT_WGS = st_coordinates(.)[,2]) 
 
+OUTPUT <- filter(OUTPUT, ! ID %in% c(3:8, 26, 34:35, 47:55, 73:77, 92:94, 98:99, 102:103, 115, 122, 129, 139, 143, 149, 168, 195, 199, 209, 214, 216, 232, 236, 247, 256, 264, 267, 268, 273, 281, 284, 285, 297, 302:303, 305, 312, 318, 326:327, 333, 343, 348, 349:350, 360, 373, 390, 399, 404, 406, 419, 423, 437:438, 447, 454, 458, 462, 470, 472, 474, 494, 509, 511, 514, 536, 539, 544, 558, 570, 572, 573, 576, 610, 611, 616, 623, 629, 632:633, 635, 651, 663, 684, 696, 711, 732, 733, 757, 767, 812, 814, 816, 819, 821, 828, 836, 849, 850, 856, 858, 874, 890, 901, 910, 939, 946, 958, 962, 966:967, 971, 981, 989, 997, 1007, 1010, 1016, 1020, 1031, 1054))
+
 ggplot() +  
   geom_sf(data = OUTPUT, aes(color = OutlierFlag)) +
   geom_sf_text(data = OUTPUT, aes(label = ID)) +
   geom_sf(data = st, fill = NA) 
 
-OUTPUT <- filter(OUTPUT, !ID %in% c(2316))
-
-leaflet(data = filter(OUTPUT, ID < 2500)) %>%  addTiles() %>%
+leaflet(data = filter(OUTPUT, ID < 1100)) %>%  addTiles() %>%
    addMarkers(~LONG_WGS, ~LAT_WGS,  popup = ~as.character(ID), label = ~as.character(ID))
+
+rm(bio_v, bio_v1, OUTPUT, pts1)
 ```
 
 
 Every single taxon was individually mapped, and had their records investigated. Points which were in the 1.5% most extreme values for at least two values of BIO1, BIO4, BIO10, BIO12, BIO19, and for distance from the nearest population were color coded for investigations. 
 
-
-```{r Inspect Records for Each Taxon}
-```
-
-
-
-
-```{r load occurrence records}
+```{r subset occurrence records for final clean batch}
 thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
-st <- tigris::states() %>% 
-    filter(DIVISION %in% c(8, 9), ! STUSPS %in% c('AK', 'HI')) %>% st_transform(4326) 
+thinned2 <- st_read('../data/raw/occurrence/thinned/thinned_occurrences2.shp', quiet = TRUE)
+pts2remove <- read.delim('../data/raw/species_manual_cleaning.txt', header = FALSE)
+colnames(pts2remove) <- 'Species'
+pts2remove <- pts2remove %>% 
+  mutate(Values = str_extract(Species, 'c\\(([^\\)]+)\\)'),
+         Species = str_remove(Species, ' c\\(([^\\)]+)\\)'),
+         Species = str_squish(Species))
+
+thinned <- bind_rows(thinned, thinned2) %>% 
+  mutate(taxon = str_replace(taxon, 'Acmispon humistratus', 'Acmispon brachycarpus'), 
+         taxon = str_replace(taxon, 'Adenostoma fasiculatum', 'Adenostoma fasciculatum'),
+         taxon = str_replace(taxon, 'Brodiaeae elegans', 'Brodiaea elegans')
+         ) %>% 
+  filter(! taxon %in% c('Ceanothus pauciflorus', 'Cirsium acuminata', 'Mirabilis lanata')) %>% 
+  arrange(taxon)
+
+splicies <- split(thinned, f = thinned$taxon)
+
+names(splicies) == pts2remove$Species
+
+rm(thinned2)
+# now combine synonyms
 ```
 
 ```{r load nifc}
