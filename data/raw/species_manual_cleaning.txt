@@ -11,7 +11,7 @@
 "Acmispon rigidus" c(385, 55)
 "Acmispon strigosus" c(1469)
 "Adenostoma fasiculatum"
-"Adenostoma sparsifolium"
+"Adenostoma sparsifolium" c(231, 224, 304, 299)
 "Agoseris glauca"  c(0)
 "Agoseris grandiflora" c(638, 863)
 "Agoseris parviflora"  c(0)
@@ -21,16 +21,16 @@
 "Ambrosia psilostachya" c(534, 1116, 156)
 "Ambrosia salsola" c(0)
 "Amsinckia menziesii" c(1, 1451, 1422)
-"Amsinckia menziesii var. intermedia"
+"Amsinckia menziesii var. intermedia" c(113:114, 304, 467:469 )
 "Amsinckia tessellata" c(304, 113:114, 1011, 851, 896, 1017, 719, 1009, 775, 288, 285, 289, 286, 467:469, 287, 870, 868, 733, 821, 795, 2373, 1394, 2332, 338)
 "Anaphalis margaritacea" c(2857, 2905, 2095, 15, 2685, 2948, 2140, 2193, 2386, 2316, 2407)
 "Anisocoma acaulis" c(518)
 "Antirrhinum coulterianum" c(0)
-"Apocynum cannabinum"
+"Apocynum cannabinum" c(0)
 "Arctostaphylos glauca" c(358, 1316, 773, 1037, 1473, 1114, 569, 1048, 1566, 1377, 1252, 1287, 1252, 1253, 1169, 966, 870)
-"Aristida purpurea"
+"Aristida purpurea" c(1006, 2483, 3413, 3658)
 "Aristolochia californica" c(12, 47, 82, 104, 84, 39)
-"Artemisia douglasiana"
+"Artemisia douglasiana" c(2316)
 "Asclepias albicans" c(1, 50, 265, 284)
 "Asclepias cordifolia" c(2, 3, 5, 609)
 "Asclepias cryptoceras" c(238, 303, 35:49)
@@ -48,14 +48,14 @@
 "Astragalus lentiginosus var. chartaceus"
 "Astragalus lonchocarpus" c(9, 128, 372)
 "Astragalus whitneyi" c(19, 36, 29)
-"Atriplex canescens"
-"Atriplex confertifolia"
+"Atriplex canescens" c(7008, 7196, 6222, 6673, 6085, 7018, 3924, 6523, 4717, 7144, 5024)
+"Atriplex confertifolia" c(7174, 13, 7135, 7652, 7587, 7603, 7097, 7422, 7226, 7473, 7177, 7369)
 "Atriplex hymenelytra" c(20, 506, 558)
-"Atriplex lentiformis"
+"Atriplex lentiformis" c(203, 515, 12:20, 25:63)
 "Atriplex parryi" c(5, 87)
 "Atriplex polycarpa" c(37, 61, 63, 65:66, 68:70, 72, 91:93, 96, 98, 100, 105, 106, 109, 110, 112, 115:117, 250, 273, 279, 369, 503, 507, 791, 852, 875)
-"Baccharis pilularis"
-"Baccharis salicifolia"
+"Baccharis pilularis" c(5211, 5535, 5422, 3333, 3058, 3542, 393, 150, 1973, 2320, 2291, 3834, 4801, 5161)
+"Baccharis salicifolia" c(64, 1,2856)
 "Baileya multiradiata" c(126, 311, 239, 833, 702, 271, 326, 590, 1023)
 "Balsamorhiza hookeri" c(1150)
 "Balsamorhiza sagitatta" c(0)
@@ -64,17 +64,17 @@
 "Bidens frondosa" c(0)
 "Bouteloua aristidoides" c(595)
 "Bouteloua barbata" c(0)
-"Bouteloua gracilis"
+"Bouteloua gracilis" c(10123, 10723, 11116, 9513, 9871, 9933, 8951, 9323, 11286, 10396, 11140, 11119, 11121, 9473, 9627, 9325, 1652, 11309, 10807, 10235, 10930, 9186, 9514, 9717)
 "Brodiaeae elegans"
-"Bromus carinatus"
+"Bromus carinatus" c(1673, 1653, 1119, 1397, 769, 1653, 1305, 636, 350, 615, 345, 1112, 421, 1267, 1813, 1458, 1655, 1196, 1863, 1178, 475, 506, 1913, 1083, 973, 1627, 344, 430, 1541, 1, 946, 1231, 572, 580, 1224, 1039, 141, 1321, 1629, 1214, 1249, 999, 845, 1517, 945, 1757, 1581, 529, 613, 1141, 1008, 553, 333, 814, 938, 1140, 1266, 1767, 943, 440, 488, 429, 868, 416, 731, 487, 48, 1525)
 "Bromus sitchensis" c(28, 67, 149)
 "Calamagrostis nutkaensis" c(0)
-"Calandrinia menziesii"
+"Calandrinia menziesii" c(0)
 "Calliandra eriophylla" c(903, 811)
 "Calycoseris parryi" c(8)
 "Camissonia strigulosa" c(349, 538, 274, 495, 770, 145, 722, 29, 561, 418, 577, 656, 351, 662, 306)
 "Carex nebrascensis" c(723)
-"Ceanothus greggii"
+"Ceanothus greggii" c(0)
 "Ceanothus pauciflorus"
 "Ceanothus perplexans" c(259, 355, 335, 407, 261, 179, 267, 452, 224, 356, 353, 401, 432)
 "Centromadia fitchii" c(151, 227)
@@ -121,7 +121,7 @@
 "Cymopterus purpureus" c(327, 381, 283, 104, 98, 97, 99, 136)
 "Dalea mollis" c(591)
 "Dalea ornata" c(0)
-"Dalea searlsiae"  c(0)
+"Dalea searlsiae" c(0)
 "Danthonia californica" c(0)
 "Dasyochloa pulchella" c(1231)
 "Deschampsia cespitosa" c(0)
@@ -194,7 +194,7 @@
 "Helenium puberulum" c(451, 550, 620, 533)
 "Helianthus annuus" c(0)
 "Heliomeris multiflora" c(734, 964, 1016, 970, 996, 339, 342, 247, 341)
-"Heliotropium curassavicum"
+"Heliotropium curassavicum" c(0)
 "Hemizonia congesta" c(446, 365)
 "Hesperostipa comata" c(7044, 7911)
 "Heterotheca grandiflora" c(1, 2, 2003)
@@ -207,12 +207,12 @@
 "Koeleria macrantha" c(4757, 2920, 6612, 6320, 7487, 1153, 8028, 1151)
 "Krameria bicolor"
 "Krameria erecta"
-"Krascheninnikovia lanata"
+"Krascheninnikovia lanata" c(921, 2675, 2679, 922, 916, 6)
 "Lasthenia gracilis" c(704, 729, 1134, 651, 1109, 992, 562, 406, 537, 644)
 "Layia glandulosa" c(830, 1506, 51, 445, 31)
-"Lepidium fremontii"
-"Lepidium lasiocarpum"
-"Leymus cinereus"
+"Lepidium fremontii" c(936, 503, 2981, 815, 81, 57:77, 220, 230, 851, 298, 182, 154, 156, 734, 350, 104:107, 582, 209, 303, 236)
+"Lepidium lasiocarpum" c(976, 393, 26:27, 12, 1234, 1157, 1190, 1159, 831, 733, 1793, 685, 1576, 506:507, 931, 1267, 1283, 859, 1408, 505, 701, 1498, 1280, 1624)
+"Leymus cinereus" c(3977, 4139, 4161, 4087, 4202, 4123, 1927, 3070, 4452)
 "Leymus triticoides" c(327)
 "Lomatium dissectum" c(933, 880, 1075, 1118, 931, 204)
 "Lomatium grayi" c(137, 765, 212, 244, 740, 586, 320, 321, 359, 148,312)
@@ -232,22 +232,21 @@
 "Lycium cooperi" c(115, 220, 219, 519, 7, 301, 422, 494, 387, 309, 66 )
 "Lycium pallidum" c(743, 709, 771, 334, 63, 176, 336)
 "Machaeranthera canescens" c(2424)
-"Machaeranthera gracilis"
-"Machaeranthera pinnatifida"
-"Macheranthera canescens"
-"Macheranthera tanacetifolia"
+"Machaeranthera gracilis" c(44, 66, 11:16, 28, 61:64, 337)
+"Machaeranthera pinnatifida" c(828, 455, 474, 576, 612)
+"Macheranthera canescens" c(0)
+"Macheranthera tanacetifolia" c(14:15, 174)
 "Madia elegans" c(5, 8, 891, 301, 975, 909, 953, 1186)
 "Madia gracilis" c(0)
 "Malacothrix glabrata" c(1593, 1878, 1224, 1854, 66, 67, 1723, 2266)
 "Malvella leprosa" c(0)
 "Menodora spinescens" c(158, 261, 46, 153, 147)
-"Mentha canadensis"
+"Mentha canadensis" c(0)
 "Mentzelia affinis" c(67, 332, 258, 53, 33, 226, 139)
 "Mentzelia albicaulis" c(3629, 3406, 1593, 2207, 3293, 3501, 3268, 2370)
 "Mentzelia laevicaulis" c(402, 146, 328, 909, 883, 637, 951)
 "Mentzelia multiflora" c(402, 146, 328, 909, 883, 637, 951)
 "Mirabilis laevis" c(1760, 123, 1619, 1788, 93)
-"Mirabilis lanata" 
 "Muhlenbergia porteri" c(1247, 1458)
 "Muhlenbergia rigens" c(615, 285, 634, 829)
 "Nassella pulchra" c(1, 689, 523)
@@ -261,7 +260,7 @@
 "Oxystylis lutea" c(0)
 "Packera multilobata" c(531, 817:818, 1893, 1899, 1960, 2201, 532)
 "Parkinsonia florida" c(1042, 1008, 936, 901, 721, 907, 791, 282)
-"Pascopyrum smithii"
+"Pascopyrum smithii" c(6891, 6635, 6666, 6578, 6219)
 "Pectis papposa" c(26:31, 668, 306, 231, 1053, 118, 25, 186, 1112, 279)
 "Penstemon acuminatus" c(15, 160, 78, 212, 168)
 "Penstemon deustus" c(680, 836, 251, 228, 321, 661)
@@ -292,12 +291,12 @@
 "Platanus racemosa" c(192, 1135, 918, 947, 1507, 442)
 "Pleiacanthus spinosus" c(603, 928, 820, 951)
 "Pleuraphis jamesii" c(3659, 1717, 1742, 1725, 3712)
-"Poa secunda"
+"Poa secunda" c(0)
 "Prosopis glandulosa" c(709, 726, 2368, 1408, 1792, 1472, 907, 2106, 2136, 718)
-"Prosopis glandulosa var. torreyana"
-"Prosopis pubescens" 
+"Prosopis glandulosa var. torreyana"c(440, 404, 142, 353, 492, 421, 153, 308, 115, 294, 181, 209, 582, 464, 111, 151, 174, 331, 178, 477)
+"Prosopis pubescens"  c(661, 646, 598, 211, 670, 723, 698)
 "Psathyrotes ramosissima" c(64, 278, 125, 231, 240)
-"Pseudoroegneria spicata"
+"Pseudoroegneria spicata" c(4233, 11693, 11538, 11503, 11754, 11642)
 "Psorothamnus fremontii" c(348, 455)
 "Psorothamnus schottii" c(607)
 "Psorothamnus spinosus" c(4:6, 8:11, 21:22, 17, 24, 1)
@@ -306,11 +305,11 @@
 "Rhamnus californica" c(102)
 "Rosa californica" c(11,1368, 1204, 1333, 932, 1191, 200, 745, 358, 912, 1200, 1285, 12, 903, 553, 13, 1032, 775, 1228)
 "Rubus ursinus" c(70, 90, 3388)
-"Rumex salicifolius"
-"Sagittaria latifolia"
+"Rumex salicifolius" c(0)
+"Sagittaria latifolia" c(0)
 "Salazaria mexicana" c(329, 700)
 "Salvia columbariae" c(4047, 3182, 941, 2611, 2863, 4244, 2685, 3648, 3591, 2988)
-"Sambucus mexicana"
+"Sambucus mexicana" c(0)
 "Senecio integerrimus" c(1442, 2630, 2509, 2397)
 "Senecio spartioides" c(388, 674, 445)
 "Senegalia greggii" c(1517, 930, 1486, 1413, 477, 655)
@@ -319,21 +318,21 @@
 "Solanum americanum" c(302, 238, 796, 657)
 "Solidago velutina" c(101:105, 38, 67, 72, 637, 107:108)
 "Sphaeralcea ambigua" c(3332, 2914, 2903, 1813, 2755, 2118, 2919, 2774, 1060, 701, 1116, 2863, 590, 750, 1632, 1049, 702, 3070, 3072, 1050, 1067, 2698, 1117, 1055, 579, 699, 1056, 1122, 1059, 1061, 3224, 3013, 2625, 1975, 2518, 2789, 3281, 1120, 700, 1709, 2615, 1123, 2561, 2759, 2360, 2694, 2927, 3106, 2971, 2778, 2709, 2424, 2535, 2167, 2252, 2660, 2230, 2720, 2271, 2631, 3016, 2228, 2194, 2228, 2194, 2559, 3426, 3502, 2466, 2663,2721, 2146, 2336, 2297, 2422, 2788, 2327, 3144, 2370, 2508, 2597, 2593, 2299, 2873, 2458, 2617, 3464, 2165, 3444, 3169, 3578, 1977, 1701, 1879, 1509, 1621, 1928, 1859, 1770, 1543, 1933, 1691, 1545, 1754, 1684, 1880, 1023, 1025, 1246, 420:422, 870, 1456, 1031, 1475, 1453, 1035, 441, 440, 1032, 1346, 424, 329:332, 1022, 1036, 624, 1455, 658, 1255, 1275, 1385, 1037, 476, 222, 1458, 1470, 333, 221, 793, 610, 32, 368, 599, 1228, 598, 1196, 604, 1212, 600, 910:917, 35:45, 1198, 749, 1210:1215, 602, 1195, 369:371, 367, 1174, 686, 1722, 1634)
-"Sphaeralcea angustifolia"
+"Sphaeralcea angustifolia" c(499, 1, 182, 458, 336, 189, 534, 694, 639, 436)
 "Sphaeralcea coccinea" c(6838, 4563, 4155, 4151, 327, 325, 1972, 4577, 4728, 4153:4155, 2, 3243, 252, 6189, 323:326, 733, 6748, 4436, 4441, 251:255, 6846, 6229, 6304, 6946, 3683, 4470, 6961, 6904, 6510, 7016, 6788, 4472)
 "Sphaeralcea grossulariifolia" c(14:17, 4, 22:23, 242, 38, 43:47, 515, 326)
 "Sphaeralcea munroana" c(627, 157, 754, 510, 597, 537, 661, 790, 453, 599, 486)
 "Sporobolus airoides" c(2350, 1414, 1799)
 "Sporobolus cryptandrus" c(2557, 2919, 3133, 3453, 3419, 2760, 3871, 3877, 3597, 2320, 3783, 3966, 3920, 3929, 3783, 3174)
 "Stanleya pinnata" c(1022, 849)
-"Stanleya pinnata var. pinnata"
+"Stanleya pinnata var. pinnata" c(0)
 "Stenotus acaulis" c(2602, 2673, 2516, 1779, 2585, 2273, 344, 1170)
 "Stephanomeria exigua" c(164, 774, 1033)
-"Stephanomeria exigua ssp. coronaria"
-"Stephanomeria exigua ssp. exigua"
+"Stephanomeria exigua ssp. coronaria" c(0)
+"Stephanomeria exigua ssp. exigua" c(0)
 "Stephanomeria parryi" c(110, 63, 144, 26, 55)
 "Stephanomeria pauciflora" c(130, 1560, 1274, 1463, 2028, 900, 1296)
-"Symphyotrichum chilense"
+"Symphyotrichum chilense" c(1:9, 65, 523, 300, 229, 467:469, 622, 643, 349, 507, 540, 412, 515, 132, 151, 455, 384, 315, 502, 538, 427, 319, 543, 498, 79, 636, 500, 616, 76, 533, 630, 328, 419, 616, 636, 500, 510, 595:598, 203, 287, 292, 617, 418, 19, 537, 548, 249, 482, 422, 273, 537, 592, 177, 504, 571, 324, 567, 477, 157, 536, 546, 559, 576, 589, 380, 94, 340, 393, 291, 248, 607, 634, 568, 473, 489, 511, 263, 266, 605, 75, 542, 38, 253, 551, 641, 68, 512, 606, 35, 485, 628, 492, 517, 499, 621, 188, 189)
 "Symphyotrichum subulatum" c(0)
 "Syntrichopappus fremontii" c(296, 167, 286)
 "Thelesperma megapotamicum" c(581, 245, 1202, 1106, 677, 1059, 1258, 404, 108, 157)
