@@ -203,3 +203,21 @@ quantile_flagger <- function(x, quant, flag_threshold){
   
 }
 
+
+colon_balloon <- function(x){
+  
+  if(stringr::str_detect(x, ':')){
+    
+    suppressWarnings({
+      ranges <- as.vector(str_extract_all(x, '[:digit:]{1,}:[:digit:]{1,}'))
+      lower <- stringr::str_extract_all(ranges, '[:digit:]{1,}(?=:)') # lower end of the sequence
+      upper <- stringr::str_extract_all(ranges, '(?<=:)[:digit:]{1,}') # upper end of the sequence
+      lower <- unlist(lapply(lower, as.numeric)) ; upper <- unlist(lapply(upper, as.numeric))
+      numeric_ranges <- as.numeric(unlist( mapply(seq, from = lower, to = upper)))
+    })
+    
+    return(numeric_ranges)
+  } else {return(NA)}
+  
+}
+

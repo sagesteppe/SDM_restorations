@@ -27,7 +27,7 @@ source('functions.R')
 ```
 
 
-```{r Import Predictor Stack}
+```{r Import Predictor Stack for outlier detection, eval = F}
 
 p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio10'
 files <- file.path(p, list.files(p, recursive = TRUE))
@@ -103,46 +103,14 @@ colnames(pts2remove) <- 'Species'
 
 pos <- str_extract_all(pts2remove$Species, "\\([^()]+\\)")
 pos <- lapply(pos, function(x){substring(x, 2, nchar(x)-1)})
-pos1 <- lapply(pos, function(x){as.numeric(sub(' ' , '', unlist(strsplit(x,","))))})
+exact <- lapply(pos, function(x){suppressWarnings({as.numeric(sub(' ' , '', unlist(strsplit(x,","))))})})
+ranges <- lapply(pos, colon_balloon)
 
+to_remove <- Map(c, exact, ranges)  
+to_remove <- lapply(to_remove, na.omit)
+to_remove <- lapply(to_remove, sort)
 
-colon_balloon <- function(x){
-  
-  if(stringr::str_detect(x, ':')){
-  
-    suppressWarnings({
-    ranges <- as.vector(str_extract_all(x, '[:digit:]{1,}:[:digit:]{1,}'))
-    lower <- stringr::str_extract_all(ranges, '[:digit:]{1,}(?=:)') # lower end of the sequence
-    upper <- stringr::str_extract_all(ranges, '(?<=:)[:digit:]{1,}') # upper end of the sequence
-    lower <- unlist(lapply(lower, as.numeric)) ; upper <- unlist(lapply(upper, as.numeric))
-    numeric_ranges <- as.numeric(unlist( mapply(seq, from = lower, to = upper)))
-    })
-    
-    return(numeric_ranges)
-  } else {return(NA)}
-  
-}
-
-
-outwards <- lapply(pos, colon_balloon)
-
-
-
-
-pts2remove1 <- pts2remove %>% 
-  mutate(Values = str_extract(Species, 'c\\(([^\\)]+)\\)'),
-         Species = str_remove(Species, ' c\\(([^\\)]+)\\)'),
-         Species = str_squish(Species), 
-         Values = str_remove(Values, 'c\\('), 
-         Values = str_remove(Values, '\\)')) %>% 
-  transform(Values = strsplit(Values, ",")) %>% 
-  nest(bong = Values) %>% 
-  unnest_longer(bong, indices_include = T)
-
-
-
-
-fuck <- as.numeric(pts2remove$bong)
+rm(exact, ranges)
 
 thinned <- bind_rows(thinned, thinned2) %>% 
   mutate(taxon = str_replace(taxon, 'Acmispon humistratus', 'Acmispon brachycarpus'), 
@@ -158,51 +126,93 @@ thinned <- thinned %>%
 
 splicies <- split(thinned, f = thinned$taxon)
 
-pts2remove1 <- select(pts2remove, Values) %>% 
-  mutate(Values = str_remove(Values, 'c\\('), 
-         Values = str_remove(Values, '\\)'))
+splicies_l <- vector(mode = 'list', length = length(splicies))
+for (i in seq_along(splicies)){
+  if(to_remove[[i]] == 0){
+    splicies_l[[i]] <- splicies[[i]]
+  } else{
+    splicies_l[[i]] <- splicies[[i]][-to_remove[[i]], ]
+  }
+}
 
-avector <- pts2remove[,2]
+splicies <- bind_rows(splicies_l)
 
-
-rm(thinned2)
+rm(pos, pts2remove, splicies_l, thinned, thinned2, i, colon_balloon, to_remove)
 # now combine synonyms
 ```
 
-```{r this works}
-
-spliris <- split(iris, f = iris$Species)
-indices <- list(c(sample(1:50, size = 5)), c(sample(1:50, size = 7)), c(sample(1:50, size = 10)))
-
-testv <- c('1', '5', '8', '9')
-
-testv
-
-spliris_l <- vector(mode = 'list', length = length(spliris))
-for (i in seq_along(spliris)){
-  spliris_l[[i]] <- spliris[[i]][-indices[[i]], ]
-}
-
-
-ott <- list(pts2remove1$Values)
-ott1 <- unlist(ott)
-# ott <- lapply(ott, as.numeric)
-
-```
-
-
-
-
-
 ```{r load nifc}
 
+pNIFC <- '/media/steppe/hdd/Geospatial_data/NIFC_perimeters'
+NIFC <- st_read(file.path(pNIFC, 'InterAgencyFirePerimeterHistory_All_Years_View.shp')) |>
+  select(OBJECTID, FIRE_YEAR, INCIDENT) |>
+  st_make_valid()
+
+domain <- rast(nrows = 1, ncols = 1) # create a big empty raster, you can go in through sf too. 
+ext(domain) <- c( -125.5, -100, 27,  50) # set the extent
+domain <- as.polygons(domain) |>  # convert to vector data
+  st_as_sf() |> # convert to simple feature
+  st_transform(4326) %>% 
+  st_bbox()
+
+NIFC <- st_crop(NIFC, domain)
+print(object.size(NIFC), units = "GiB", standard = "IEC") # 600971416
+NIFC <- st_simplify(NIFC, dTolerance = 90)
+print(object.size(NIFC), units = "GiB", standard = "IEC")
+
+ggplot() + 
+  geom_sf(data = filter(NIFC, INCIDENT == 'DEL VENTURI' & FIRE_YEAR == 2003))
+
+102910208 / 600971416
 ```
 
 ```{r extract most recent fire}
 
 ```
 
+
+We will identify environmental parameters associated with species occurrences, if absences and 'pseudo absences' are very similar to these values, we will discard certain records within this space. 
+
 ```{r identify similar plots}
+
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa'
+
+paths <- file.path(p, list.files(p, recursive = F))
+files <- lapply(paths, function(x){ file.path(x, list.files(x)) })
+names(files) <- basename(paths)
+
+bio <- lapply(files, vrt)
+bio <- rast(bio)
+
+abvi <- filter(splicies, taxon == 'Eriophyllum lanatum') |>
+  st_transform(5070)
+
+ggplot(abvi) + 
+  geom_sf(aes(color = ID)) + 
+  geom_sf(data = filter(abvi, ID == 909), color = 'red')
+
+test <- extract(bio, abvi)
+test <- test %>% 
+  select(-gdgfgd10, -gdgfgd5, -swe, -scd, -ID) %>% 
+  drop_na()
+
+test1 <- apply(test, MARGIN = 2, FUN = scales::rescale, to = c(0,1))
+
+res.pca <- prcomp(test1)
+factoextra::fviz_eig(res.pca)
+
+factoextra::fviz_pca_ind(res.pca,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+
+factoextra::fviz_pca_var(res.pca,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE     # Avoid text overlapping
+             )
+
 
 ```
 
