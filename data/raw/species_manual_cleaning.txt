@@ -45,7 +45,7 @@
 "Astragalus filipes" c(1703, 773, 1281, 1029:1031)
 "Astragalus iodanthus" c(0)
 "Astragalus layneae" c(2, 7, 107, 265)
-"Astragalus lentiginosus var. chartaceus"
+"Astragalus lentiginosus var. chartaceus" c(0)
 "Astragalus lonchocarpus" c(9, 128, 372)
 "Astragalus whitneyi" c(19, 36, 29)
 "Atriplex canescens" c(7008, 7196, 6222, 6673, 6085, 7018, 3924, 6523, 4717, 7144, 5024)
@@ -272,7 +272,7 @@
 "Persicaria amphibia" c(0)
 "Persicaria lapathifolia" c(0)
 "Peucephyllum schottii" c(410, 584, 591, 220, 841, 775)
-"Phacelia bicolor var. bicolor"
+"Phacelia bicolor var. bicolor" c(0)
 "Phacelia crenulata" c(1765, 1433, 440, 1773, 2039, 346, 2029)
 "Phacelia distans" c(4:5, 78, 3366)
 "Phacelia fremontii" c(31, 115:118, 696)

@@ -100,10 +100,49 @@ thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', qui
 thinned2 <- st_read('../data/raw/occurrence/thinned/thinned_occurrences2.shp', quiet = TRUE)
 pts2remove <- read.delim('../data/raw/species_manual_cleaning.txt', header = FALSE)
 colnames(pts2remove) <- 'Species'
-pts2remove <- pts2remove %>% 
+
+pos <- str_extract_all(pts2remove$Species, "\\([^()]+\\)")
+pos <- lapply(pos, function(x){substring(x, 2, nchar(x)-1)})
+pos1 <- lapply(pos, function(x){as.numeric(sub(' ' , '', unlist(strsplit(x,","))))})
+
+
+colon_balloon <- function(x){
+  
+  if(stringr::str_detect(x, ':')){
+  
+    suppressWarnings({
+    ranges <- as.vector(str_extract_all(x, '[:digit:]{1,}:[:digit:]{1,}'))
+    lower <- stringr::str_extract_all(ranges, '[:digit:]{1,}(?=:)') # lower end of the sequence
+    upper <- stringr::str_extract_all(ranges, '(?<=:)[:digit:]{1,}') # upper end of the sequence
+    lower <- unlist(lapply(lower, as.numeric)) ; upper <- unlist(lapply(upper, as.numeric))
+    numeric_ranges <- as.numeric(unlist( mapply(seq, from = lower, to = upper)))
+    })
+    
+    return(numeric_ranges)
+  } else {return(NA)}
+  
+}
+
+
+outwards <- lapply(pos, colon_balloon)
+
+
+
+
+pts2remove1 <- pts2remove %>% 
   mutate(Values = str_extract(Species, 'c\\(([^\\)]+)\\)'),
          Species = str_remove(Species, ' c\\(([^\\)]+)\\)'),
-         Species = str_squish(Species))
+         Species = str_squish(Species), 
+         Values = str_remove(Values, 'c\\('), 
+         Values = str_remove(Values, '\\)')) %>% 
+  transform(Values = strsplit(Values, ",")) %>% 
+  nest(bong = Values) %>% 
+  unnest_longer(bong, indices_include = T)
+
+
+
+
+fuck <- as.numeric(pts2remove$bong)
 
 thinned <- bind_rows(thinned, thinned2) %>% 
   mutate(taxon = str_replace(taxon, 'Acmispon humistratus', 'Acmispon brachycarpus'), 
@@ -113,13 +152,47 @@ thinned <- bind_rows(thinned, thinned2) %>%
   filter(! taxon %in% c('Ceanothus pauciflorus', 'Cirsium acuminata', 'Mirabilis lanata')) %>% 
   arrange(taxon)
 
+thinned <- thinned %>% 
+  group_by(taxon) %>% 
+  mutate(ID = 1:n(), .before = taxon)
+
 splicies <- split(thinned, f = thinned$taxon)
 
-names(splicies) == pts2remove$Species
+pts2remove1 <- select(pts2remove, Values) %>% 
+  mutate(Values = str_remove(Values, 'c\\('), 
+         Values = str_remove(Values, '\\)'))
+
+avector <- pts2remove[,2]
+
 
 rm(thinned2)
 # now combine synonyms
 ```
+
+```{r this works}
+
+spliris <- split(iris, f = iris$Species)
+indices <- list(c(sample(1:50, size = 5)), c(sample(1:50, size = 7)), c(sample(1:50, size = 10)))
+
+testv <- c('1', '5', '8', '9')
+
+testv
+
+spliris_l <- vector(mode = 'list', length = length(spliris))
+for (i in seq_along(spliris)){
+  spliris_l[[i]] <- spliris[[i]][-indices[[i]], ]
+}
+
+
+ott <- list(pts2remove1$Values)
+ott1 <- unlist(ott)
+# ott <- lapply(ott, as.numeric)
+
+```
+
+
+
+
 
 ```{r load nifc}
 
