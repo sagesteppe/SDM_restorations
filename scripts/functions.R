@@ -68,22 +68,22 @@ multiplesPERcell <- function(x){
   
 }
 
-absence_drawer <- function(x, bg_abs){
+absence_drawer <- function(x, bg_abs, terrestrial){
   
   
   # create the observed hull, the buffered hull for random sample selection, 
   # and a hull to form the basis for a bounding box to generate regular absences in
   
-  observed_hull <- sf::st_union(x) |>
+  observed_hull <- sf::st_union(x) |> # this is the true hull around the observations
     sf::st_convex_hull() |>
     sf::st_sfc() 
   
-  obs_area <- as.numeric(st_area(observed_hull)) * 0.15 / 2
+  obs_area <- as.numeric(st_area(observed_hull)) * 0.15 / 2 # this hull should go at most 100 miles around the inner hull
   obs_area <- if(obs_area > 160934){obs_area = 160934} # cap area with 100 mi buffer. 
   
   buffer_hull <- st_buffer(observed_hull, obs_area) 
   
-  buf_area <- as.numeric(sf::st_area(buffer_hull) *0.1) / 2
+  buf_area <- as.numeric(sf::st_area(buffer_hull) *0.1) / 2 # this final hull will be used to create a box around the buffer hull
   obs_area <- if(buf_area > 40233){buf_area = 40233} # cap area with 25 mi buffer.
   
   box_hull <- sf::st_buffer(buffer_hull, dist = obs_area)
@@ -92,6 +92,11 @@ absence_drawer <- function(x, bg_abs){
     sf::st_as_sfc() 
   
   box_hull <- sf::st_difference(bbox, buffer_hull)
+  
+  # remove large oceans, or lakes, or what have you. 
+  observed_hull <- st_intersection(observed_hull, terrestrial)
+  buffer_hull <- st_intersection(buffer_hull, terrestrial)
+  box_hull <- st_intersection(box_hull, terrestrial)
   
   # perform the outline background absence sample
   reg_pts <- sf::st_sample(box_hull, size = round(nrow(x) * bg_abs, 0), type = 'regular') |>
