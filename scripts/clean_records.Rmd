@@ -9,8 +9,8 @@ Here we perform a number of steps which we use to ensure that the records going 
 
 
 Species vary in their responses to disturbances such as fire. 
-More importantly, ecosystems differ in their responses to fire based both upon intrinisic characteristics, but especially land management history. 
-Many species are unable to recover post wildfire in the West due to the rapid increase in cover of inasive annuals, especially grasses such as Cheatgrass and Medusa-Head. 
+More importantly, ecosystems differ in their responses to fire based both upon intrinsic characteristics, but especially land management history. 
+Many species are unable to recover post wildfire in the West due to the rapid increase in cover of invasive annuals, especially grasses such as Cheatgrass and Medusa-Head. 
 Using the NFIC fire perimeters data set, we flag each record which has experienced a wild lands burn, and determine which AIM plots have been located in burn scars.
 
 To do this, we first (1) identify all AIM plots with presences of the species. 
@@ -139,6 +139,25 @@ splicies <- bind_rows(splicies_l)
 
 rm(pos, pts2remove, splicies_l, thinned, thinned2, i, colon_balloon, to_remove)
 # now combine synonyms
+
+splicies <- splicies %>% 
+  mutate(
+    taxon = str_replace(taxon, 'Amsinckia menziesii var. intermedia', 'Amsinckia menziesii'),
+    taxon = str_replace(taxon, 'Eriogonum fasciculatum var. polifolium', 'Eriogonum fasciculatum'),
+    taxon = str_replace(taxon, 'Lomatium nevadense var. nevadense', 'Lomatium nevadense'),
+    taxon = str_replace(taxon, 'Stanleya pinnata var. pinnata', 'Stanleya pinnata'),
+    taxon = str_replace(taxon, 'Stephanomeria exigua ssp. coronaria|Stephanomeria exigua ssp. exigua', 'Stephanomeria exigua'),
+    taxon = str_replace(taxon, 'Machaeranthera canescens|Macheranthera canescens', 'Dieteria canescens')
+  ) %>% 
+  filter(taxon != 'Astragalus lentiginosus var. chartaceus')
+
+
+p <- '../data/raw/occurrence/thinned/'
+tworemove <- list.files(p)[grepl('2', list.files(p))]
+lapply(file.path(p, tworemove), file.remove) # remove 'thinned2'
+
+# combine records into new thinned records
+st_write(splicies, '../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE, append = F)
 ```
 
 ```{r load nifc}

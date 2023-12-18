@@ -44,8 +44,12 @@ pout <- '/media/steppe/hdd/SDM_restorations/data/raw/coarse_blm/'
 blm_surf <- st_read(paste0(pout, 'coarse_surface.shp'), quiet = TRUE)
 blm_surf <- st_simplify(blm_surf, dTolerance = 500) # just make it a bit smaller. 
 blm_surf <- st_make_valid(blm_surf)
+
+rm(p, pout)
 ```
 
+
+After we have removed spurious occurrence records (see chunk: 'subset occurrence records for final clean batch', in clean_records), we can generate absences for each species. 
 ```{r generate raw absences, eval = F}
 
 # here we subset a terrestrial surface to our area of analysis - we don't want all of
@@ -65,20 +69,66 @@ land <- st_crop(land, domain) |>
 
 rm(domain)
 
-
 records <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
 records <- records %>% 
   group_by(taxon) %>% 
   filter(n() >= 15)
 records <- split(records, f = records$taxon)
 
-out <- lapply(records, absence_drawer, terrestrial = land,  bg_abs = 0.15)
-out <- bind_rows(out)
-st_write(out, '../data/raw/occurrence/absences.shp')
+out1 <- lapply(records, absence_drawer, terrestrial = land,  bg_abs = 0.15)
 
-ab <- st_read('../data/raw/occurrence/absences.shp')
+out <- bind_rows(out1) %>% 
+  rename(taxon = Taxon) %>% 
+  mutate(date = as.Date('2023-12-18'), .before = geometry)
+  
+st_write(out, '../data/raw/occurrence/absences/absences.shp', append = FALSE)
 
-table(records$taxon)
+rm(out1, blm_surf, AIM_points, records)
+```
+
+
+
+```{r extract environmental predictors to records}
+
+absences <- st_read('../data/raw/occurrence/absences/absences.shp', quiet = TRUE)
+presences <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE) %>% 
+  mutate(Occurrence = 1, 
+         PtType = if_else(is.na(PrmryKy), 'AIM Presence', 'Opportunistic Presence'), .before = geometry)
+
+abvi_p <- filter(presences, taxon == 'Abronia villosa')
+abvi_a <- filter(absences, taxon == 'Abronia villosa')
+
+abvi <- bind_rows(abvi_p, abvi_a) %>% 
+  st_as_sf() %>% 
+  mutate(ID = 1:n())
+
+table(abvi$Occurrence)
+
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa'
+paths <- file.path(p, list.files(p, recursive = F))
+files <- lapply(paths, function(x){ file.path(x, list.files(x)) })
+names(files) <- basename(paths)
+bio <- lapply(files, vrt)
+bio <- rast(bio)
+
+vif_vals <- spatSample(bio, size = 5000)
+collinear_probs <- vifstep(vif_vals, th = 10)
+exclude()
+
+abvi_rv <- extract(bio, abvi)
+abvi_rv <- select(abvi_rv, -gdgfgd10, -gdgfgd5, -swe) %>% 
+  drop_na()
+abvi_rv_scaled <- data.frame(apply(abvi_rv[,2:17], MARGIN = 2, FUN = scales::rescale, to = c(0,1)))
+abvi_rv_scaled$ID <- abvi_rv$ID
+
+table(abvi_rv_scaled$Occurrence)
+
+abvi <- right_join(abvi, abvi_rv_scaled, by = 'ID')
+
+
+table(abvi$Occurrence)
+
+rm(abvi_a, abvi_p, p, paths, files, abvi_rv)
 ```
 
 
@@ -99,36 +149,37 @@ library(ggord)
 # Only up to 750:750 presences:absences per species will be used to train a model. The maximum
 # imbalance between presences to absences will be 750:250, or 3:1. 
 
-lda_PA_dropper <- function(x, path){
+lda_PA_dropper <- function(x, path, column_range){
   
-  pres <- x[x$Occurrence == 'Presence', ]
+  pres <- x[x$Occurrence == 1, ]
   real_abs <- x[x$PtType == 'AIM Absence', ]
   geo_abs <- x[x$PtType == 'Background Absence', ]
   model_abs <- dplyr::bind_rows(real_abs, geo_abs)
 
-  if(nrow(pres) > 750){pres <- sample(1:nrow(pres), size = 750, replace = FALSE)}
-  if(nrow(model_abs) > 750){model_abs <- sample(1:nrow(model_abs), size = 750, replace = FALSE)}
+  if(nrow(pres) > 750){pres <- pres[sample(1:nrow(pres), size = 750, replace = FALSE),]}
+  if(nrow(model_abs) > 750){model_abs <- model_abs[sample(1:nrow(model_abs), size = 750, replace = FALSE),]}
 
-  training <- dplyr::bind_rows(pres, model_abs)
+  training <- dplyr::bind_rows(pres, model_abs) 
+  training <- training[, c('Occurrence', colnames(abvIng)[7:22])]
   testing <- filter(x, ! ID %in% training$ID)
 
-  LDA_model <- MASS::lda(Species ~ ., training) # generate model
+  LDA_model <- MASS::lda(Occurrence ~ ., training) # generate model
 
   # Here the accuracy of the trained modeled is evaluated
   LDA_train <- predict(LDA_model, training)$class
-  tab <- table(Predicted = LDA_train, Actual = training$Species)
+  tab <- table(Predicted = LDA_train, Actual = training$Occurrence)
   ACC_train <- sum(diag(tab))/sum(tab) # accuracy
 
   # Here the model is applied to unclassified data
   LDA_test <- predict(LDA_model, testing)$class
   testing$Predicted <- predict(LDA_model, testing)$class
-  tab1 <- table(Predicted = LDA_test, Actual = testing$Species)
+  tab1 <- table(Predicted = LDA_test, Actual = testing$Occurrence)
   ACC_test <- sum(diag(tab1))/sum(tab1) # accuracy. 
 
-  n_pres <- nrow(x[x$Occurrence == 'Presence',])
-  n_abs <- nrow(x[x$Occurrence != 'Presence',])
+  n_pres <- nrow(x[x$Occurrence == 1,])
+  n_abs <- nrow(x[x$Occurrence == 0,])
   conflicted <- filter(testing, Predicted != Occurrence) 
-  max_rcs_2_remove <- n_pres - n_ab
+  max_rcs_2_remove <- n_abs - n_pres
 
   if(nrow(conflicted) == 0){ # identify the records we want to remove from the test data. 
     removals <- NA
@@ -141,19 +192,34 @@ lda_PA_dropper <- function(x, path){
   if(!is.na(removals)){data_out <- dplyr::filter(x, ! ID %in% removals)}
   
   metrics <- data.frame(
-    Presences = nrow(pres), 
-    Absences = nrow(model_abs),
+    Train_Presences = nrow(pres), 
+    Train_Absences = nrow(model_abs),
     ACC_train = ACC_train, 
     ACC_test = ACC_test,
-    Flagged = nrow(conflicted)
+    Flagged = nrow(conflicted), 
+    Removed = length(removals)
     )
   
-  species <- x$Taxon[1]
+  species <- x$taxon[1]
   message(length(removals), ' records dropped from ', species)
   species <- gsub(' ', '_', species)
   write.csv(metrics, file.path(path, paste0(species, '.csv')), row.names = FALSE)
   
   return(data_out)
 }
+
+
+abvIng <- st_drop_geometry(abvi) %>% 
+  mutate(Occurrence = as.factor(Occurrence))
+
+TEST <- lda_PA_dropper(abvIng, path = '../results/lda/', column_range = 7:22)
+
+
+mapme <- left_join(select(abvi, ID, geometry), TEST)
+
+ggplot() +
+  geom_sf(data = mapme, aes(color = Occurrence))
+
+table(TEST$Occurrence)
 
 ```

@@ -87,16 +87,16 @@ absence_drawer <- function(x, bg_abs, terrestrial){
   obs_area <- if(buf_area > 40233){buf_area = 40233} # cap area with 25 mi buffer.
   
   box_hull <- sf::st_buffer(buffer_hull, dist = obs_area)
-  
   bbox <- sf::st_bbox(box_hull) |>
     sf::st_as_sfc() 
   
   box_hull <- sf::st_difference(bbox, buffer_hull)
   
   # remove large oceans, or lakes, or what have you. 
-  observed_hull <- st_intersection(observed_hull, terrestrial)
-  buffer_hull <- st_intersection(buffer_hull, terrestrial)
-  box_hull <- st_intersection(box_hull, terrestrial)
+  observed_hull <- sf::st_intersection(observed_hull, terrestrial) |> sf::st_union()
+  buffer_hull <- sf::st_intersection(buffer_hull, terrestrial) |> sf::st_union()
+  box_hull <- sf::st_intersection(box_hull, terrestrial) |> sf::st_union()
+  bbox <- sf::st_intersection(bbox, terrestrial) |> sf::st_union()
   
   # perform the outline background absence sample
   reg_pts <- sf::st_sample(box_hull, size = round(nrow(x) * bg_abs, 0), type = 'regular') |>
@@ -112,21 +112,20 @@ absence_drawer <- function(x, bg_abs, terrestrial){
     sf::st_transform(buffer_hull, sf::st_crs(blm_surf)), blm_surf)
   blm_surf_area <- as.numeric(sf::st_area(blm_surf))
   prcnt_blm <- (blm_surf_area / as.numeric(sf::st_area(buffer_hull))) 
-  aim_recs <- nrow(x) * (1 - bg_abs) * prcnt_blm
+  aim_recs <- round( nrow(x) * (1 - bg_abs) * prcnt_blm, 0)
   
   AIM_points <- AIM_points[lengths(st_intersects(AIM_points, buffer_hull)) > 0,]
   AIM_points <- AIM_points |> 
     filter(! PrimaryKey %in% x$PrmryKy ) # these are presences
   
-  if(aim_recs >= nrow(AIM_points)){aim_recs <- nrow(AIM_points)} # in case species v. abundant. 
+  if(aim_recs >= nrow(AIM_points)){aim_recs <- nrow(AIM_points)}
   
-  AIM_absence <- sample_n(AIM_points, size = round(aim_recs * 1.1, 0), replace = FALSE) |> 
+  AIM_absence <- sample_n(AIM_points, size = aim_recs, replace = FALSE) |> 
     dplyr::mutate(Occurrence = 0, PtType = 'AIM Absence') |>
     dplyr::select(Occurrence, PtType, geometry) |>
     sf::st_transform(sf::st_crs(x))
   
   # generate Random absences
-  
   rand_recs <- nrow(x) * ((1 - bg_abs) * (1 - prcnt_blm))
   buffered_presences <- sf::st_buffer(x, dist = 10000) |>
     sf::st_union() |>
@@ -137,14 +136,14 @@ absence_drawer <- function(x, bg_abs, terrestrial){
   non_blm_area <- sf::st_difference(buffer_hull, blm_surf) 
   non_blm_area <- sf::st_difference(non_blm_area, buffered_presences)
   
-  random_samples <- sf::st_sample(non_blm_area, size = round(rand_recs * 1.1, 0),
+  random_samples <- sf::st_sample(non_blm_area, size = round(rand_recs * 1.25, 0),
                                   type = 'random') |> 
     sf::st_as_sf() |>
     dplyr::mutate(Occurrence = 0, PtType = 'Random Absence') |>
     sf::st_transform(sf::st_crs(x)) |>
     dplyr::rename(geometry = x)
   
-  absences <- dplyr::bind_rows(reg_pts, AIM_absence, random_samples) |>
+  absences <- dplyr::bind_rows(reg_pts, AIM_absence, random_samples)|>
     dplyr::mutate(Taxon = unique(x$taxon), .before = 'geometry') 
   
   print(unique(x$taxon))
