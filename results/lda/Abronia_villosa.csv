@@ -1,2 +1,2 @@
-"Presences","Absences","ACC_train","ACC_test","Flagged","Removed"
-750,430,0.921186440677966,0.871572871572872,267,129
+"Train_Presences","Train_Absences","Pres_in","Abs_in","Abs_out","Max_Recs_Removal","ACC_train","ACC_test","Flagged","Removed"
+750,398,1104,1041,934,110,0.99913,0.89268,107,107
