@@ -161,3 +161,33 @@ makeTiles(dem, template, filename)
 rm(p2dem, files, dem, pout, filename, bio1, target_cells, template)
 ```
 
+these layers have NAs which we will treat as 0s
+```{r eval = F}
+
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa'
+paths <- list.dirs(p, recursive = T)
+
+maskR <- vrt(file.path(p, 'bio1', list.files(file.path(p, 'bio1'))))
+
+gdgfgd10 <- vrt(file.path(p, 'gdgfgd10_old', list.files(file.path(p, 'gdgfgd10_old'))))
+gdgfgd5 <- vrt(file.path(p, 'gdgfgd5_old', list.files(file.path(p, 'gdgfgd5_old'))))
+swe <- vrt(file.path(p, 'swe_old', list.files(file.path(p, 'swe_old'))))
+
+gdgfgd10 <- subst(gdgfgd10, NA, 0)
+gdgfgd10 <- mask(gdgfgd10, maskR) # remove the ocean/set extent again
+filename <- paste0(p, '/gdgfgd10/', 'gdgfgd10_.tif')
+makeTiles(gdgfgd10, template, filename)
+
+gdgfgd5 <- subst(gdgfgd5, NA, 0)
+gdgfgd5 <- mask(gdgfgd5, maskR) # remove the ocean/set extent again
+filename <- paste0(p, '/gdgfgd5/', 'gdgfgd5_.tif')
+makeTiles(gdgfgd5, template, filename)
+
+swe <- subst(swe, NA, 0)
+swe <- mask(swe, maskR) # remove the ocean/set extent again
+filename <- paste0(p, '/swe/', 'swe_.tif')
+makeTiles(swe, template, filename)
+
+rm(gdgfgd10, gdgfgd5, swe, p, paths, maskR)
+```
+
