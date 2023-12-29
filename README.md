@@ -14,42 +14,35 @@ Two major models are created, one which focuses on identifying areas of fundamen
 |  7.   |              Mean annual precipitation (BIO12)          |              Chelsa                   |     both     |
 |  8.   |         Precipitation of Warmest Quarter (BIO18)        |              Chelsa                   |     both     |
 |  9.   |        Precipitation of Coldest Quarter (BIO19)         |              Chelsa                   |     both     |
-| 10.   |         Beginning of the frost-free period (gdgfgd0)    |              Chelsa                   |     both     |
-| 11.   |      Mean Monthly vapour pressure deficit (vpd_mean)    |              Chelsa                   |     both     |
-| 12.   |     Heat accumulation of  Degree-days above 5C (gdd5)   |              Chelsa                   |     both     |
-| 13.   |           Number of Degree-days above 5C (ngd5)         |              Chelsa                   |     both     |
-| 14.   |   Heat accumulation of  Degree-days above 10C (gdd10)   |              Chelsa                   |     both     |
-| 15.   |         Number of Degree-days above 10C (ngd10)         |              Chelsa                   |     both     |
-| 16.   |           Mean Monthly cloudiness (tcc mean)            |              Chelsa                   |     both     |
-| 17.   |        Mean monthly near surface humidity (hurs_mean)   |              Chelsa                   |     both     |
-| 18.   |            Number of Days with Snow Cover(scd)          |              Chelsa                   |     both     |
-| 19.   |            Annual Snow Water Equivalent (swe)           |              Chelsa                   |     both     |
-| 20.   |          Number of days where temps cross 0C (fcf)      |              Chelsa                   |     both     |
-| 21.   |           Mean annual precipitation as snow             |              Chelsa                   |     both     |
-| 22.   |                Percent Herbaceous Vegetation            |              EarthEnv                 |     wild     |
-| 23.   |                   Percent Shrub Cover                   |              EarthEnv                 |     wild     |
-| 24.   |                   Percent Tree Cover                    |              EarthEnv                 |     wild     |
-| 25.   |            Soil probability of bedrock (R Horizon)      |              SoilGrids                |     wild     |
-| 26.   |                Soil organic carbon (Tonnes / ha)        |              SoilGrids                |     wild     |
-| 27.   |                Surface (0-5 cm) soil pH in H~2~O        |              SoilGrids                |     both     |
-| 28.   |                   30-60 cm soil pH in H~2~O             |              SoilGrids                |     both     |
-| 29.   |                Surface (0-5 cm) soil % sand             |              SoilGrids                |     both     |
-| 30.   |                    5-15 cm  soil % sand                 |              SoilGrids                |     both     |
-| 31.   |                    15-30 cm soil % sand                 |              SoilGrids                |     both     |
-| 32.   |                Surface (0-5 cm) soil % clay             |              SoilGrids                |     both     |
-| 33.   |                    5-15 cm  soil % clay                 |              SoilGrids                |     both     |
-| 34.   |                    15-30 cm soil % clay                 |              SoilGrids                |     both     |
-| 35.   |              Surface (0-5 cm) coarse fragments          |              SoilGrids                |     wild     | 
-| 36.   |                      Soil USDA class                    |              SoilGrids                |     both     |
-| 37.   |                   Global Soil Salinity                  |              SoilGrids                |     both     |
-| 38.   |                         Elevation                       |             Geomorpho90               |     both     |
-| 39.   |                          Slope                          |             Geomorpho90               |     wild     |
-| 40.   |                          Aspect                         |             Geomorpho90               |     wild     |
-| 41.   |                 Topographic Wetness Index               |             Geomorpho90               |     wild     |
-| 42.   |                  Terrain ruggedness Index               |             Geomorpho90               |     wild     |
-| 43.   |                       Geomorphon                        |             Geomoprho90               |     wild     |
-| 44.   |        Log-transformed distance to surface water        |     Global Surface Water Explorer     |     both     |
-| 45.   |                   Human Influence Index                 |           NASA Earth Data             |     wild     |
+| 10.   |      Mean Monthly vapour pressure deficit (vpd)         |              Chelsa                   |     both     |
+| 11.   |     Heat accumulation of  Degree-days above 5C (gdd5)   |              Chelsa                   |     both     |
+| 12.   |           Number of Degree-days above 5C (ngd5)         |              Chelsa                   |     both     |
+| 13.   |   Heat accumulation of  Degree-days above 10C (gdd10)   |              Chelsa                   |     both     |
+| 14.   |         Number of Degree-days above 10C (ngd10)         |              Chelsa                   |     both     |
+| 15.   |        Mean monthly near surface humidity (hurs)        |              Chelsa                   |     both     |
+| 16.   |            Number of Days with Snow Cover(scd)          |              Chelsa                   |     both     |
+| 17.   |            Annual Snow Water Equivalent (swe)           |              Chelsa                   |     both     |
+| 18.   |                Percent Herbaceous Vegetation            |              EarthEnv                 |     wild     |
+| 19.   |                   Percent Shrub Cover                   |              EarthEnv                 |     wild     |
+| 20.   |                   Percent Tree Cover                    |              EarthEnv                 |     wild     |
+| 21.   |                 Depth to Bedrock (R Horizon)            |              SoilGrids                |     wild     |
+| 22.   |                Soil organic carbon (Tonnes / ha)        |              SoilGrids                |     wild     |
+| 23.   |                Surface (0-5 cm) soil pH in H~2~O        |              SoilGrids                |     both     |
+| 24.   |                   30-60 cm soil pH in H~2~O             |              SoilGrids                |     both     |
+| 25.   |                Surface (0-5 cm) soil % sand             |              SoilGrids                |     both     |
+| 26.   |                    5-15 cm  soil % sand                 |              SoilGrids                |     both     |
+| 27.   |                    15-30 cm soil % sand                 |              SoilGrids                |     both     |
+| 28.   |                Surface (0-5 cm) soil % clay             |              SoilGrids                |     both     |
+| 29.   |                    5-15 cm  soil % clay                 |              SoilGrids                |     both     |
+| 30.   |                    15-30 cm soil % clay                 |              SoilGrids                |     both     |
+| 31.   |              Surface (0-5 cm) coarse fragments          |              SoilGrids                |     wild     | 
+| 32.   |                       Soil Salinity                     |              SoilGrids                |     both     |
+| 33.   |                         Elevation                       |             MERIT - DEM               |     both     |
+| 34.   |                          Slope                          |             Geomorpho90               |     wild     |
+| 35.   |                          Aspect                         |             Geomorpho90               |     wild     |
+| 36.   |                  Topographic Position Index             |             Geomorpho90               |     wild     |
+| 37.   |        Log-transformed distance to surface water        |     Global Surface Water Explorer     |     both     |
+| 38.   |                   Human Influence Index                 |           NASA Earth Data             |     wild     |
 
 
 ## Workflow for Presence/Absence generation and cleaning  
