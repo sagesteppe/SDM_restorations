@@ -89,8 +89,6 @@ lfile <- paste0(
   ".tif"
 )
 
-
-
 sg_url = "/vsicurl?max_retry=3&retry_delay=1&list_dir=no&url=https://files.isric.org/soilgrids/latest/data/"
 
 ### soil physical-texture properties ###
@@ -127,10 +125,6 @@ depth <- c('0-5', '30-60')
 #### soil organic carbon ####
 var <- 'soc'  # these only have these depths downloaded
 depth <- c('0-5')
-
-#### salinity ####
-
-
 
 ```
 

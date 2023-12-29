@@ -52,7 +52,7 @@ bio <- c(bio1, bio10, bio12, bio4, bio19)
 rm(bio1, bio10, bio12, bio4, bio19, p, files)
 ```
 
-```{r manually review outliers,  eval = F}
+```{r manually review outliers, eval = F}
 
 st <- tigris::states() %>% 
     filter(DIVISION %in% c(8, 9), ! STUSPS %in% c('AK', 'HI')) %>% 
@@ -95,7 +95,7 @@ rm(bio_v, bio_v1, OUTPUT, pts1)
 
 Every single taxon was individually mapped, and had their records investigated. Points which were in the 1.5% most extreme values for at least two values of BIO1, BIO4, BIO10, BIO12, BIO19, and for distance from the nearest population were color coded for investigations. 
 
-```{r subset occurrence records for final clean batch}
+```{r subset occurrence records for final clean batch, eval = F}
 thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE)
 thinned2 <- st_read('../data/raw/occurrence/thinned/thinned_occurrences2.shp', quiet = TRUE)
 pts2remove <- read.delim('../data/raw/species_manual_cleaning.txt', header = FALSE)
@@ -160,7 +160,7 @@ lapply(file.path(p, tworemove), file.remove) # remove 'thinned2'
 st_write(splicies, '../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE, append = F)
 ```
 
-```{r load nifc}
+```{r load nifc, eval = F}
 
 pNIFC <- '/media/steppe/hdd/Geospatial_data/NIFC_perimeters'
 NIFC <- st_read(file.path(pNIFC, 'InterAgencyFirePerimeterHistory_All_Years_View.shp')) |>
@@ -177,94 +177,79 @@ domain <- as.polygons(domain) |>  # convert to vector data
 NIFC <- st_crop(NIFC, domain)
 print(object.size(NIFC), units = "GiB", standard = "IEC") # 600971416
 NIFC <- st_simplify(NIFC, dTolerance = 90)
+NIFC <- NIFC[ !st_is_empty(NIFC), ] 
 print(object.size(NIFC), units = "GiB", standard = "IEC")
 
-ggplot() + 
-  geom_sf(data = filter(NIFC, INCIDENT == 'DEL VENTURI' & FIRE_YEAR == 2003))
-
-102910208 / 600971416
+st_write(NIFC, file.path(pNIFC, 'InterAgencyFirePerimeterHistory_All_Years_View-Simplified.shp'), append = F)
+rm(domain, ext, pNIFC)
 ```
 
 ```{r extract most recent fire}
+pNIFC <- '/media/steppe/hdd/Geospatial_data/NIFC_perimeters'
+NIFC <- st_read(file.path(pNIFC, 'InterAgencyFirePerimeterHistory_All_Years_View-Simplified.shp')) %>% 
+  select(FIRE_YEAR, INCIDENT) %>% 
+  filter(FIRE_YEAR > 1950)
 
+pRep <- '../data/raw/occurrence/repeated'
+f <- list.files(pRep, pattern   = '.shp')
+repeated <- bind_rows(
+  st_read(file.path(pRep, f[1])), 
+  st_read(file.path(pRep, f[2])) 
+) 
+
+early <- repeated %>% # we will run spatial operations on only the first of each paired point to reduce processing time. 
+  group_by(taxon, SitePair) %>% 
+  slice_min(date, n = 1) %>% 
+  st_transform(st_crs(NIFC))
+
+test_me <- st_intersects(early, NIFC ) # reduce the records here real quickly. 
+early <- early[ lengths(test_me) > 1, ] 
+early <- group_by(early, taxon) %>% 
+  filter(n() > 10) # will require at least 10 records per species to be successful, let alone even attempt. 
+
+NIFC <- NIFC[ lengths(st_intersects(NIFC, early)) > 1, ]  # likewise reduce the number of fires to speed up the intersecitons
+early_fires <- st_intersection(early, NIFC)
+
+early_fires1 <- early_fires %>% 
+  filter(as.numeric(gsub('-.*$', '', date)) < FIRE_YEAR) %>% 
+  distinct(taxon, SitePair, FIRE_YEAR, .keep_all = TRUE) %>% 
+  select(-PrmryKy) %>% 
+  filter(as.numeric(gsub('-.*$', '', date)) < FIRE_YEAR) %>% 
+  st_drop_geometry()
+
+early_fires1 <- early_fires %>% 
+  filter(as.numeric(gsub('-.*$', '', date)) < FIRE_YEAR)
+
+# RECOMBINE THE DATA SETS
+late <- repeated %>% # we will run spatial operations on only the first of each paired point to reduce processing time. 
+  group_by(taxon, SitePair) %>% 
+  slice_max(date, n = 1) 
+
+late_fire <- left_join(early_fires1, late, by = c('taxon', 'SitePair')) %>% 
+  select(-date.x) %>% 
+  rename(date = date.y) %>% 
+  relocate(FIRE_YEAR, INCIDENT, .before = 'geometry') %>% 
+  filter(as.numeric(gsub('-.*$', '', date)) > FIRE_YEAR)
+
+reppy <- bind_rows(early_fires1, late_fire) %>% 
+  arrange(taxon, SitePair) %>% 
+  group_by(taxon, SitePair) %>% 
+  filter(n() > 1) %>% 
+  mutate(long = unlist(map(geometry,1)),
+           lat = unlist(map(geometry,2))) %>% 
+  fill(PrmryKy, long, lat, .direction = "up")  %>% 
+  st_drop_geometry() %>% 
+  drop_na(long) %>% # corner case where the late and aearly observation years are the same
+  st_as_sf(coords = c('long', 'lat'), crs = 5070)
+
+table(reppy$taxon)
+
+# there do not appear to be a meaningful number of replicates to determine which species bounce back after fires. 
+
+rm(pRep, f, late, early)
 ```
 
 
-We will identify environmental parameters associated with species occurrences, if absences and 'pseudo absences' are very similar to these values, we will discard certain records within this space. 
-
-```{r identify similar plots}
-
-```
-
-```{r remove pseudo absences in presence niche space}
-
-library(klaR)
-library(psych)
-library(MASS)
-library(ggord)
-
-# to determine whether the pseudo-random absences are in areas which are possibly suitable
-# we will use linear discrimination analysis (LDA). LDA uses a label, e.g. presence or absence
-# as a response which can be predicted by independent variables which are linear combinations 
-# generated by reducing a higher dimensional data set to two axis. LDA will be trained on a data set 
-# of AIM Plots with true absences, geographic absences, and a subset of the Psuedo-absences. 
-# Only up to 750:750 presences:absences per species will be used to train a model. The maximum
-# imbalance between presences to absences will be 750:250, or 3:1. 
-
-lda_PA_dropper <- function(x){
-  
-  pres <- x[x$Occurrence == 'Presence', ]
-  real_abs <- x[x$Occurrence == 'Absence' ..., ]
-  geo_abs <- x[x$Occurrence == 'Absence' ..., ]
-  model_abs <- dplyr::bind_rows(real_abs, geo_abs)
-
-  if(nrow(pres) > 750){pres <- sample(1:nrow(pres), size = 750, replace = FALSE)}
-  if(nrow(model_abs) > 750){model_abs <- sample(1:nrow(model_abs), size = 750, replace = FALSE)}
-
-  training <- dplyr::bind_rows(pres, model_abs)
-  testing <- filter(x, ! ID %in% training$ID)
-
-  LDA_model <- lda(Species ~ ., training) # generate model
-
-  # Here the accuracy of the trained modeled is evaluated
-  LDA_train <- predict(LDA_model, training)$class
-  tab <- table(Predicted = LDA_train, Actual = training$Species)
-  ACC_train <- sum(diag(tab))/sum(tab) # accuracy
-
-  # Here the model is applied to unclassified data
-  LDA_test <- predict(LDA_model, testing)$class
-  testing$Predicted <- predict(LDA_model, testing)$class
-  tab1 <- table(Predicted = LDA_test, Actual = testing$Species)
-  ACC_test <- sum(diag(tab1))/sum(tab1) # accuracy. 
-
-  n_pres <- nrow(x[x$Occurrence == 'Presence',])
-  n_abs <- nrow(x[x$Occurrence != 'Presence',])
-  conflicted <- filter(testing, Predicted != Occurrence) 
-  max_rcs_2_remove <- n_pres - n_ab
-
-  if(nrow(conflicted) == 0){
-    removals <- NA
-  } else if (nrow(conflicted) > max_rcs_2_remove) {
-    removals <- conflicted[sample(1:nrow(conflicted), size = max_rcs_2_remove, replace = FALSE), 'ID']
-  } else {
-    removals <- conflicted$ID
-  }
-  
-  if(!is.na(removals)){data_out <- dplyr::filter(x, ! ID %in% removals)}
-
-  metrics <- data.frame(Presences = nrow(pres), 
-             Absences = nrow(model_abs),
-             ACC_train = ACC_train, 
-             ACC_test = ACC_test,
-             Flagged = nrow(conflicted)
-             )
-#   write.csv()\
-  
-  return(data_out)
-  
-}
-
-```
 
 
 

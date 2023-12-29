@@ -116,35 +116,31 @@ rm(p, paths, files)
 
 ```{r import potential records}
 
+collinear_probs <- read_rds('../results/bioclim_VIF_PA_drop.rda')
+bio <- usdm::exclude(bio, collinear_probs)
+
 absences <- st_read('../data/raw/occurrence/absences/absences.shp', quiet = TRUE)
 presences <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE) %>% 
   mutate(Occurrence = 1, 
          PtType = if_else(is.na(PrmryKy), 'AIM Presence', 'Opportunistic Presence'), .before = geometry)
 
 recs <- bind_rows(absences, presences) %>% 
+  mutate(taxon = str_replace(taxon, 'Dudleya cymosa ssp. cymosa', 'Dudleya cymosa')) %>% 
   group_by(taxon) %>% 
-  mutate(ID = 1:n())
-
-collinear_probs <- read_rds( '../results/bioclim_VIF_PA_drop.rda')
-bio <- usdm::exclude(bio, collinear_probs)
+  mutate(ID = 1:n()) 
 
 rm(absences, presences, collinear_probs)
 ```
 
 
 
-```{r remove pseudo absences in presence niche space}
+```{r remove pseudo absences in presence niche space, eval = F}
 
 set.seed(27)
-
 cn <- names(bio)
-# splicies <- split(recs, f = recs$taxon)
-lapply(splicies, lda_PA_dropper, path = '../results/lda/', col_names = cn)
+splicies <- split(recs, f = recs$taxon)
 
-which(names(splicies)[130] == 'Dudleya cymosa')
-# need to restart on record 130, 
-# which is Dudleya cymosa ssp. cymosa, and which should be subsumed into Dudleya cymosa!
-# the problem was that a variable displayed 0 variance because there were only 2 records!!!
+lapply(splicies, lda_PA_dropper, path = '../results/lda/', col_names = cn)
 ```
 
 

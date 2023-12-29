@@ -203,7 +203,7 @@ splicies <- split(records, records$taxon)
 
 thinned <- lapply(splicies, ONEperCELL)
 thinned <- bind_rows(thinned)
-st_write(thinned, '../data/raw/occurrence/thinned/thinned_occurrences.shp', append = F)
+# st_write(thinned, '../data/raw/occurrence/thinned/thinned_occurrences.shp', append = F)
 repeated_occurrences <- lapply(splicies, multiplesPERcell)
 repeated_occurrences <- purrr::discard(repeated_occurrences, ~nrow(.) < 2)
 repeated_occurrences <- bind_rows(repeated_occurrences)
@@ -212,7 +212,7 @@ st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurre
 rm(ONEperCELL, multiplesPERcell, records, splicies, repeated_occurrences, base_p)
 ```
 
-```{r Create consensus presence records}
+```{r Create consensus presence records 2, eval = F}
 
 base_p <- '../data/raw/occurrence'
 
