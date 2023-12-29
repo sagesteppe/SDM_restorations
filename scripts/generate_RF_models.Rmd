@@ -29,7 +29,7 @@ layers <- rast(layers)
 names(layers) <- basename(paths)
 plot(layers[[1:3]])
 
-# gdgfgd10", "gdgfgd5, "swe"
+# "gdgfgd10", "gdgfgd5, "swe"
 # both need NA replaced with 0, if terrestrial... 
 
 layers[[19]] <- subst(layers[[19]], NA, 0)

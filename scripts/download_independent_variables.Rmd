@@ -188,6 +188,6 @@ swe <- mask(swe, maskR) # remove the ocean/set extent again
 filename <- paste0(p, '/swe/', 'swe_.tif')
 makeTiles(swe, template, filename)
 
-rm(gdgfgd10, gdgfgd5, swe, p, paths, maskR)
+rm(gdgfgd10, gdgfgd5, swe, p, paths, maskR, filename, template)
 ```
 
