@@ -184,7 +184,7 @@ st_write(NIFC, file.path(pNIFC, 'InterAgencyFirePerimeterHistory_All_Years_View-
 rm(domain, ext, pNIFC)
 ```
 
-```{r extract most recent fire}
+```{r identify sites where species found before and after a fire, eval = F}
 pNIFC <- '/media/steppe/hdd/Geospatial_data/NIFC_perimeters'
 NIFC <- st_read(file.path(pNIFC, 'InterAgencyFirePerimeterHistory_All_Years_View-Simplified.shp')) %>% 
   select(FIRE_YEAR, INCIDENT) %>% 
@@ -217,9 +217,6 @@ early_fires1 <- early_fires %>%
   filter(as.numeric(gsub('-.*$', '', date)) < FIRE_YEAR) %>% 
   st_drop_geometry()
 
-early_fires1 <- early_fires %>% 
-  filter(as.numeric(gsub('-.*$', '', date)) < FIRE_YEAR)
-
 # RECOMBINE THE DATA SETS
 late <- repeated %>% # we will run spatial operations on only the first of each paired point to reduce processing time. 
   group_by(taxon, SitePair) %>% 
@@ -246,30 +243,7 @@ table(reppy$taxon)
 
 # there do not appear to be a meaningful number of replicates to determine which species bounce back after fires. 
 
-rm(pRep, f, late, early)
+rm(pRep, f, late, early, late_fire, early_fires, reppy, repeated)
 ```
 
-
-
-
-
-```{r prepare data for modelling}
-
-```
-
-```{r model}
-
-```
-
-```{r evaluate models}
-
-```
-
-```{r export model summaries}
-
-```
-
-```{r subset occurrence records to reflect fire history}
-
-```
 

@@ -7,6 +7,7 @@ output: html_document
 
 ```{r}
 library(tidyverse)
+library(terra)
 ```
 
 The main bioclim variables can be found at the [link here](https://envicloud.wsl.ch/#/?bucket=https%3A%2F%2Fos.zhdk.cloud.switch.ch%2Fenvicloud%2F&prefix=chelsa%2Fchelsa_V2%2FGLOBAL%2Fclimatologies%2F1981-2010%2Fbio%2F) an S3 bucket for CHELS*A* (not the neighborhood!).
@@ -90,7 +91,6 @@ lfile <- paste0(
 )
 
 
-
 sg_url = "/vsicurl?max_retry=3&retry_delay=1&list_dir=no&url=https://files.isric.org/soilgrids/latest/data/"
 
 ### soil physical-texture properties ###
@@ -131,5 +131,33 @@ depth <- c('0-5')
 #### salinity ####
 
 
+```
+
+
+process dem
+```{r}
+p2dem <- '/media/steppe/hdd/Geospatial_data/merit-dem'
+files <- file.path(p2dem, list.files(p2dem, recursive = TRUE, pattern= 'flt'))
+files <- files[15:length(file)] # lower files south of extent
+
+dem <- vrt(files)
+dem <- crop(dem, project(domain, crs(dem)))
+dem <- project(dem, 'EPSG:5070')
+
+pout <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/dem/' 
+filename <- paste0(pout, 'dem_.tif')
+
+bio1 <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio1'
+target_cells <- vrt(file.path(bio1, list.files(bio1)))
+dem <- resample(dem, target_cells)
+
+template <- rast(nrows = 25, ncols = 25) # create a big empty raster, you can go in through sf too. 
+ext(template) <- c( -125.5, -100, 27,  50) # set the extent
+crs(template) <- "EPSG:4326" 
+template <- project(template, 'EPSG:5070')
+
+makeTiles(dem, template, filename)
+
+rm(p2dem, files, dem, pout, filename, bio1, target_cells, template)
 ```
 
