@@ -191,3 +191,46 @@ makeTiles(swe, template, filename)
 rm(gdgfgd10, gdgfgd5, swe, p, paths, maskR, filename, template)
 ```
 
+make tiles of shrub and herbaceous cover, and create total percent tree cover layers
+
+```{r}
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/chelsa/bio1'
+bio1 <- vrt(file.path(p, list.files(p))) # use this for resampling. 
+
+p <- '/media/steppe/hdd/Geospatial_data/earthenv'
+f <- list.files(p)
+
+shrub <- vrt(file.path(p, f[5]))
+shrub <- crop(shrub, project(domain, crs(shrub)))
+shrub <- project(shrub, 'EPSG:5070')
+shrub <- resample(shrub, bio1)
+
+pout <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/veg_cover'
+filename <- paste0(pout, '/shrub/', 'shrub_.tif')
+makeTiles(shrub, template, filename)
+rm(shrub)
+
+herbs <- vrt(file.path(p, f[6]))
+herbs <- crop(herbs, project(domain, crs(herbs)))
+herbs <- project(herbs, 'EPSG:5070')
+herbs <- resample(herbs, bio1)
+
+filename <- paste0(pout, '/herb/', 'herb_.tif')
+makeTiles(herbs, template, filename)
+rm(herbs)
+
+layers <- lapply(file.path(p, f[1:4]), vrt)
+layers <- rast(layers)
+
+layers <- crop(layers, project(domain, crs(layers)))
+layers <- project(layers, 'EPSG:5070')
+layers <- resample(layers, bio1)
+
+tree <- sum(layers)
+filename <- paste0(pout, '/tree/', 'tree_.tif')
+makeTiles(tree, template, filename)
+rm(tree, layers)
+
+rm(p, f, pout, filename)
+```
+
