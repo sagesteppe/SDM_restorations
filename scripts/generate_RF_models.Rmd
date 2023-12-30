@@ -17,7 +17,7 @@ source('functions.R')
 p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2'
 paths <- list.dirs(p, recursive = T)
 paths <- paths[2:length(paths)]
-paths <- paths[! grepl('chelsa$|veg_cover$|soilgrids$|sand$|silt$|clay$|phh2o$|cfvo$', paths) ]
+paths <- paths[! grepl('chelsa$|veg_cover$|soilgrids$|sand$|silt$|clay$|phh2o$|cfvo$|soc$', paths) ]
 
 files <- lapply(paths, function(x){ file.path(x, list.files(x)) })
 names(files) <- basename(paths)
@@ -25,6 +25,8 @@ names(files) <- basename(paths)
 layers <- lapply(files, vrt)
 layers <- rast(layers)
 names(layers) <- basename(paths)
+
+rm(paths, files)
 ```
 
 ```{r read in response}
@@ -34,12 +36,12 @@ train_dat <- lapply(p2f, sf::st_read, quiet = TRUE)
 train_dat <- bind_rows(train_dat) %>% 
   st_transform(crs(layers))
 
-abvi <- filter(train_dat, taxon == 'Abronia villosa')
+splicies <- split(train_dat, f = train_dat$taxon)
 
-abvi_test <- terra::extract(layers, abvi)
+cores <- parallel::detectCores()
+lapply(splicies[3:335], modeller)
 
 
-# identify a single component of each pair for usage. 
 ```
 
 

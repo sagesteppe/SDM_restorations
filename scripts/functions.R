@@ -317,3 +317,88 @@ lda_PA_dropper <- function(x, path, col_names){
 }
 
 
+
+Boruta_var_selector <- function(x){
+  
+  BorutaRes <- Boruta::Boruta(Occurrence ~ ., data = x, num.threads = cores, doTrace = 1)
+  importance <- Boruta::attStats(BorutaRes)
+  rn <- rownames(importance)
+  important_vars <- Boruta::getSelectedAttributes(BorutaRes, withTentative = F)
+  
+  
+  ### Remove highly autocorrelated variables ###
+  co_pairs <- c('cfvo', 'phh2o', 'gdd', 'ngd', 'gdgfgd')
+  pair_removals <- unlist(lapply(co_pairs, function(x){ rn[min(grep(x, rn))]}))
+  
+  triplets <- c('sand', 'silt', 'clay')
+  triplet_removals <- unlist(lapply(triplets, function(x){ rn[grep(x, rn)[1:2]]}))
+  
+  # reduce two the maximum of three soil textures
+  sand_imp <- mean(importance [ grep('sand', rn), 'meanImp'])
+  silt_imp <- mean(importance [ grep('silt', rn), 'meanImp'])
+  clay_imp <- mean(importance [ grep('clay', rn), 'meanImp'])
+  
+  texture2remove <- c('sand', 'silt', 'clay')[which.min(c(sand_imp, silt_imp, clay_imp))]
+  textures2remove <- rn[ grep(texture2remove, rn)]
+  
+  removals <- unique(c(pair_removals, triplet_removals, textures2remove))
+  
+  x_sub <- x[ , !names(x) %in% removals]
+  return(x_sub)
+}
+
+
+
+#' perform random forest modelling and save outputs to locations
+#' test_data output from Boruta_var_selector
+randomForests <- function(train_data, test_data, species){
+  
+  # identify the appropriate mtry
+  opt_mtry <- data.frame(
+    randomForest::tuneRF(train_data[,-1], train_data[,1], stepFactor=1.5))
+  opt_mtry <- opt_mtry[ which.min(opt_mtry$OOBError), 'mtry'] # here we subset the lowest OOB. 
+  
+  # model and predict
+  rf_model <- randomForest::randomForest(Occurrence ~ ., data = train_data, mtry = opt_mtry)
+  prediction <- predict(rf_model, test_data)
+  cmRestrat <- caret::confusionMatrix(prediction, test_data$Occurrence)
+  
+  # plot and save results
+  saveRDS(rf_model,
+          file = paste0('../results/rf_models/', species, '-', Sys.time(), '.rds'))
+  
+  vip::vip(rf_model) +
+    theme_bw() +
+    labs(title = species) + 
+    theme(plot.title = element_text(hjust = 0.5))
+  ggsave(paste0('../results/vip_plots/', species, '.png'), device = 'png')
+  
+  prediction_prob <- predict(rf_model, test_data, type = 'prob') # use this for auc/roc
+  result.roc <- pROC::roc(test_data$Occurrence, prediction_prob[,1]) # Draw ROC curve.
+  
+  png(file = paste0('../results/roc_plots/', species, '.png'))
+  plot(
+    result.roc,
+    print.thres="best",
+    print.thres.best.method="closest.topleft")
+  dev.off()
+  
+  summary <- setNames(
+    rbind(stack(cmRestrat$byClass), stack(cmRestrat$overall)), 
+    c('Value', 'Metric')
+  ) 
+  samples <- data.frame(
+    Value = c(
+      nrow(train_data[train_data$Occurrence==0,]), 
+      nrow(train_data[train_data$Occurrence==1,]), 
+      nrow(test_data[test_data$Occurrence==0,]), 
+      nrow(test_data[test_data$Occurrence==1,]) 
+    ),
+    Metric = c('nTrainPres', 'nTrainAbs', 'nTestPres', 'nTestAbs')
+  )
+  summary <- rbind(
+    setNames(data.frame(as.numeric(result.roc$auc), 'AUC'), c('Value', 'Metric')), 
+    summary, samples)
+  write.csv(summary, paste0('../results/summary/', species, '.csv'), row.names = F)
+  
+}
