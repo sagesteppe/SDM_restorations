@@ -46,7 +46,7 @@ URL_LIST=$(<../data/raw/ClimateVariables.txt)
 ```
 
 
-```{r download soil grids data eval = F}
+```{r download soil grids data,  eval = F}
 library(terra)
 library(sf)
 library(gdalUtilities)
@@ -99,9 +99,15 @@ var <- c('silt', 'clay', 'sand') # these three have all three vars downloaded
 depth <- c('0-5', '5-15', '15-30')
 
 vrts <- paste0(var, '/', var, '_', rep(depth, each = length(var)), 'cm_mean.vrt') 
+vrts
+
+lapply(paste0(sg_url, vrts)[1:2], gdal_translate,  dst_dataset = "./crop_roi_igh_r.vrt",
+               of = "VRT", tr = c(250, 250),
+               projwin = domain,
+               projwin_srs = igh)
 
 gdal_translate(
-  paste0(sg_url, vrts),
+  paste0(sg_url, vrts[1]),
                "./crop_roi_igh_r.vrt",
                of = "VRT", tr = c(250, 250),
                projwin = domain,
@@ -128,9 +134,38 @@ depth <- c('0-5', '30-60')
 var <- 'soc'  # these only have these depths downloaded
 depth <- c('0-5')
 
-#### salinity ####
+```
 
+```{r create soil grids products, eval = F}
 
+p2grids <- '/media/steppe/hdd/Geospatial_data/soilgrids'
+prods <- list.files(p2grids)
+tifs <- list.files(p2grids, recursive = TRUE)
+tifs <- tifs[grepl('cm_mean', tifs)]
+
+# tifs is input. 
+
+gridder <- function(x){
+  
+  product <- terra::vrt(file.path(p2grids, x))
+  product <- terra::crop(product, terra::project(domain, terra::crs(product)))
+  product <- terra::project(product, 'EPSG:5070')
+  product <- resample(product, target_cells)
+  
+  out_root <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/soilgrids'
+  paths <- gsub('cm_.*', '', x)
+  paths <- file.path(out_root, gsub('-', '_', paths))
+
+  filename <- file.path(paths, basename(x))
+  makeTiles(product, template, filename)
+  
+}
+
+lapply(tifs, gridder)
+
+p1 <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2/soilgrids/cfvo/cfvo_0_5'
+cfvo5 <- vrt(file.path(p1, list.files(p1)))
+plot(cfvo5)
 ```
 
 
@@ -217,7 +252,6 @@ herbs <- resample(herbs, bio1)
 
 filename <- paste0(pout, '/herb/', 'herb_.tif')
 makeTiles(herbs, template, filename)
-rm(herbs)
 
 layers <- lapply(file.path(p, f[1:4]), vrt)
 layers <- rast(layers)
