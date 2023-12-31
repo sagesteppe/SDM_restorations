@@ -29,7 +29,7 @@ names(layers) <- basename(paths)
 rm(paths, files)
 ```
 
-```{r read in response}
+```{r read in response data and model}
 p <- '../data/raw/occurrence/combined_records'
 p2f <- file.path(p, list.files(p, pattern = '.shp$'))
 train_dat <- lapply(p2f, sf::st_read, quiet = TRUE)
@@ -41,7 +41,24 @@ splicies <- split(train_dat, f = train_dat$taxon)
 cores <- parallel::detectCores()
 lapply(splicies[3:335], modeller)
 
-
 ```
 
+```{r summarize results from RF models}
+
+psum <- '../results/summary'
+f <- file.path(psum, list.files(psum))
+
+summary <- lapply(f, read.csv)
+names(summary) <- gsub('.csv', '',  basename(f))
+summary <- data.table::rbindlist(summary, idcol = 'species')
+
+filter(summary, Metric == 'Balanced Accuracy') %>% 
+  ggplot(aes(x = Value)) + 
+  geom_histogram() +
+  geom_density() 
+
+filter(summary, Metric == 'Sensitivity') %>% 
+  ggplot(aes(x = Value)) + 
+  geom_histogram()
+```
 
