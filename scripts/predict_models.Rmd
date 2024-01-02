@@ -1,0 +1,88 @@
+---
+title: "Predict Models"
+author: "steppe"
+date: "2024-01-02"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(terra)
+library(sf)
+source('functions.R')
+```
+
+```{r read in predictors}
+
+p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2'
+paths <- list.dirs(p, recursive = T)
+paths <- paths[2:length(paths)]
+paths <- paths[! grepl('chelsa$|veg_cover$|soilgrids$|sand$|silt$|clay$|phh2o$|cfvo$|soc$', paths) ]
+
+files <- lapply(paths, function(x){ file.path(x, list.files(x)) })
+names(files) <- basename(paths)
+
+layers <- lapply(files, vrt)
+layers <- rast(layers)
+names(layers) <- basename(paths)
+
+rm(paths, files)
+```
+
+```{r read in models}
+
+pmodels <- '../results/rf_models'
+f <- file.path(pmodels, list.files(pmodels))
+
+occpath <- '../data/raw/occurrence/combined_records'
+occ_files <- list.files(occpath, pattern = 'shp$')
+
+models_occ <- data.frame(
+  path2model = f, occurrence_data = occ_files
+) %>% 
+  mutate(
+    species = gsub('-.*$', '', basename(path2model)),
+    match = if_else(species == gsub('[.]shp$', '', occurrence_data), T, F )
+  ) # all look good!
+
+models_occ <- split(models_occ, f = models_occ$species)
+
+predict_wrapper <- function(x){
+  
+  sdm <- readRDS(x$path2model)
+  occ_path <- file.path(occpath, x$occurrence_data)
+  
+  # read in occurrences and subset prediction to 100 miles from border
+  bound <- sf::st_read(occ_path, quiet = TRUE) |>
+    dplyr::filter(Occurrence == 1) |>
+    sf::st_union() |>
+    sf::st_convex_hull() |>
+    sf::st_buffer(160934) |>
+    sf::st_bbox()
+  
+  pout <- '../results/suitability_maps'
+  layer_subset <- terra::crop(layers, bound)
+  terra::predict(
+    type = 'prob', cores = 8,
+    layer_subset, sdm, cpkgs="randomForest",
+    filename = file.path(pout, paste0(x$species, '.tif')),
+    wopt = c(names = 'predicted_suitability'))
+  
+}
+
+lapply(models_occ[3], predict_wrapper)
+
+r <- terra::rast('../results/suitability_maps/Acamptopappus_sphaerocephalus.tif')
+plot(r)
+
+```
+
+
+
+```{r}
+
+g <- readRDS('../results/rf_models/Abronia_villosa-2023-12-30_14:48:33.rds')
+
+
+```
+

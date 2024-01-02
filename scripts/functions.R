@@ -364,8 +364,9 @@ randomForests <- function(train_data, test_data, species){
   cmRestrat <- caret::confusionMatrix(prediction, test_data$Occurrence)
   
   # plot and save results
+  species <- gsub(' ', '_', species)
   saveRDS(rf_model,
-          file = paste0('../results/rf_models/', species, '-', Sys.time(), '.rds'))
+          file = paste0('../results/rf_models/', species, '-', gsub(' ', '_', Sys.time()), '.rds'))
   
   vip::vip(rf_model) +
     theme_bw() +
@@ -400,5 +401,29 @@ randomForests <- function(train_data, test_data, species){
     setNames(data.frame(as.numeric(result.roc$auc), 'AUC'), c('Value', 'Metric')), 
     summary, samples)
   write.csv(summary, paste0('../results/summary/', species, '.csv'), row.names = F)
+  
+}
+
+modeller <- function(x){
+  
+  species <- sf::st_drop_geometry(x) %>% 
+    dplyr::pull(taxon)
+  species <- species[1]
+  x1 <- terra::extract(layers, x)
+  
+  x_dat <- cbind(x$Occurrence, x1) %>% 
+    dplyr::mutate(Occurrence = as.factor(`x$Occurrence`)) %>% 
+    dplyr::select(-ID, -`x$Occurrence`) %>% 
+    dplyr::relocate(Occurrence, .before = 1) %>% 
+    dplyr::filter(if_all(2:ncol(.), ~ !is.na(.)))
+  
+  trainIndex <- caret::createDataPartition(x_dat$Occurrence, p = .8, 
+                                           list = FALSE, times = 1)
+  TRAIN <- x_dat[ trainIndex,]
+  TEST  <- x_dat[-trainIndex,]
+  
+  TRAIN_DATA <- Boruta_var_selector(TRAIN)
+  randomForests(train_data = TRAIN_DATA, test_data = TEST, species)
+  message(species, ' complete')
   
 }
