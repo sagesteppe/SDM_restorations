@@ -427,3 +427,40 @@ modeller <- function(x){
   message(species, ' complete')
   
 }
+
+
+predict_wrapper <- function(x){
+  
+  sdm <- readRDS(x$path2model)
+  occ_path <- file.path(occpath, x$occurrence_data)
+  
+  # read in occurrences and subset prediction to 100 miles from border
+  bound <- sf::st_read(occ_path, quiet = TRUE) |>
+    dplyr::filter(Occurrence == 1) |>
+    sf::st_union() |>
+    sf::st_convex_hull() |>
+    sf::st_buffer(160934) |>
+    sf::st_bbox()
+  
+  pout <- '../results/suitability_maps'
+  layer_subset <- terra::crop(layers, bound)
+  terra::predict(
+    type = 'prob', cores = 16,
+    layer_subset, sdm, cpkgs="randomForest",
+    filename = file.path(pout, paste0(x$species, '.tif')),
+    wopt = c(names = 'predicted_suitability'))
+  
+}
+
+
+term_grab <- function(x){
+  
+  pieces <- unlist(
+    strsplit(
+      as.character(x[['terms']][[3]]),
+      " ")
+  )
+  
+  terms <- pieces[grepl('[A-z]', pieces)]
+  return(terms)
+}

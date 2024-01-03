@@ -14,6 +14,8 @@ source('functions.R')
 
 ```{r read in predictors}
 
+setGDALconfig(c("GDAL_MAX_DATASET_POOL_SIZE=1024"))
+
 p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2'
 paths <- list.dirs(p, recursive = T)
 paths <- paths[2:length(paths)]
@@ -57,32 +59,28 @@ predict_wrapper <- function(x){
     dplyr::filter(Occurrence == 1) |>
     sf::st_union() |>
     sf::st_convex_hull() |>
-    sf::st_buffer(160934) |>
+    sf::st_buffer(80467) |>
     sf::st_bbox()
   
   pout <- '../results/suitability_maps'
-  layer_subset <- terra::crop(layers, bound)
+  layers <- terra::subset(layers, term_grab(sdm))
+  layer_subset <- terra::crop(rast(layers, bound)
   terra::predict(
-    type = 'prob', cores = 8,
+    type = 'prob', cores = 16,
     layer_subset, sdm, cpkgs="randomForest",
     filename = file.path(pout, paste0(x$species, '.tif')),
     wopt = c(names = 'predicted_suitability'))
   
 }
 
-lapply(models_occ[3], predict_wrapper)
+setGDALconfig(c("GDAL_MAX_DATASET_POOL_SIZE"),  c(""))
 
-r <- terra::rast('../results/suitability_maps/Acamptopappus_sphaerocephalus.tif')
-plot(r)
-
+lapply(models_occ[c(5)], predict_wrapper)
 ```
-
-
 
 ```{r}
-
-g <- readRDS('../results/rf_models/Abronia_villosa-2023-12-30_14:48:33.rds')
-
-
+achy <- rast('../results/suitability_maps/Achnatherum_hymenoides.tif')
+plot(achy[[2]])
 ```
+
 
