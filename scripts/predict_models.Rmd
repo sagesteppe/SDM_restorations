@@ -63,19 +63,24 @@ predict_wrapper <- function(x){
     sf::st_bbox()
   
   pout <- '../results/suitability_maps'
-  layers <- terra::subset(layers, term_grab(sdm))
-  layer_subset <- terra::crop(rast(layers, bound)
-  terra::predict(
-    type = 'prob', cores = 16,
-    layer_subset, sdm, cpkgs="randomForest",
-    filename = file.path(pout, paste0(x$species, '.tif')),
-    wopt = c(names = 'predicted_suitability'))
+  layer_subset <- terra::subset(layers, term_grab(sdm))
+  layer_subset <- terra::crop(layer_subset, bound)
+  
+  return(layer_subset)
+  #terra::predict(
+  #  type = 'prob', cores = 16,
+  #  layer_subset, sdm, cpkgs="randomForest",
+  #  filename = file.path(pout, paste0(x$species, '.tif')),
+  #  wopt = c(names = 'predicted_suitability'))
   
 }
 
-setGDALconfig(c("GDAL_MAX_DATASET_POOL_SIZE"),  c(""))
+ob <- lapply(models_occ[c(5)], predict_wrapper)
+ob1 <- ob[[1]]
+ob1
 
-lapply(models_occ[c(5)], predict_wrapper)
+
+predict_wrapper(models_occ[[5]])
 ```
 
 ```{r}
