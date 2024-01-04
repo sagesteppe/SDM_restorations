@@ -325,7 +325,6 @@ Boruta_var_selector <- function(x){
   rn <- rownames(importance)
   important_vars <- Boruta::getSelectedAttributes(BorutaRes, withTentative = F)
   
-  
   ### Remove highly autocorrelated variables ###
   co_pairs <- c('cfvo', 'phh2o', 'gdd', 'ngd', 'gdgfgd')
   pair_removals <- unlist(lapply(co_pairs, function(x){ rn[min(grep(x, rn))]}))
@@ -425,6 +424,7 @@ modeller <- function(x){
   TEST  <- x_dat[-trainIndex,]
   
   TRAIN_DATA <- Boruta_var_selector(TRAIN)
+  TRAIN_DATA <- rfe_var_selector(TRAIN_DATA)
   randomForests(train_data = TRAIN_DATA, test_data = TEST, species)
   message(species, ' complete')
   
@@ -466,3 +466,41 @@ term_grab <- function(x){
   terms <- pieces[grepl('[A-z]', pieces)]
   return(terms)
 }
+
+
+rfe_var_selector <- function(x){
+  
+  ctrl <- caret::rfeControl(functions = rfFuncs, method = "repeatedcv", number = 10,
+                            repeats = 5, rerank = TRUE, allowParallel = TRUE)
+  
+  subsets = seq(from = 10, to = (floor((ncol(x)-1)*0.1)*10), by = 5)
+  
+  cl <- parallel::makeCluster(cores, type='PSOCK')
+  doParallel::registerDoParallel(cl)
+  rfProfile <- caret::rfe(x[,2:ncol(x)], x$Occurrence,
+                          sizes = subsets, rfeControl = ctrl)
+  ParallelLogger::stopCluster(cl)
+  
+  # accept a percent change with less than -1.5% 
+  results <- rfProfile[['results']] %>% 
+    dplyr::mutate(pct_change = (Accuracy/lead(Accuracy) - 1) * 100)
+  
+  v_no <- if(any(results$pct_change > 0 & results$Variables < 30)){ # here if performance increases, select the
+    A <- results[results$pct_change  > 0,] # increased value with the fewest number of terms. Do not allow the 
+    v_no <- A[which.min(A$Variables), 'Variables'] # 30 vars!! that is essentially where we started.
+  } else { # if perfomance only moderately decreases across all models with fewer vars, select that with 
+    B <- results[results$pct_change > -1.5,] # the fewest terms, but with less than a 1.5% drop in performance
+    v_no <- B[which.min(B$Variables), 'Variables']
+  }
+  
+  rfe_tab <- rfProfile[["variables"]] %>% 
+    dplyr::filter(Variables == v_no) %>% 
+    dplyr::group_by(var) %>% 
+    dplyr::summarise(imp = mean(Overall)) %>% 
+    dplyr::arrange(-imp) 
+  
+  x_sub <- x[ , !names(x) %in% rfe_tab$var]
+  return(x_sub)
+  
+}
+

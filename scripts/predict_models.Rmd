@@ -67,11 +67,13 @@ predict_wrapper <- function(x){
   layer_subset <- terra::crop(layer_subset, bound)
   
   return(layer_subset)
-  #terra::predict(
-  #  type = 'prob', cores = 16,
-  #  layer_subset, sdm, cpkgs="randomForest",
-  #  filename = file.path(pout, paste0(x$species, '.tif')),
-  #  wopt = c(names = 'predicted_suitability'))
+  surface <- terra::subset(terra::predict(
+    type = 'prob', cores = 16,
+    layer_subset, sdm, cpkgs="randomForest",
+    wopt = c(names = 'predicted_suitability'))
+  , 2)
+  names(surface) <- 'Hyp.Suitability'
+  writeRaster(surface, filename = file.path(pout, paste0(x$species, '.tif')))
   
 }
 
