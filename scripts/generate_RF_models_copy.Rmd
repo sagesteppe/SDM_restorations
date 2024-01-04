@@ -39,9 +39,8 @@ train_dat <- bind_rows(train_dat) %>%
 splicies <- split(train_dat, f = train_dat$taxon)
 
 cores <- parallel::detectCores()
-lapply(splicies[1:3], modeller)
+lapply(splicies[1:10], modeller) # skpped 1-4
 
-table(train_dat$taxon)
 ```
 
 

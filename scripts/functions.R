@@ -383,7 +383,7 @@ randomForests <- function(train_data, test_data, species){
     result.roc,
     print.thres="best",
     print.thres.best.method="closest.topleft")
-  dev.off()
+  dev.off(); graphics.off()
   
   summary <- setNames(
     rbind(stack(cmRestrat$byClass), stack(cmRestrat$overall)), 
@@ -400,6 +400,7 @@ randomForests <- function(train_data, test_data, species){
   )
   summary <- rbind(
     setNames(data.frame(as.numeric(result.roc$auc), 'AUC'), c('Value', 'Metric')), 
+    setNames(data.frame((ncol(train_data)-1), 'Independent_Variables'), c('Value', 'Metric')), 
     summary, samples)
   write.csv(summary, paste0('../results/summary/', species, '.csv'), row.names = F)
   
@@ -470,7 +471,7 @@ term_grab <- function(x){
 
 rfe_var_selector <- function(x){
   
-  ctrl <- caret::rfeControl(functions = rfFuncs, method = "repeatedcv", number = 10,
+  ctrl <- caret::rfeControl(functions = caret::rfFuncs, method = "repeatedcv", number = 10,
                             repeats = 5, rerank = TRUE, allowParallel = TRUE)
   
   subsets = seq(from = 10, to = (floor((ncol(x)-1)*0.1)*10), by = 5)
@@ -485,8 +486,8 @@ rfe_var_selector <- function(x){
   results <- rfProfile[['results']] %>% 
     dplyr::mutate(pct_change = (Accuracy/lead(Accuracy) - 1) * 100)
   
-  v_no <- if(any(results$pct_change > 0 & results$Variables < 30)){ # here if performance increases, select the
-    A <- results[results$pct_change  > 0,] # increased value with the fewest number of terms. Do not allow the 
+  v_no <- if(any(results$pct_change > 0 & results$Variables < 20)){ # here if performance increases, select the
+    A <- results[results$pct_change  > 0 & results$Variables < 20,] # increased value with the fewest number of terms. Do not allow the 
     v_no <- A[which.min(A$Variables), 'Variables'] # 30 vars!! that is essentially where we started.
   } else { # if perfomance only moderately decreases across all models with fewer vars, select that with 
     B <- results[results$pct_change > -1.5,] # the fewest terms, but with less than a 1.5% drop in performance
@@ -499,7 +500,7 @@ rfe_var_selector <- function(x){
     dplyr::summarise(imp = mean(Overall)) %>% 
     dplyr::arrange(-imp) 
   
-  x_sub <- x[ , !names(x) %in% rfe_tab$var]
+  x_sub <- x[ , names(x) %in% c('Occurrence', rfe_tab$var)]
   return(x_sub)
   
 }

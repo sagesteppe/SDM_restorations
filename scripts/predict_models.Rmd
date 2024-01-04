@@ -68,8 +68,8 @@ predict_wrapper <- function(x){
   
   return(layer_subset)
   surface <- terra::subset(terra::predict(
-    type = 'prob', cores = 16,
     layer_subset, sdm, cpkgs="randomForest",
+    type = 'prob', cores = 16,
     wopt = c(names = 'predicted_suitability'))
   , 2)
   names(surface) <- 'Hyp.Suitability'
@@ -80,7 +80,6 @@ predict_wrapper <- function(x){
 ob <- lapply(models_occ[c(5)], predict_wrapper)
 ob1 <- ob[[1]]
 ob1
-
 
 predict_wrapper(models_occ[[5]])
 ```
