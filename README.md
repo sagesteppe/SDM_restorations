@@ -73,6 +73,7 @@ Two major models are created, one which focuses on identifying areas of fundamen
 data sources (@karger2017climatologies, @hengl2017soilgrids250m, @ivushkin2019global,  @tuanmu2014global, @yamazaki2017merit, @amatulli2020geomorpho90m, @sanderson2002human)
 
 ## Workflow for Presence/Absence generation and cleaning  
+All analyses were performed in R using terra (@hijman2023terra)...
 
 Some considerations for dealing with temporal mismatch between environmental variables and species occurrence records. 
 
@@ -93,17 +94,17 @@ True absences are acquired from AIM plots... True absences are generated around 
 ### Pseudo-absence generation and reduction
 
 PA's are generated within the known geographic range of the species at least XX km from a known presence.
-Linear Discriminant Analyses with XX variables, using the true absences and presences, is used to flag pseudo-absence records which would be classified as presences and randomly remove a subset to balance sample sets. 
+Linear Discriminant Analyses with XX variables, using the true absences and presences, is used to flag pseudo-absence records which would be classified as presences and randomly remove a subset to balance sample sets (@venables2002mass). 
 
 ## Modelling
 
 ### Fitting Models
-
-Random Forests models will be generated for each species.  
-The Boruta algorithm will be applied to the full stack of predictor variables to remove un-informative predictors, to reduce the costs associated with overfitting, but largely in an effort to speed up projecting models onto gridded surfaces.   
+ 
+Random Forests models will be generated for each species (@liaw2002randomForest). 
+The Boruta algorithm will be applied to the full stack of predictor variables to remove un-informative predictors, to reduce the costs associated with overfitting, but largely in an effort to speed up projecting models onto gridded surfaces (@kursa2010boruta). 
 The projection of models onto raster surfaces has been identified as the rate limiting step in performing species distribution modelling using my setup.    
 Subsequent to the thinning of un-informative variables via the boruta algorithm, groups of variables with high degrees of multicollinearity (e.g. % soil textural components at varying depths), will be thinned by selection of a single variable per group which *appeared* to have the highest variable importance via boruta analysis. 
-Following the dropping of collinear variables, Recursive Feature Elimination (rfe), is performed using the Caret package. 
+Following the dropping of collinear variables, Recursive Feature Elimination (rfe), is performed using the Caret package @kuhn2008caret. 
 RFE identifies variables which are uninformative using cross-fold validation and stepwise combinations of all predictors. 
 The algorithm will suggest variables to remove, but given that the penalty for extraneous variables is low in random forest, it generally suggests utilizing all features. 
 In order to better reduce the number of variables to speed up prediction of models onto rasters any number of predictors which result in a less than 1.5% decrease in mean accuracy, relative to the full model, are retained and the terms contributing to the model with the fewest variable are selected. 
