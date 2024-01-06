@@ -1,6 +1,6 @@
 ## Variables and Sources for Environmental Niche Models
 
-Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms which the species has considerable niche overlap with. The full 'wild' models feature up to 38 variables, while the 'farm' models features ca. 26 variables. Both endeavors run step wise. 
+Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms which the species has considerable niche overlap with. The full 'wild' models feature up to 33 variables, while the 'farm' models features ca. 26 variables. Both endeavors run step wise. 
 
 
 | Layer |                       Description                       |              Source                   |     Model    |      
@@ -53,8 +53,43 @@ In order to reduce the number of records which have questionable geographic inte
 
 ### Thinning Historic Records  
 a) remove records with noted coordinate uncertainty of > 270m  
-b) remove records on county centroids  
-c) if multiple records exist per raster cell, reduce to that with the lowest coordinate uncertainty, or the most recent
+b) if multiple records exist per raster cell, reduce to that with the lowest coordinate uncertainty, or the most recent
+
+### Manual Review of Presence Records
+
+### Acquisition & Generation of Absences
+
+True absences are acquired from AIM plots... True absences are generated around a buffered convex hull of the species. 
+
+### Pseudo-absence generation and reduction
+
+PA's are generated within the range of the species... 
+
+## Modelling
+
+### Fitting Models
+
+Random Forests models will be generated for each species. \
+The Boruta algorithm will be applied to the full stack of predictor variables to remove un-informative predictors, to reduce the costs associated with overfitting, but largely in an effort to speed up projecting models onto gridded surfaces. 
+The projection of models onto raster surfaces has been identified as the rate limiting step in performing species distribution modelling using my setup. 
+Subsequent to the thinning of un-informative variables via the boruta algorithm, groups of variables with high degrees of multicollinearity (e.g. % soil textural components at varying depths), will be thinned by selection of a single variable per group which *appeared* to have the highest variable importance via boruta analysis. 
+Following the dropping of collinear variables, Recursive Feature Elimination (rfe), is performed using the Caret package. 
+RFE identifies variables which are uninformative using cross-fold validation and stepwise combinations of all predictors. 
+The algorithm will suggest variables to remove, but given that the penalty for extraneous variables is low in random forest, it generally suggests utilizing all features. 
+In order to better reduce the number of variables to speed up prediction of models onto rasters any number of predictors which result in a less than 1.5% decrease in mean accuracy, relative to the full model, are retained and the terms contributing to the model with the fewest variable are selected. 
+
+## A Better Test Set of Ensembled Predictions
+
+
+
+## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
+
+Discrepancies exist between areas with suitable environmental niches which a species is capable of establishing a population in, and it's existence there, due most notably to dispersal limitation. 
+In order to identify areas which have fundamental niche, but may not have extent populations, the distance between the nearest known population and suitable patches of habitat are analyzed using connectivity analysis. 
+Cost surfaces are generated via the inversion of hypothesized habitat suitability maps, and circuit theory is used to score predicted suitable habitats from known populations. 
+
+
+# this content goes somewhere.... 
 
 ### Processing Post Burn Records
 a) flag all historic records which are located within a burn scar, which occurred after the date of observation.    
@@ -66,42 +101,7 @@ a) flag all historic records which are located within an area with greater >10% 
 b) for that species, use plot based occurrence data, and cover of invasive annual grasses to model probability of an extant population at the site.  $\text{occurrence ~ modelled invasive annual grass cover}$     
 c) randomly sample flagged records with probabilities defined in *b*  
 
-### Identifying Infraspecies Records
 
-Many collectors of field data do not match taxa to infraspecies due to sampling at times when the population lacks the appropriate character states. Some of these records may be recoverable by identifying their:
-1) nearest neighbors  
-2) whether they lay within the n-dimensional convex hulls of hyper volumes generated from unambiguously identified records.
-
-## Modelling
-
-### Ensemble learning methods
-
-Boosted Regression Trees, and Random Forests models will be generated for each species. \
-The Boruta algorithm will be applied to the full stack of predictor variables to remove un-informative predictors, to reduce the costs associated with overfitting, but largely in an effort to speed up projecting models onto gridded surfaces. 
-The projection of models onto raster surfaces has been identified as the rate limiting step in performing species distribution modelling using my setup. 
-Subsequent to the thinning of un-informative variables via the boruta algorithm, groups of variables with high degrees of multicollinearity (e.g. % soil textural components at varying depths), will be thinned by selection of a single variable per group which *appeared* to have the highest variable importance via boruta analysis. 
-
-## A Better Test Set of Ensembled Predictions
-
-In order to generate test sets which may most accurately evaluate ensembled predictions of SDM's stratitied sampling of a reduced set hypervolume is used to identify 100 occurrence and 100 absence records. 
-
-## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
-
-Discrepancies exist between the niche which a species is capable of establishing a poopulation in, and it's existence there. These mismatches are due to dispersal limitations. In order to identify areas which have fundamental niche, but may not have extent populations the distance between the nearest known population and suitable patches of habitat. 
-
-Cost surfaces reflect historic connectivity of locations prior to European settlement.
-
-|  Layer  |                       Description                       |              Source                   |    Effect      |
-| :-----: | :-----------------------------------------------------: | :-----------------------------------: | :------------: |
-|   1.    |                 Terrain Ruggedness Index                |             Geomorpho90               |    negative    |
-|   2.    |        Log-transformed distance to surface water        |     Global Surface Water Explorer     |    negative    |
-|   3.    |      Log-transformed distance to perennial streams      |     National Hydrography Dataset      |    negative    |
-|   4.    |                      Percent Barren                     |              EarthEnv                 |    negative    |
-|   5.    |          Max Temperature of Warmest Month (BIO5)        |        PRISM / CLIMATENA / DISMO      |    negative    |
-|   6.    |                     Wind Direction*                     |              rWind/GFS                |   anisotropic  |
-|   7.    |                       Wind Speed*                       |              rWind/GFS                |    positive    |
-
-Variables indicated by a '*' exist only for taxa which have evident adaptions to wind dispersal, notably those of the Asteraceae.
 
 ## Correlation between patch habitat suitable and abundance
 
