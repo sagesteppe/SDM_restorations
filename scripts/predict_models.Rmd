@@ -9,14 +9,15 @@ output: html_document
 library(tidyverse)
 library(terra)
 library(sf)
+library(randomForest)
 source('functions.R')
+
+# unix::rlimit_as(1e32)
+# setGDALconfig(c("GDAL_MAX_DATASET_POOL_SIZE"), c(""))
 ```
 
 ```{r read in predictors}
-
-setGDALconfig(c("GDAL_MAX_DATASET_POOL_SIZE=1024"))
-
-p <- '/media/steppe/hdd/Geospatial_data/WesternPlantPredictors2'
+p <- '~/Documents/WesternPlantPredictors2'
 paths <- list.dirs(p, recursive = T)
 paths <- paths[2:length(paths)]
 paths <- paths[! grepl('chelsa$|veg_cover$|soilgrids$|sand$|silt$|clay$|phh2o$|cfvo$|soc$', paths) ]
@@ -35,6 +36,17 @@ rm(paths, files)
 
 pmodels <- '../results/rf_models'
 f <- file.path(pmodels, list.files(pmodels))
+f <- data.frame(
+  path = f,  
+  species = gsub('-.*$', '', basename(f)), 
+  time = gsub('[A-Za-z]', '', basename(f))
+  ) |>
+  mutate(time = gsub('_-|[.]', '', time),
+         time = gsub('_', ' ', time), 
+         time = as.POSIXct(time)) |>
+  group_by(species) |>
+  slice_max(order_by = time, n = 1) |>
+  pull(path)
 
 occpath <- '../data/raw/occurrence/combined_records'
 occ_files <- list.files(occpath, pattern = 'shp$')
@@ -62,26 +74,22 @@ predict_wrapper <- function(x){
     sf::st_buffer(80467) |>
     sf::st_bbox()
   
-  pout <- '../results/suitability_maps'
+  pout <- '~/Documents/suitability_maps'
   layer_subset <- terra::subset(layers, term_grab(sdm))
   layer_subset <- terra::crop(layer_subset, bound)
   
-  return(layer_subset)
-  surface <- terra::subset(terra::predict(
+  OneClass <- \(...) predict(...)[,2]
+  terra::predict(
     layer_subset, sdm, cpkgs="randomForest",
-    type = 'prob', cores = 16,
+    type = 'prob', cores = 1, f = OneClass,
+    filename = file.path(pout, paste0(x$species, '-', gsub(' ', '_', Sys.time()), '.tif')),
     wopt = c(names = 'predicted_suitability'))
-  , 2)
-  names(surface) <- 'Hyp.Suitability'
-  writeRaster(surface, filename = file.path(pout, paste0(x$species, '.tif')))
   
 }
 
-ob <- lapply(models_occ[c(5)], predict_wrapper)
-ob1 <- ob[[1]]
-ob1
 
-predict_wrapper(models_occ[[5]])
+lapply(models_occ[2], predict_wrapper)
+
 ```
 
 ```{r}
@@ -89,4 +97,37 @@ achy <- rast('../results/suitability_maps/Achnatherum_hymenoides.tif')
 plot(achy[[2]])
 ```
 
+
+
+
+```{r}
+logo <- rast(system.file("ex/logo.tif", package="terra"))   
+names(logo) <- c("red", "green", "blue")
+p <- matrix(c(48, 48, 48, 53, 50, 46, 54, 70, 84, 85, 74, 84, 95, 85, 
+              66, 42, 26, 4, 19, 17, 7, 14, 26, 29, 39, 45, 51, 56, 46, 38, 31, 
+              22, 34, 60, 70, 73, 63, 46, 43, 28), ncol=2)
+
+a <- matrix(c(22, 33, 64, 85, 92, 94, 59, 27, 30, 64, 60, 33, 31, 9,
+              99, 67, 15, 5, 4, 30, 8, 37, 42, 27, 19, 69, 60, 73, 3, 5, 21,
+              37, 52, 70, 74, 9, 13, 4, 17, 47), ncol=2)
+
+xy <- rbind(cbind(1, p), cbind(0, a))
+
+# extract predictor values for points
+e <- extract(logo, xy[,2:3])
+
+# combine with response (excluding the ID column)
+v <- data.frame(cbind(pa=xy[,1], e))
+
+rm(p, a, xy, e)
+
+### with two output variables (probabilities for each class)
+v$pa <- as.factor(v$pa)
+rfm2 <- randomForest(formula=pa~., data=v)
+rfp <- predict(logo, rfm2, cores=2, type="prob", cpkgs="randomForest")
+
+f <- \(...) predict(...)[,2]
+rfp <- predict(logo, rfm2, cores=2, type="prob", cpkgs="randomForest", fun=f)
+
+```
 
