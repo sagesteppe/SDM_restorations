@@ -4,6 +4,35 @@ date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: pdf_document
 ---
 
+# Introduction
+
+(identify difficulties)
+The lack of available plant germplasm is a primary challenge in effectively restoring terrestrial ecosystems.
+This challenge has two major components 1) the number of species available for projects, and 2) whether the seed is appropriately adapted to sites. 
+Enormous efforts are now underway, to wild harvest seed and increase it in agricultural settings, to increase the number of species available for restoration and the number of populations within these species. 
+However, difficulties in both the wild harvest and increase of seed exist. 
+
+(paragraph about why many species, why locally adapted, why it needs to be farmed, why decrease the possibility of bottlenecks while farming)
+
+(paragraph about difficulty to find/collect)
+While most species which are desired in restorations generally have relatively large geographic ranges, numbers of populations, and number of individuals per populations, collecting from an adequate amount of species and populations is lagging BEHIND GOALS... 
+We posit that most of these challenges relate to the difficulty in finding populations with the appropriate number of individuals, which are experiencing climatic conditions conducive to producing enough viable seed for agricultural increase. 
+Tools which are capable of predicting a species geographic range, and presences across seed collection target units (such as empirical or ... seed transfer zones), such as Species Distribution Models offer promise to decrease the amount of time spent scouting populations, whilst increasing the number of populations which are suitable for collection in a single year.
+While SDM's generate hypothesis of whether areas have environmental conditions conducive to supporting populations of a species, they do not consider the probability of colonization of these patches. 
+However, connectivity analysis based on the predicted unsuitability of habitat, now offer a quick approach to proxy probabilities of occurrence to patches which are previously not known to support populations. 
+We believe, based on recent correlations between habitat suitability predictions and abundance, properties of these patches (e.g. mean weighted suitability) offer a way to estimate census population size to help identify populations which can support seed collections (@weber2017there, @waldock2022quantitative ).
+
+(paragraph about difficulty to farm seed)
+The production of wild harvested seed in agricultural settings whilst preventing natural selection faces multiple challenges... 
+Not all farms suitable for all species ... increasing costs of human resources, water, cloth to warm seedlings, and perhaps decreasing yield. 
+Within species seed collected closer to harvest sites should do better ... 
+(just those two points... )
+
+
+
+## old intro 
+
+
 Drylands constitute roughly ~45% of earths surface (@pruavualie2016drylands). 
 These water-limited areas are commonly used as range or pasture lands, hence much of the land is maintained in natural or semi-natural conditions (@reynolds2007globa, @asner2004grazingl). 
 Accordingly drylands lands represent an enormous proportion of Earth's remaining natural areas, while fostering roughly 2.5 billion persons, however many of these areas are in ecological states which do not maximize their ecosystem services to either human or wildlife (@reynolds2007global, @bestelmeyer2015desertification).

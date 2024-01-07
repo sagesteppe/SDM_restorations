@@ -1,28 +1,3 @@
-# Introduction
-
-(bs paragraph)
-The 2020's have been declared as the United Nations Decade on Ecosystem Restoration...
-
-(identify difficulties)
-The lack of available plant germplasm is a primary challenge in effectively restoring terrestrial ecosystems.
-This challenge has two major components 1) the number of species available for projects, and 2) whether the seed is appropriately adapted to sites. 
-Enormous efforts are now underway, to wild harvest seed and increase it in agricultural settings, to increase the number of species available for restoration and the number of populations within these species. 
-However, difficulties in both the wild harvest and increase of seed exist. 
-
-(paragraph about difficulty to find/collect)
-While most species which are desired in restorations generally have relatively large geographic ranges, numbers of populations, and number of individuals per populations, collecting from an adequate amount of species and populations is lagging BEHIND GOALS... 
-We posit that most of these challenges relate to the difficulty in finding populations with the appropriate number of individuals, which are experiencing climatic conditions conducive to producing enough viable seed for agricultural increase. 
-Tools which are capable of predicting a species geographic range, and presences across seed collection target units (such as empirical or ... seed transfer zones), such as Species Distribution Models offer promise to decrease the amount of time spent scouting populations, whilst increasing the number of populations which are suitable for collection in a single year.
-While SDM's generate hypothesis of whether areas have environmental conditions conducive to supporting populations of a species, they do not consider the probability of colonization of these patches. 
-However, connectivity analysis based on the predicted unsuitability of habitat, now offer a quick approach to proxy probabilities of occurrence to patches which are previously not known to support populations. 
-We believe, based on recent correlations between habitat suitability predictions and abundance, properties of these patches (e.g. mean weighted suitability) offer a way to estimate census population size to help identify populations which can support seed collections (@weber2017there, @waldock2022quantitative ).
-
-(paragraph about difficulty to farm seed)
-The production of wild harvested seed in agricultural settings whilst preventing natural selection faces multiple challenges... 
-Not all farms suitable for all species ... increasing costs of human resources, water, cloth to warm seedlings, and perhaps decreasing yield. 
-Within species seed collected closer to harvest sites should do better ... 
-(just those two points... )
-
 
 ## Variables and Sources for Environmental Niche Models
 
@@ -72,53 +47,6 @@ Two major models are created, one which focuses on identifying areas of fundamen
 
 data sources (@karger2017climatologies, @hengl2017soilgrids250m, @ivushkin2019global,  @tuanmu2014global, @yamazaki2017merit, @amatulli2020geomorpho90m, @sanderson2002human)
 
-## Workflow for Presence/Absence generation and cleaning  
-All analyses were performed in R using terra (@hijman2023terra)...
-
-Some considerations for dealing with temporal mismatch between environmental variables and species occurrence records. 
-
-In order to reduce the number of records which have questionable geographic integrity, no records before 1950 were acquired. 
-
-### Thinning Historic Records  
-a) remove records with noted coordinate uncertainty of > 270m  
-b) if multiple records exist per raster cell, reduce to that with the lowest coordinate uncertainty, or the most recent
-
-### Manual Review of Presence Records
-
-All presence records were manually reviewed after calculating and coding the records which were in the 1.5% quantiles of distributions for XX traits: or the furthest geographic distances.
-
-### Acquisition & Generation of Absences
-
-True absences are acquired from AIM plots... True absences are generated around a buffered convex hull of the species. 
-
-### Pseudo-absence generation and reduction
-
-PA's are generated within the known geographic range of the species at least XX km from a known presence.
-Linear Discriminant Analyses with XX variables, using the true absences and presences, is used to flag pseudo-absence records which would be classified as presences and randomly remove a subset to balance sample sets (@venables2002mass). 
-
-## Modelling
-
-### Fitting Models
- 
-Random Forests models will be generated for each species (@liaw2002randomForest). 
-The Boruta algorithm will be applied to the full stack of predictor variables to remove un-informative predictors, to reduce the costs associated with overfitting, but largely in an effort to speed up projecting models onto gridded surfaces (@kursa2010boruta). 
-The projection of models onto raster surfaces has been identified as the rate limiting step in performing species distribution modelling using my setup.    
-Subsequent to the thinning of un-informative variables via the boruta algorithm, groups of variables with high degrees of multicollinearity (e.g. % soil textural components at varying depths), will be thinned by selection of a single variable per group which *appeared* to have the highest variable importance via boruta analysis. 
-Following the dropping of collinear variables, Recursive Feature Elimination (rfe), is performed using the Caret package @kuhn2008caret. 
-RFE identifies variables which are uninformative using cross-fold validation and stepwise combinations of all predictors. 
-The algorithm will suggest variables to remove, but given that the penalty for extraneous variables is low in random forest, it generally suggests utilizing all features. 
-In order to better reduce the number of variables to speed up prediction of models onto rasters any number of predictors which result in a less than 1.5% decrease in mean accuracy, relative to the full model, are retained and the terms contributing to the model with the fewest variable are selected. 
-
-Models are predicted using terra::predict. 
-
-## Better matching the Fundamental Niche to Population Occurrence via Cost Surfaces  
-
-Discrepancies exist between areas with suitable environmental niches which a species is capable of establishing a population in, and it's existence there, due most notably to dispersal limitation. 
-In order to identify areas which have fundamental niche, but may not have extent populations, the distance between the nearest known population and suitable patches of habitat are analyzed using connectivity analysis. 
-Cost surfaces are generated via the inversion of hypothesized habitat suitability maps, and circuit theory is used to score predicted suitable habitats from known populations. 
-
-
-# this content goes somewhere.... 
 
 ### Processing Post Burn Records
 a) flag all historic records which are located within a burn scar, which occurred after the date of observation.    
@@ -129,7 +57,6 @@ c) randomly sample flagged records with probabilities defined in *b*
 a) flag all historic records which are located within an area with greater >10% invasive annual grass cover    
 b) for that species, use plot based occurrence data, and cover of invasive annual grasses to model probability of an extant population at the site.  $\text{occurrence ~ modelled invasive annual grass cover}$     
 c) randomly sample flagged records with probabilities defined in *b*  
-
 
 
 ## Correlation between patch habitat suitable and abundance
