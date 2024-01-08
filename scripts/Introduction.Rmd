@@ -7,20 +7,30 @@ output: pdf_document
 # Introduction
 
 (identify difficulties)
-The lack of available plant germplasm is a primary challenge in effectively restoring terrestrial ecosystems.
-This challenge has two major components 1) the number of species available for projects, and 2) whether the seed is appropriately adapted to sites. 
-Enormous efforts are now underway, to wild harvest seed and increase it in agricultural settings, to increase the number of species available for restoration and the number of populations within these species. 
-However, difficulties in both the wild harvest and increase of seed exist. 
+A primary challenge in effectively restoring Earths terrestrial ecosystems is the lack of available plant germplasm (@national2023assessment).
+Given the scale of our restoration needs, in most scenarios, the only sustainable source of seed is from grow-outs of wild harvested seed in agricultural settings.
+Enormous efforts are now underway to increase the number of species, the number of populations within these species, and the genetic diversity of these populations available for restoration @national2023assessment.
+However, difficulties in both the wild harvest and increase of seed exist are limiting our ability to develop adequate amounts of germplams.  
+Herein, we identify prospective methods to increase the 1) number of species, 2) populations, and 3) genetic diversity of collections and 4) increase the success of agriculturally produced seed lots using Species Distribution Models and subsequent analysis of them intended to pair them more aptly with species biology and ecology.   
 
-(paragraph about why many species, why locally adapted, why it needs to be farmed, why decrease the possibility of bottlenecks while farming)
+(paragraph about why many species, why locally adapted, reluctant correlation between pop size genetic diversity, why seed needs to be farmed, why decrease the possibility of bottlenecks while farming)
+
+
+#### no species (@wilsey2021restoration) 
 
 (paragraph about difficulty to find/collect)
-While most species which are desired in restorations generally have relatively large geographic ranges, numbers of populations, and number of individuals per populations, collecting from an adequate amount of species and populations is lagging BEHIND GOALS... 
-We posit that most of these challenges relate to the difficulty in finding populations with the appropriate number of individuals, which are experiencing climatic conditions conducive to producing enough viable seed for agricultural increase. 
-Tools which are capable of predicting a species geographic range, and presences across seed collection target units (such as empirical or ... seed transfer zones), such as Species Distribution Models offer promise to decrease the amount of time spent scouting populations, whilst increasing the number of populations which are suitable for collection in a single year.
-While SDM's generate hypothesis of whether areas have environmental conditions conducive to supporting populations of a species, they do not consider the probability of colonization of these patches. 
-However, connectivity analysis based on the predicted unsuitability of habitat, now offer a quick approach to proxy probabilities of occurrence to patches which are previously not known to support populations. 
-We believe, based on recent correlations between habitat suitability predictions and abundance, properties of these patches (e.g. mean weighted suitability) offer a way to estimate census population size to help identify populations which can support seed collections (@weber2017there, @waldock2022quantitative ).
+While most species which are desired in restorations historically have generally had relatively large geographic ranges, numbers of populations, and number of individuals per populations, the development of native germplasm remains behind targets (@national2023assessment). 
+We posit that most of these challenges relate to the difficulty in finding populations with the appropriate number of individuals, which are experiencing climatic conditions conducive to producing enough viable seed to being agricultural increase, complications borne of widespread habitat degradation and unnatural wildfires (cite on degradation and wildfires). 
+Tools which are capable of predicting a species geographic range, the presence and size of populations across seed collection target units (such as empirical or provisional seed transfer zones or ecoregions), such as Species Distribution Models offer promise to decrease the amount of time spent by field crews scouting populations, whilst increasing their knowledge of the number of populations which are suitable for collection in a single year. 
+
+(paragraph about resolving problems)
+However, while SDM's generate hypothesis of whether areas have environmental conditions similar to the observed environmental niche of the species they do not consider the probabilities of colonization, nor the populations census sizes.
+A possible tool to associate a probability of occurrence of a species in a suitable habitat patch, is connectivity analysis.
+Utilizing the predicted unsuitability of habitat, with extreme barriers to dispersal, to create cost-resistance surfaces between patches with known populations and predicted populations allows for simulating the probability of occurrence. 
+While previous correlations between habitat suitability and population size have often been low, we posit that patch level parameters offer a more useful prediction of population size (@weber2017there, @waldock2022quantitative)
+Patch metrics will more appropriately reflect parameters of a potential population, e.g. geographic extent, which we posit is a more informative proxy of population size than environmental niche correlation.  
+
+Utilizing this approach will allow field crews to associate probabilities with previously unground truthed patches. 
 
 (paragraph about difficulty to farm seed)
 The production of wild harvested seed in agricultural settings whilst preventing natural selection faces multiple challenges... 
@@ -28,7 +38,9 @@ Not all farms suitable for all species ... increasing costs of human resources, 
 Within species seed collected closer to harvest sites should do better ... 
 (just those two points... )
 
+Goals/Questions/hypotheses.
 
+Here we showcase the utility of SDM's to (1) predict suitable habitat for common species in natural settings and use those data to test two specific hypotheses. Firstly 2) that SDM's can identify more populations than exist in the occurrence based records they were derived from, and secondly 3) patch metrics derived from SDM's correlate with observed population census size. Further we showcase the possibility of SDM's as tools to predict areas which are suitable for agricultural grow-outs to increase seed lot sizes (4).
 
 ## old intro 
 

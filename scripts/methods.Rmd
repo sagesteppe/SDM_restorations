@@ -28,7 +28,7 @@ Random Forests models were generated for each species following several steps to
 While superfluous features generally do not notably decrease the performance of random forests, they increase the amount of time required to predict models onto gridded surfaces. 
 The Boruta algorithm was used on the full stack of 44?? independent variables to remove un-informative variables @kursa2010boruta), and the variable importance factor (VIF) scores were then used to subset the most informative features in several auto-correlated pairs, reducing the independent variables to at most 33.  
 Recursive Feature Elimination (rfe) was then used to identify the fewest number of independent variables which could either increase model performance (measured using accuracy), or only decrease it by 1.5% relative to the full set of variables, these variables were subset and used as features for random forest modelling with all default values except for optimized mtrys (@kuhn2008caret, @liaw2002randomForest). 
-Models were then predicted onto gridded surfaces which exceeded the species range by 50 miles using terra predict. 
+Models were then predicted onto gridded surfaces which exceeded the species range by 50 miles using terra's predict. 
 
 ## Patch identification 
 In order to identify patches which may support populations raster values less than 0.6 were masked as NA's and a rooks case search was conducted (@hijman2023terra). 
