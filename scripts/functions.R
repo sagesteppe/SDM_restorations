@@ -68,8 +68,11 @@ multiplesPERcell <- function(x){
   
 }
 
-absence_drawer <- function(x, bg_abs, terrestrial){
-  
+#' @param x sf/tibble/dataframe containing cleaned presences
+#' @param bg_abs the proportion of records which should be background absences, i..e come from outside the species known range
+#' @param terrestrial an object of terrestrial surfaces
+#' @param rand-dist the distance offset between the presences and random absences. 
+absence_drawer <- function(x, bg_abs, terrestrial, rand_dist){
   
   # create the observed hull, the buffered hull for random sample selection, 
   # and a hull to form the basis for a bounding box to generate regular absences in
@@ -127,7 +130,7 @@ absence_drawer <- function(x, bg_abs, terrestrial){
   
   # generate Random absences
   rand_recs <- nrow(x) * ((1 - bg_abs) * (1 - prcnt_blm))
-  buffered_presences <- sf::st_buffer(x, dist = 10000) |>
+  buffered_presences <- sf::st_buffer(x, dist = rand_dist) |>
     sf::st_union() |>
     sf::st_transform(sf::st_crs(blm_surf))
   
@@ -240,7 +243,7 @@ colon_balloon <- function(x){
 
 lda_PA_dropper <- function(x, path, col_names){
   
-  recs_w_vars <- terra::extract(bio, x)
+  recs_w_vars <- terra::extract(layers, x)
   
   recs_w_vars_scaled <- data.frame(apply(recs_w_vars[,2:ncol(recs_w_vars)], MARGIN = 2, FUN = scales::rescale, to = c(0,1)))
   recs_w_vars_scaled$ID <- x$ID
@@ -505,3 +508,22 @@ rfe_var_selector <- function(x){
   
 }
 
+
+
+
+# this bash script was made to write files to the sdd, and copy to an hdd periodically 
+
+#!/bin/bash
+# cd /home/steppe/Documents/suitability_maps
+#maps=(*) # save all file names into object
+#noFiles="$((${#maps[@]}-1))" # the number of completed files. 
+#if [ "$noFiles" -gt 1 ]; then
+#maps2move=${maps[@]::${#maps[@]}-1} # subset the completed files
+#  for f in $maps2move; do 
+#  mv "$f" "/media/steppe/hdd/SDM_restorations/results/suitability_maps/"
+#  done
+#  else
+#    :
+#    fi
+# we set up a cron job to run every24 hours to move the files
+# 0 */3 * * * sdd2hdd.sh
