@@ -7,7 +7,6 @@ output: html_document
 
 Here we perform a number of steps which we use to ensure that the records going into the modelling process are as clean as can be. 
 
-
 Species vary in their responses to disturbances such as fire. 
 More importantly, ecosystems differ in their responses to fire based both upon intrinsic characteristics, but especially land management history. 
 Many species are unable to recover post wildfire in the West due to the rapid increase in cover of invasive annuals, especially grasses such as Cheatgrass and Medusa-Head. 
