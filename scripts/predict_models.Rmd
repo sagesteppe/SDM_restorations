@@ -87,47 +87,7 @@ predict_wrapper <- function(x){
   
 }
 
-
-lapply(models_occ[2], predict_wrapper)
-
-```
-
-```{r}
-achy <- rast('../results/suitability_maps/Achnatherum_hymenoides.tif')
-plot(achy[[2]])
-```
-
-
-
-
-```{r}
-logo <- rast(system.file("ex/logo.tif", package="terra"))   
-names(logo) <- c("red", "green", "blue")
-p <- matrix(c(48, 48, 48, 53, 50, 46, 54, 70, 84, 85, 74, 84, 95, 85, 
-              66, 42, 26, 4, 19, 17, 7, 14, 26, 29, 39, 45, 51, 56, 46, 38, 31, 
-              22, 34, 60, 70, 73, 63, 46, 43, 28), ncol=2)
-
-a <- matrix(c(22, 33, 64, 85, 92, 94, 59, 27, 30, 64, 60, 33, 31, 9,
-              99, 67, 15, 5, 4, 30, 8, 37, 42, 27, 19, 69, 60, 73, 3, 5, 21,
-              37, 52, 70, 74, 9, 13, 4, 17, 47), ncol=2)
-
-xy <- rbind(cbind(1, p), cbind(0, a))
-
-# extract predictor values for points
-e <- extract(logo, xy[,2:3])
-
-# combine with response (excluding the ID column)
-v <- data.frame(cbind(pa=xy[,1], e))
-
-rm(p, a, xy, e)
-
-### with two output variables (probabilities for each class)
-v$pa <- as.factor(v$pa)
-rfm2 <- randomForest(formula=pa~., data=v)
-rfp <- predict(logo, rfm2, cores=2, type="prob", cpkgs="randomForest")
-
-f <- \(...) predict(...)[,2]
-rfp <- predict(logo, rfm2, cores=2, type="prob", cpkgs="randomForest", fun=f)
+lapply(models_occ[30:335], predict_wrapper)
 
 ```
 
