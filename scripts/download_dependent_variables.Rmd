@@ -66,6 +66,7 @@ rm(user, pwd, email, gbif_taxon_keys, dl_key)
 
 
 BIEN is pretty finicky these days and is prone to crashing. There is a paper by Maitner with Enquist, Wilson, Merow etc. about the need for open source devs to be rewarded academically, I take that has a sign of Brian stepping away from it. We will use a for loop to download from BIEN. 
+
 ```{r Perform bien queries, eval = F}
 
 for(i in seq_along(target_taxa)){
