@@ -356,14 +356,13 @@ display: none;
 <h1>2 MATERIALS AND METHODS</h1>
 <div id="study-system" class="section level2">
 <h2>2.1 Study system</h2>
-<p>The 355 modelled species were selected by land managers in Western
-North America and are species they already or immediately intend to use
-in restoration. These species are all intended for arid and semi-arid
-lands dominated. The spatial domain of modelling broadly encompasses the
-Western United States being bounded by the Pacific Ocean, the 50th
-parallel at north, -100 degrees at East and Mexico to the south. This
-domain has tremendous variation in amounts of elevation,
-precipitation.</p>
+<p>The 355 modelled species were selected by land managers in arid &amp;
+semi-arid areas Western North America and are species they already or
+immediately intend to use in restoration. The spatial domain of
+modelling broadly encompasses the Western United States being bounded by
+the Pacific Ocean, the 50th parallel at north, -100 degrees at East and
+Mexico to the south. This domain has tremendous variation in amounts of
+elevation, temperature, and precipitation.</p>
 </div>
 <div id="species-occurrence-records" class="section level2">
 <h2>Species Occurrence Records</h2>
@@ -419,7 +418,7 @@ several steps to reduce the number of features. While superfluous
 features generally do not notably decrease the performance of random
 forests, they increase the amount of time required to predict models
 onto gridded surfaces. The Boruta algorithm was used on the full stack
-of XX independent variables to remove un-informative variables <span class="citation">@kursa2010boruta</span>), and the variable importance
+of 44?? independent variables to remove un-informative variables <span class="citation">@kursa2010boruta</span>), and the variable importance
 factor (VIF) scores were then used to subset the most informative
 features in several auto-correlated pairs, reducing the independent
 variables to at most 33.<br />
@@ -430,7 +429,7 @@ relative to the full set of variables, these variables were subset and
 used as features for random forest modelling with all default values
 except for optimized mtrys (<span class="citation">@kuhn2008caret</span>, <span class="citation">@liaw2002randomForest</span>). Models were then
 predicted onto gridded surfaces which exceeded the species range by 50
-miles using terra predict.</p>
+miles using terra’s predict.</p>
 </div>
 <div id="patch-identification" class="section level2">
 <h2>Patch identification</h2>
@@ -448,7 +447,7 @@ of a species only along SR was considered 1% cover, while the canopy
 cover from LPI was used.</p>
 <p>To determine whether connectivity could predict the presence of a
 population in a patch, connectivity was calculated between every patch,
-and jacknife resampled for logistic regression where connectivity scaled
+and jacknife-resampled for logistic regression where connectivity scaled
 from 0 to 100 served as a the independent variable.</p>
 </div>
 </div>
