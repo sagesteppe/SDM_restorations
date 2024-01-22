@@ -34,7 +34,6 @@ writeRaster(rivr, '../../Geospatial_data/river_resistance/rivR.tif', overwrite =
 
 
 
-
 ##############################################################
 ## read and watershed boundaries and convert some to raster ##
 ## to delineate groups (spatial structured populations, population, deme) ##
@@ -64,4 +63,3 @@ hu12R <- terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12
 writeRaster(hu10R, '../../Geospatial_data/WBD_rast/hu10R.tif', overwrite = TRUE)
 writeRaster(hu12R, '../../Geospatial_data/WBD_rast/hu12R.tif', overwrite = TRUE)
 
-plot(hu12R)

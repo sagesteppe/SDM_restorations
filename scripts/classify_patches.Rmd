@@ -1,0 +1,32 @@
+---
+title: "detect patches"
+author: "steppe"
+date: "2024-01-22"
+output: html_document
+---
+
+```{r}
+library(terra)
+```
+
+```{r}
+p <- '../results/suitability_maps'
+r <- rast(file.path(p, 'Achnatherum_aridum1k-2024-01-10_09:16:55.tif'))
+msk <- ifel(r < 0.80, NA, r)
+m <- mask(r, msk)
+m1 <- aggregate(m, 3, fun = 'mean')
+
+
+# aggregate the raster to speed up the patch detection process. 
+```
+
+
+
+```{r}
+system.time({ob <- terra::patches(m1,  directions = 4)})
+system.time({z =  zonal(cellSize(ob, unit="ha"), ob, sum, as.raster=TRUE) })
+z = ifel(z < 2.0235, NA, z)
+
+plot(z)
+```
+

@@ -91,7 +91,7 @@ predict_wrapper <- function(x){
   
 }
 
-lapply(models_occ[68:335], predict_wrapper)
+lapply(models_occ, predict_wrapper)
 
 ```
 
