@@ -159,10 +159,7 @@ set.seed(27)
 cn <- names(layers)
 splicies <- split(recs, f = recs$taxon)
 
-
-lapply(splicies[41:335], lda_PA_dropper, path = '../results/lda2/', col_names = cn)
-
-which(names(splicies) == 'Asclepias speciosa')
+lapply(splicies, lda_PA_dropper, path = '../results/lda2/', col_names = cn)
 
 rm(absences, presences, collinear_probs)
 ```

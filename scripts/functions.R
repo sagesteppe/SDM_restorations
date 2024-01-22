@@ -355,7 +355,7 @@ Boruta_var_selector <- function(x){
 
 #' perform random forest modelling and save outputs to locations
 #' test_data output from Boruta_var_selector
-randomForests <- function(train_data, test_data, species){
+randomForests <- function(train_data, test_data, species, suffix){
   
   # identify the appropriate mtry
   opt_mtry <- data.frame(
@@ -370,18 +370,18 @@ randomForests <- function(train_data, test_data, species){
   # plot and save results
   species <- gsub(' ', '_', species)
   saveRDS(rf_model,
-          file = paste0('../results/rf_models/', species, '-', gsub(' ', '_', Sys.time()), '.rds'))
+          file = paste0('../results/rf_models/', species, suffix, '-', gsub(' ', '_', Sys.time()), '.rds'))
   
   vip::vip(rf_model) +
     theme_bw() +
     labs(title = species) + 
     theme(plot.title = element_text(hjust = 0.5))
-  ggsave(paste0('../results/vip_plots/', species, '.png'), device = 'png')
+  ggsave(paste0('../results/vip_plots/', species, suffix, '.png'), device = 'png')
   
   prediction_prob <- predict(rf_model, test_data, type = 'prob') # use this for auc/roc
   result.roc <- pROC::roc(test_data$Occurrence, prediction_prob[,1]) # Draw ROC curve.
   
-  png(file = paste0('../results/roc_plots/', species, '.png'))
+  png(file = paste0('../results/roc_plots/', species, suffix, '.png'))
   plot(
     result.roc,
     print.thres="best",
@@ -405,11 +405,12 @@ randomForests <- function(train_data, test_data, species){
     setNames(data.frame(as.numeric(result.roc$auc), 'AUC'), c('Value', 'Metric')), 
     setNames(data.frame((ncol(train_data)-1), 'Independent_Variables'), c('Value', 'Metric')), 
     summary, samples)
-  write.csv(summary, paste0('../results/summary/', species, '.csv'), row.names = F)
+  write.csv(summary, paste0('../results/summary/', species, suffix, '.csv'), row.names = F)
   
 }
 
-modeller <- function(x){
+
+modeller <- function(x, suffix){
   
   species <- sf::st_drop_geometry(x) %>% 
     dplyr::pull(taxon)
@@ -429,10 +430,11 @@ modeller <- function(x){
   
   TRAIN_DATA <- Boruta_var_selector(TRAIN)
   TRAIN_DATA <- rfe_var_selector(TRAIN_DATA)
-  randomForests(train_data = TRAIN_DATA, test_data = TEST, species)
+  randomForests(train_data = TRAIN_DATA, test_data = TEST, species, suffix)
   message(species, ' complete')
   
 }
+
 
 
 predict_wrapper <- function(x){

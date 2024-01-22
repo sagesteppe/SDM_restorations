@@ -12,8 +12,7 @@ library(sf)
 library(randomForest)
 source('functions.R')
 
-# unix::rlimit_as(1e32)
-# setGDALconfig(c("GDAL_MAX_DATASET_POOL_SIZE"), c(""))
+setGDALconfig('GDAL_MAX_DATASET_POOL_SIZE=1024')
 ```
 
 ```{r read in predictors}
@@ -43,9 +42,12 @@ f <- data.frame(
   ) |>
   mutate(time = gsub('_-|[.]', '', time),
          time = gsub('_', ' ', time), 
+         time = trimws(time),
+         time = gsub('^.1-|^1-', '', time), 
          time = as.POSIXct(time)) |>
-  group_by(species) |>
-  slice_max(order_by = time, n = 1) |>
+ # group_by(species) |>
+  filter(str_detect(species, '1k$')) |>
+ # slice_max(order_by = time, n = 1) #|>
   pull(path)
 
 occpath <- '../data/raw/occurrence/combined_records'
@@ -85,9 +87,11 @@ predict_wrapper <- function(x){
     filename = file.path(pout, paste0(x$species, '-', gsub(' ', '_', Sys.time()), '.tif')),
     wopt = c(names = 'predicted_suitability'))
   
+   terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
+  
 }
 
-lapply(models_occ[30:335], predict_wrapper)
+lapply(models_occ[68:335], predict_wrapper)
 
 ```
 
