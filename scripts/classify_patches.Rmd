@@ -30,3 +30,45 @@ z = ifel(z < 2.0235, NA, z)
 plot(z)
 ```
 
+
+```{r Patch metics to predict presence}
+
+# euclidean nearest neighbor distance (enn)
+## (modification) log(x), sqrt(x)
+### Expectation: the number of colonized predicted patches decrease with increasing distance.
+#### why: long-distance dispersal is limited from colonized to suitable patches. 
+##### test: logistic regression, independent: distance, dependent: colonization (0|1)
+
+sqrt(c( 1000, 150))
+```
+
+
+```{r Patch metrics to predict abundance}
+library(landscapemetrics)
+
+# Patch level metrics. 
+print(
+  list_lsm(level = "patch"), 
+  n = 12)
+
+# Core Area Index (cai)  
+## (modification) arithmetic mean of core area cells
+### Expectation: higher cai higher abundance
+#### why: better within patch distribution, and a persistent 'source' to 'sink' peripheral cells. 
+##### test: glmm?(% cover ~ cai, correlation = nlme::corExp(Long ~ Lat, nugget=T), family = quasibinomial)
+
+# perimeter-area ratio (para)
+## (modification) none
+### Expectation: lower para higher abundance
+#### why: areas with 'large edges' will suffer dispersal limitations throughout them, as many seeds will go to unsuitable habitat.
+##### test: glmm?(% cover ~ para, correlation = nlme::corExp(Long ~ Lat, nugget=T), family = quasibinomial)
+
+# fractal dimension index (frac)
+## (modification) none
+### Expectation: lower fractal dimensions (less complex patch shapes) have higher abundances. 
+#### why: components of patches with complex shapes may suffer dispersal limitation. 
+##### test: glmm?(% cover ~ frac, correlation = nlme::corExp(Long ~ Lat, nugget=T), family = quasibinomial)
+
+## to all models a term for the previous 4 years SPEI may be incorporated. 
+
+```
