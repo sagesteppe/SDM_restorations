@@ -32,8 +32,27 @@ slope <- mosaic(
 rivr <- terra::rasterize(vect(riv), rast(slope), touches = TRUE, update = TRUE)
 writeRaster(rivr, '../../Geospatial_data/river_resistance/rivR.tif', overwrite = TRUE)
 
+##################################################
+### now burn lakes and oceans into the raster ###
+##################################################
 
+lakes10 <- rnaturalearth::ne_download(scale = 10, type = "lakes_north_america",
+                                      category = "physical") %>% 
+  st_as_sf() %>% 
+  st_make_valid() %>%
+  filter(featurecla == 'Lake') %>% 
+  select(featurecla)
 
+lakes10 <- lakes10[ which(st_is_valid(lakes10) == T), ]
+lakes10 <- st_crop(lakes10, domain)
+
+ocean <- rnaturalearth::ne_download(scale = 10, type = "ocean",
+                                    category = "physical") 
+
+rivr <- terra::mask(rivr, vect(ocean), touches = TRUE, update = TRUE)
+rivr <- terra::mask(rivr, vect(lakes10), touches = TRUE, update = TRUE)
+
+plot(lakes10[,1])
 ##############################################################
 ## read and watershed boundaries and convert some to raster ##
 ## to delineate groups (spatial structured populations, population, deme) ##
