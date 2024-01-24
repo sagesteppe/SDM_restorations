@@ -14,13 +14,12 @@ p <- '../results/suitability_maps'
 r <- rast(file.path(p, 'Achnatherum_aridum1k-2024-01-10_09:16:55.tif'))
 msk <- ifel(r < 0.80, NA, r)
 m <- mask(r, msk)
-m1 <- aggregate(m, 3, fun = 'mean')
-
+m1 <- aggregate(m, 2, fun = 'mean')
 
 # aggregate the raster to speed up the patch detection process. 
 ```
 
-
+aggregation by a factor of 2 allows for quick patch delineation and detection. 
 
 ```{r}
 system.time({ob <- terra::patches(m1,  directions = 4)})
@@ -33,23 +32,26 @@ plot(z)
 
 ```{r Patch metics to predict presence}
 
-# euclidean nearest neighbor distance (enn)
-## (modification) log(x), sqrt(x)
+# euclidean nearest neighbor distance (enn) - (Patch)
+## (modification) log(enn), sqrt(enn)
 ### Expectation: the number of colonized predicted patches decrease with increasing distance.
 #### why: long-distance dispersal is limited from colonized to suitable patches. 
-##### test: logistic regression, independent: distance, dependent: colonization (0|1)
+##### test: glm(colonization(0|1) ~ enn,  family = binomial)
 
-sqrt(c( 1000, 150))
+# nearest neighbor distance (enn_mn) - (Class) # note other method of aggregation can be used too!
+## (modification) log(enn_mn), sqrt(enn_mn)
+### Expectation: the number of colonized predicted patches increases with increasing distance.
+#### why: this species is adept at long distance dispersal
+##### test: glm(colonization(0|1) ~ enn_mn,  family = binomial)
 ```
 
 
 ```{r Patch metrics to predict abundance}
-library(landscapemetrics)
+# library(landscapemetrics)
 
 # Patch level metrics. 
 print(
-  list_lsm(level = "patch"), 
-  n = 12)
+  landscapemetrics::list_lsm(level = "class"))
 
 # Core Area Index (cai)  
 ## (modification) arithmetic mean of core area cells
