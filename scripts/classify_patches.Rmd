@@ -11,7 +11,7 @@ library(terra)
 
 ```{r}
 p <- '../results/suitability_maps'
-r <- rast(file.path(p, 'Achnatherum_aridum1k-2024-01-10_09:16:55.tif'))
+r <- rast(file.path(p, 'Acamptopappus_sphaerocephalus1k-2024-01-10_08:57:46.tif'))
 msk <- ifel(r < 0.80, NA, r)
 m <- mask(r, msk)
 m1 <- aggregate(m, 2, fun = 'mean')
@@ -21,13 +21,55 @@ m1 <- aggregate(m, 2, fun = 'mean')
 
 aggregation by a factor of 2 allows for quick patch delineation and detection. 
 
-```{r}
-system.time({ob <- terra::patches(m1,  directions = 4)})
-system.time({z =  zonal(cellSize(ob, unit="ha"), ob, sum, as.raster=TRUE) })
-z = ifel(z < 2.0235, NA, z)
 
-plot(z)
+We need to identify and names patches. 
+
+```{r}
+system.time({ob <- terra::patches(m1,  directions = 4, allowgaps = FALSE)})
+system.time({sizes =  zonal(cellSize(ob, unit="ha"), ob, sum, as.raster=TRUE) }) # use this has a mask
+size_mask = ifel(sizes < 2.0235, NA, sizes) # remove areas < 5 acres.
+ob <- mask(ob, z)
+plot(ob)
 ```
+
+
+
+```{r}
+
+p <- '../results/suitability_maps'
+f <- file.path(p, list.files(p, pattern = '1k-'))
+
+
+patcheR <- functions(x){
+  
+  # read in file
+  r <- rast(f)
+  taxon <- gsub('1k.*$', '', basename(f))
+  pout <- '../results/patches'
+  
+  # mask raster values < 0.8
+  r <- mask(r, ifel(r < 0.80, NA, r))
+  r1 <- aggregate(r, 2, fun = 'mean')
+
+  # burn away rivers, and burn patches to hydrologic units ~ populations
+  r1 <- mask(r1, hydro, inverse = TRUE)
+  
+  # detect patches
+  pat <- terra::patches(r1,  directions = 4, allowgaps = FALSE)
+  
+  # remove patches < 5 acres
+  sizes <- zonal(cellSize(pat, unit="ha"), pat, sum, as.raster=TRUE)
+  size_mask <- ifel(sizes < 2.0235, NA, sizes)
+  r1 <- mask(r1, size_mask)
+  
+  # resample the patches to the original raster resolution
+  resample(r1, r, threads = 16, method = 'near',
+           filename = file.path(pout, paste0(taxon, '.tif')))
+  
+}
+
+```
+
 
 
 ```{r Patch metics to predict presence}
@@ -43,6 +85,8 @@ plot(z)
 ### Expectation: the number of colonized predicted patches increases with increasing distance.
 #### why: this species is adept at long distance dispersal
 ##### test: glm(colonization(0|1) ~ enn_mn,  family = binomial)
+
+
 ```
 
 

@@ -53,6 +53,7 @@ rivr <- terra::mask(rivr, vect(ocean), touches = TRUE, update = TRUE)
 rivr <- terra::mask(rivr, vect(lakes10), touches = TRUE, update = TRUE)
 
 plot(lakes10[,1])
+
 ##############################################################
 ## read and watershed boundaries and convert some to raster ##
 ## to delineate groups (spatial structured populations, population, deme) ##
@@ -61,10 +62,13 @@ st_layers(p2gdb)
 
 hu10 <- st_read(p2gdb, layer = 'WBDHU10', quiet = TRUE)  %>% 
   st_make_valid() %>% 
+  select(huc10) %>% 
   st_crop(., project(domain, crs(.))) %>% 
   st_simplify() %>% 
   st_transform(5070) %>% 
   st_simplify(dTolerance = 80)
+
+hu10_line <- st_cast(hu10 , 'LINESTRING')
 
 hu12 <- st_read(p2gdb, layer = 'WBDHU12', quiet = TRUE)  %>% 
   st_make_valid() %>% 
@@ -73,12 +77,12 @@ hu12 <- st_read(p2gdb, layer = 'WBDHU12', quiet = TRUE)  %>%
   st_transform(5070) %>% 
   st_simplify(dTolerance = 80)
 
-hu10 <- select(hu10, huc10)
-hu12 <- select(hu12, huc12)
+hu10R <- terra::rasterize(vect(hu10), rast(slope), update = TRUE, field = 'huc10', 
+                          filename = '../../Geospatial_data/WBD_rast/hu10R.tif', overwrite = T)
 
-hu10R <- terra::rasterize(vect(hu10), rast(slope), update = TRUE, field = 'huc10')
-hu12R <- terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12')
+terra::rasterize(vect(hu10_line), rast(slope), update = TRUE, field = 'huc10', 
+                 filename = '../../Geospatial_data/WBD_rast/hu10R-line.tif', overwrite = T)
 
-writeRaster(hu10R, '../../Geospatial_data/WBD_rast/hu10R.tif', overwrite = TRUE)
-writeRaster(hu12R, '../../Geospatial_data/WBD_rast/hu12R.tif', overwrite = TRUE)
+hu12R <- terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12', 
+                          filename = '../../Geospatial_data/WBD_rast/hu12R.tif', overwrite = T)
 
