@@ -15,13 +15,11 @@ library(terra)
 
 p <- '../results/suitability_maps'
 f <- file.path(p, list.files(p, pattern = '1k-'))
-info <- lapply(f, file.info)
-
-info1 <- info[[1]]$size/1e9
 
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
 hydr_ftr <-  rast( file.path(gd, 'river_resistance', 'water_ftR.tif') )
+rm(gd)
 
 patcheR <- function(x){
   
@@ -29,7 +27,7 @@ patcheR <- function(x){
   r <- rast(x)
   taxon <- gsub('1k.*$', '', basename(x))
   pout <- '../results/patches'
-  fsize <- file.info(f[1])$size/1e9
+  fsize <- file.info(x)$size/1e9
     
   # mask raster values < 0.8
   r <- terra::mask(r, ifel(r < 0.80, NA, r))
@@ -42,10 +40,10 @@ patcheR <- function(x){
   # Areas need to be aggregateed for computatations to be run in meaningful amount of
   # time
   
-  if(fsize < 0.2){r1 <- r} else
-    if(fsize < 0.4){r1 <- terra::aggregate(r, 2, fun = 'mean')} else 
-      if(fsize < 0.7){r1 <- terra::aggregate(r, 3, fun = 'mean')} else
-        {r1 <- terra::aggregate(r, 4, fun = 'mean')}
+  if(fsize < 0.3){r1 <- terra::aggregate(r, 2, fun = 'mean')} else
+    if(fsize < 0.5){r1 <- terra::aggregate(r, 3, fun = 'mean')} else 
+      if(fsize < 0.7){r1 <- terra::aggregate(r, 4, fun = 'mean')} else
+        if(fsize > 0.9){r1 <- terra::aggregate(r, 5, fun = 'mean')}
 
   pat <- terra::patches(r1,  directions = 4, allowGaps = FALSE)
   
@@ -63,7 +61,7 @@ patcheR <- function(x){
 }
 
 
-lapply(f, patcheR)
+lapply(f[4:355], patcheR) # start 9:05
 
 ```
 
