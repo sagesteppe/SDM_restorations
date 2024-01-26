@@ -9,43 +9,19 @@ output: html_document
 library(terra)
 ```
 
-```{r}
-p <- '../results/suitability_maps'
-r <- rast(file.path(p, 'Acamptopappus_sphaerocephalus1k-2024-01-10_08:57:46.tif'))
-msk <- ifel(r < 0.80, NA, r)
-m <- mask(r, msk)
-
-m <- mask(m, crop(hydr_bound, m), inverse = TRUE)
-plot(m)
-m1 <- aggregate(m, 2, fun = 'mean')
-
-# aggregate the raster to speed up the patch detection process. 
-```
-
-aggregation by a factor of 2 allows for quick patch delineation and detection. 
-
-
-We need to identify and names patches. 
-
-```{r}
-system.time({ob <- terra::patches(m1,  directions = 4, allowgaps = FALSE)})
-system.time({sizes =  zonal(cellSize(ob, unit="ha"), ob, sum, as.raster=TRUE) }) # use this has a mask
-size_mask = ifel(sizes < 2.0235, NA, sizes) # remove areas < 5 acres.
-ob <- mask(ob, z)
-plot(ob)
-```
-
 
 
 ```{r}
 
 p <- '../results/suitability_maps'
 f <- file.path(p, list.files(p, pattern = '1k-'))
+info <- lapply(f, file.info)
+
+info1 <- info[[1]]$size/1e9
 
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
 hydr_ftr <-  rast( file.path(gd, 'river_resistance', 'water_ftR.tif') )
-
 
 patcheR <- function(x){
   
@@ -53,7 +29,8 @@ patcheR <- function(x){
   r <- rast(x)
   taxon <- gsub('1k.*$', '', basename(x))
   pout <- '../results/patches'
-  
+  fsize <- file.info(f[1])$size/1e9
+    
   # mask raster values < 0.8
   r <- terra::mask(r, ifel(r < 0.80, NA, r))
   
@@ -61,8 +38,15 @@ patcheR <- function(x){
   r <- terra::mask(r, terra::crop(hydr_bound, r), inverse = TRUE)
   r <- terra::mask(r, terra::crop(hydr_ftr, r), inverse = TRUE)
   
-  # detect patches
-  r1 <- terra::aggregate(r, 2, fun = 'mean')
+  # detect patches - this scales to the extent of analysis. #
+  # Areas need to be aggregateed for computatations to be run in meaningful amount of
+  # time
+  
+  if(fsize < 0.2){r1 <- r} else
+    if(fsize < 0.4){r1 <- terra::aggregate(r, 2, fun = 'mean')} else 
+      if(fsize < 0.7){r1 <- terra::aggregate(r, 3, fun = 'mean')} else
+        {r1 <- terra::aggregate(r, 4, fun = 'mean')}
+
   pat <- terra::patches(r1,  directions = 4, allowGaps = FALSE)
   
   # remove patches < 5 acres
@@ -74,11 +58,12 @@ patcheR <- function(x){
   terra::resample(r1, r, threads = 16, method = 'near',
            filename = file.path(pout, paste0(taxon, '.tif')))
   
+  terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
+  
 }
 
 
-lapply(f[4:335], patcheR)
-
+lapply(f, patcheR)
 
 ```
 
