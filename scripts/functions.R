@@ -529,3 +529,45 @@ rfe_var_selector <- function(x){
 #    fi
 # we set up a cron job to run every24 hours to move the files
 # 0 */3 * * * sdd2hdd.sh
+
+
+
+
+patcheR <- function(x){
+  
+  # read in file
+  r <- rast(x)
+  taxon <- gsub('1k.*$', '', basename(x))
+  pout <- '../results/patches'
+  fsize <- file.info(x)$size/1e9
+  
+  # mask raster values < 0.8
+  r <- terra::mask(r, ifel(r < 0.80, NA, r))
+  
+  # burn away rivers, and burn patches to hydrologic units ~ populations
+  r <- terra::mask(r, terra::crop(hydr_bound, r), inverse = TRUE)
+  r <- terra::mask(r, terra::crop(hydr_ftr, r), inverse = TRUE)
+  
+  # detect patches - this scales to the extent of analysis. #
+  # Areas need to be aggregateed for computatations to be run in meaningful amount of
+  # time
+  
+  if(fsize < 0.3){r1 <- terra::aggregate(r, 2, fun = 'mean')} else
+    if(fsize < 0.5){r1 <- terra::aggregate(r, 3, fun = 'mean')} else 
+      if(fsize < 0.7){r1 <- terra::aggregate(r, 4, fun = 'mean')} else
+        if(fsize > 0.7){r1 <- terra::aggregate(r, 5, fun = 'mean')}
+  
+  pat <- terra::patches(r1,  directions = 4, allowGaps = FALSE)
+  
+  # remove patches < 5 acres
+  sizes <- terra::zonal(cellSize(pat, unit="ha"), pat, sum, as.raster=TRUE)
+  size_mask <- terra::ifel(sizes < 4.0470, NA, sizes)
+  r1 <- mask(r1, size_mask)
+  
+  # resample the patches to the original raster resolution
+  terra::resample(r1, r, threads = 16, method = 'near',
+                  filename = file.path(pout, paste0(taxon, '.tif')))
+  
+  terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
+  
+}

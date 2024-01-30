@@ -7,9 +7,10 @@ output: html_document
 
 ```{r}
 library(terra)
+library(landscapemetrics)
 ```
 
-
+Create coarse patches for 'meta-populations'
 
 ```{r}
 
@@ -21,61 +22,62 @@ hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
 hydr_ftr <-  rast( file.path(gd, 'river_resistance', 'water_ftR.tif') )
 rm(gd)
 
-patcheR <- function(x){
-  
-  # read in file
-  r <- rast(x)
-  taxon <- gsub('1k.*$', '', basename(x))
-  pout <- '../results/patches'
-  fsize <- file.info(x)$size/1e9
-    
-  # mask raster values < 0.8
-  r <- terra::mask(r, ifel(r < 0.80, NA, r))
-  
-    # burn away rivers, and burn patches to hydrologic units ~ populations
-  r <- terra::mask(r, terra::crop(hydr_bound, r), inverse = TRUE)
-  r <- terra::mask(r, terra::crop(hydr_ftr, r), inverse = TRUE)
-  
-  # detect patches - this scales to the extent of analysis. #
-  # Areas need to be aggregateed for computatations to be run in meaningful amount of
-  # time
-  
-  if(fsize < 0.3){r1 <- terra::aggregate(r, 2, fun = 'mean')} else
-    if(fsize < 0.5){r1 <- terra::aggregate(r, 3, fun = 'mean')} else 
-      if(fsize < 0.7){r1 <- terra::aggregate(r, 4, fun = 'mean')} else
-        if(fsize > 0.9){r1 <- terra::aggregate(r, 5, fun = 'mean')}
 
-  pat <- terra::patches(r1,  directions = 4, allowGaps = FALSE)
-  
-  # remove patches < 5 acres
-  sizes <- terra::zonal(cellSize(pat, unit="ha"), pat, sum, as.raster=TRUE)
-  size_mask <- terra::ifel(sizes < 4.0470, NA, sizes)
-  r1 <- mask(r1, size_mask)
-  
-  # resample the patches to the original raster resolution
-  terra::resample(r1, r, threads = 16, method = 'near',
-           filename = file.path(pout, paste0(taxon, '.tif')))
-  
-  terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
-  
-}
-
-
-lapply(f[4:355], patcheR) # start 9:05
+lapply(f, patcheR) # roughly 72 hours. 
 
 ```
 
 
 
+
+```{r}
+
+abvi <- rast('../results/patches/Abronia_villosa.tif')
+
+gd <- '/media/steppe/hdd/Geospatial_data'
+hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
+
+
+landscapR <- function(x, pout, pRout){
+
+  x <- terra::ifel(x > 0.75, 1, NA)
+  x <- terra::mask(x, f_wbd, inverse = TRUE)
+  landscape <- landscapemetrics::get_patches(x, directions = 4)
+  calcs <- landscapemetrics::calculate_lsm(x, what = c('lsm_c_enn_mn', 'lsm_c_enn_cv',
+                "lsm_p_enn", "lsm_p_enn", "lsm_p_cai", "lsm_p_para", "lsm_p_frac"), 
+              neighbourhood = 4, directions = 4)
+
+  p <- '../results/'
+  write.csv(
+    calcs[calcs$level == 'patch', c('id', 'metric', 'value')],
+    filename = paste0(p, pout, '/', taxon, '-', 'patch_vals.csv'),  row.names = F
+  )
+
+  write.csv(
+    calcs[calcs$level == 'class', c('id', 'metric', 'value')],
+    filename = paste0(p, pout, '/', taxon, '-', 'class_vals.csv'), row.names = F
+  )
+
+  writeRaster(landscape[["layer_1"]][["class_1"]], 
+    filename = paste0(p, pRout, '/', taxon, '-', 'patchIDS.tif')
+  )
+
+}
+
+landscapR(f, pout = 'patch_metrics', pRout = 'fine_patches')
+
+```
+
+
 ```{r Patch metics to predict presence}
 
-# euclidean nearest neighbor distance (enn) - (Patch)
+# euclidean nearest neighbor distance (enn) - (Patch) {lsm_p_enn}
 ## (modification) log(enn), sqrt(enn)
 ### Expectation: the number of colonized predicted patches decrease with increasing distance.
 #### why: long-distance dispersal is limited from colonized to suitable patches. 
 ##### test: glm(colonization(0|1) ~ enn,  family = binomial)
 
-# nearest neighbor distance (enn_mn) - (Class) # note other method of aggregation can be used too!
+# nearest neighbor distance (enn_mn) - (Class) {lsm_c_enn_mn} # note other method of aggregation can be used too!
 ## (modification) log(enn_mn), sqrt(enn_mn)
 ### Expectation: the number of colonized predicted patches increases with increasing distance.
 #### why: this species is adept at long distance dispersal
@@ -92,19 +94,20 @@ lapply(f[4:355], patcheR) # start 9:05
 print(
   landscapemetrics::list_lsm(level = "class"))
 
-# Core Area Index (cai)  
+
+# Core Area Index (cai)  {lsm_p_cai}
 ## (modification) arithmetic mean of core area cells
 ### Expectation: higher cai higher abundance
 #### why: better within patch distribution, and a persistent 'source' to 'sink' peripheral cells. 
 ##### test: glmm?(% cover ~ cai, correlation = nlme::corExp(Long ~ Lat, nugget=T), family = quasibinomial)
 
-# perimeter-area ratio (para)
+# perimeter-area ratio (para) {lsm_p_para}
 ## (modification) none
 ### Expectation: lower para higher abundance
 #### why: areas with 'large edges' will suffer dispersal limitations throughout them, as many seeds will go to unsuitable habitat.
 ##### test: glmm?(% cover ~ para, correlation = nlme::corExp(Long ~ Lat, nugget=T), family = quasibinomial)
 
-# fractal dimension index (frac)
+# fractal dimension index (frac) {lsm_p_frac}
 ## (modification) none
 ### Expectation: lower fractal dimensions (less complex patch shapes) have higher abundances. 
 #### why: components of patches with complex shapes may suffer dispersal limitation. 
