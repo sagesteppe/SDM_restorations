@@ -77,6 +77,8 @@ hu12 <- st_read(p2gdb, layer = 'WBDHU12', quiet = TRUE)  %>%
   st_transform(5070) %>% 
   st_simplify(dTolerance = 80)
 
+hu12_line <- st_cast(hu12 , 'LINESTRING')
+
 hu10R <- terra::rasterize(vect(hu10), rast(slope), update = TRUE, field = 'huc10', 
                           filename = '../../Geospatial_data/WBD_rast/hu10R.tif', overwrite = T)
 
@@ -86,3 +88,5 @@ terra::rasterize(vect(hu10_line), rast(slope), update = TRUE, field = 'huc10',
 hu12R <- terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12', 
                           filename = '../../Geospatial_data/WBD_rast/hu12R.tif', overwrite = T)
 
+terra::rasterize(vect(hu12_line), rast(slope), update = TRUE, field = 'huc12', 
+                 filename = '../../Geospatial_data/WBD_rast/hu12R-line.tif', overwrite = T)

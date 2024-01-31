@@ -12,7 +12,7 @@ library(landscapemetrics)
 
 Create coarse patches for 'meta-populations'
 
-```{r}
+```{r, eval = F}
 
 p <- '../results/suitability_maps'
 f <- file.path(p, list.files(p, pattern = '1k-'))
@@ -32,30 +32,31 @@ lapply(f, patcheR) # roughly 72 hours.
 
 ```{r}
 
-abvi <- rast('../results/patches/Abronia_villosa.tif')
+f <- list.files('../results/patches/')
 
 gd <- '/media/steppe/hdd/Geospatial_data'
-hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
-
+hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu12R-line.tif') )
 
 landscapR <- function(x, pout, pRout){
 
-  x <- terra::ifel(x > 0.75, 1, NA)
-  x <- terra::mask(x, f_wbd, inverse = TRUE)
+  taxon <- gsub('[.]tif', '', basename(x))
+  x <- terra::rast(file.path('../results/patches', x))
+  x <- terra::ifel(x > 0, 1, NA)
+  x <- terra::mask(x, terra::crop(hydr_bound, x), inverse = TRUE)
   landscape <- landscapemetrics::get_patches(x, directions = 4)
   calcs <- landscapemetrics::calculate_lsm(x, what = c('lsm_c_enn_mn', 'lsm_c_enn_cv',
-                "lsm_p_enn", "lsm_p_enn", "lsm_p_cai", "lsm_p_para", "lsm_p_frac"), 
+                "lsm_p_enn", "lsm_p_cai", "lsm_p_para", "lsm_p_frac"), 
               neighbourhood = 4, directions = 4)
 
   p <- '../results/'
   write.csv(
     calcs[calcs$level == 'patch', c('id', 'metric', 'value')],
-    filename = paste0(p, pout, '/', taxon, '-', 'patch_vals.csv'),  row.names = F
+    file = paste0(p, pout, '/', taxon, '-', 'patch_vals.csv'),  row.names = F
   )
 
   write.csv(
-    calcs[calcs$level == 'class', c('id', 'metric', 'value')],
-    filename = paste0(p, pout, '/', taxon, '-', 'class_vals.csv'), row.names = F
+    calcs[calcs$level == 'class', c('metric', 'value')],
+    file = paste0(p, pout, '/', taxon, '-', 'class_vals.csv'), row.names = F
   )
 
   writeRaster(landscape[["layer_1"]][["class_1"]], 
@@ -64,7 +65,7 @@ landscapR <- function(x, pout, pRout){
 
 }
 
-landscapR(f, pout = 'patch_metrics', pRout = 'fine_patches')
+lapply(f[4:20], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 
 ```
 
