@@ -65,7 +65,7 @@ landscapR <- function(x, pout, pRout){
 
 }
 
-lapply(f[4:20], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
+lapply(f[21:335], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 
 ```
 
@@ -80,9 +80,9 @@ lapply(f[4:20], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 
 # nearest neighbor distance (enn_mn) - (Class) {lsm_c_enn_mn} # note other method of aggregation can be used too!
 ## (modification) log(enn_mn), sqrt(enn_mn)
-### Expectation: the number of colonized predicted patches increases with increasing distance.
-#### why: this species is adept at long distance dispersal
-##### test: glm(colonization(0|1) ~ enn_mn,  family = binomial)
+### Expectation: the proportion of predicted patches which are colonized decreases with increaing mean distance between patches
+#### why: further distances between suitable habitats prevent colonization and recolonization of habitat.
+##### test: glm(prcnt_patches_colonized ~ enn_mn,  family = (quasi)binomial)
 
 
 ```
@@ -94,7 +94,6 @@ lapply(f[4:20], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 # Patch level metrics. 
 print(
   landscapemetrics::list_lsm(level = "class"))
-
 
 # Core Area Index (cai)  {lsm_p_cai}
 ## (modification) arithmetic mean of core area cells
@@ -117,3 +116,86 @@ print(
 ## to all models a term for the previous 4 years SPEI may be incorporated. 
 
 ```
+
+To determine whether a patch is occupied the original training data are matched as an attribute to the fine patches. 
+
+```{r}
+
+f <- file.path('../results/fine_patches', list.files('../results/fine_patches'))
+
+recs <- st_read('../data/raw/occurrence/combined_records') %>% 
+  filter(PtType == 1)
+
+patchTaggR <- function(x){
+  
+  r <- terra::rast(f)
+  r_taxon <- gsub('[.]tif', '', basename(f))
+  occs <- dplyr::filter(recs, taxon == r_taxon) |>
+    dplyr::mutate(ID = 1:nrow(.)) |>
+    terra::vect()
+  
+  occ_pts <- terra::extract(r, occs, bind = TRUE) |>
+    sf::st_as_sf()
+  
+  # if pts were NA, buffer to 90m, many occupied areas were 'cut' away by the 
+  # hydrologic mapping. 
+  occ_poly <- dplyr::filter(occ_pts, is.na(RASTER)) |>
+    sf::st_buffer(occ_pts, 120) # we cut out 90, but let's go a bit further for corner cases.
+  occ_poly <- terra::extract(r, occ_poly, bind = TRUE, weights = TRUE) |>
+    sf::st_as_sf() |>
+    sf::st_centroid()  |>
+    dplyr::group_by(ID) |> # now make sure we get the patch with the 'most' overlap with the polygon
+    dplyr::slice_max(WEIGHT) |>
+    dplyr::drop_na(RASTER) # these values actually NA. 
+    
+  occ_pops <- dplyr::bind_rows( # a dataframe of all raster patch ID's with populations known from within
+    # the last few decades in them. 
+    dplyr::drop_na(occ_pts), occ_poly) |>
+    dplyr::distinct(RASTER, .keep_all = TRUE) # this is multiple pts per patch - not neccessary for us. 
+  
+  write.csv(occ_pops, row.names = F,
+            file.path('../results/occupiedPatches', paste0(r_taxon, '.csv')))
+  
+}
+
+```
+
+
+```{r}
+
+p1 <- '../data/raw/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb'
+st_layers(dsn = p1)
+
+AIM_points <- st_read(dsn = p1, 
+        layer = 'TerrADat', quiet = T) %>%
+  select(PrimaryKey, DateVisited, geometry = Shape) %>% 
+  st_transform(5070) 
+
+lpi <- spp_richness <- st_read(dsn = p1, 
+        layer = 'tbl LINE POINT INTERCEPT', quiet = T) %>% 
+  select(SpeciesList, PrimaryKey) %>% 
+  right_join(AIM_points, by = 'PrimaryKey') %>% 
+  st_as_sf()  %>% 
+  
+  # NOW CALCULATE THE PERCENT COVER OF EACH SPECIES FROM LPI #
+  # ...
+   
+  mutate(DateVisited = as.Date(DateVisited), .before = geometry) %>% 
+  arrange(SpeciesList) %>% 
+  right_join(., select(targets, taxon, symbol) %>% 
+               distinct(), by = c('SpeciesList' = 'symbol' ))
+
+# add the species names from USDA PLANTS CODES
+
+# ...
+
+AIM_abundance_retrievR <- function(x, aim_tables){
+  
+  
+  
+  
+}
+
+```
+
+
