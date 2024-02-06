@@ -7,6 +7,8 @@ output: html_document
 
 ```{r}
 library(terra)
+library(tidyverse)
+library(sf)
 library(landscapemetrics)
 ```
 
@@ -29,8 +31,9 @@ lapply(f, patcheR) # roughly 72 hours.
 
 
 
+Create finer scale patches which more or less are meant to represent populations
 
-```{r}
+```{r eval = F}
 
 f <- list.files('../results/patches/')
 
@@ -65,7 +68,7 @@ landscapR <- function(x, pout, pRout){
 
 }
 
-lapply(f[21:335], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
+lapply(f, FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 
 ```
 
@@ -122,46 +125,71 @@ To determine whether a patch is occupied the original training data are matched 
 ```{r}
 
 f <- file.path('../results/fine_patches', list.files('../results/fine_patches'))
+p <- '../data/raw/occurrence/combined_records'
 
-recs <- st_read('../data/raw/occurrence/combined_records') %>% 
-  filter(PtType == 1)
+recs <- lapply(
+  file.path(p, list.files(p, pattern = '.shp$')), sf::st_read, quiet = TRUE) %>% 
+  bind_rows() %>% 
+  filter(Occurrence == 1)
+
+r1 <- rast(f[1])
 
 patchTaggR <- function(x){
   
-  r <- terra::rast(f)
-  r_taxon <- gsub('[.]tif', '', basename(f))
+  r <- terra::rast(x)
+  r_taxon <- gsub('_', ' ', gsub('-patchIDS[.]tif', '', basename(x)))
   occs <- dplyr::filter(recs, taxon == r_taxon) |>
-    dplyr::mutate(ID = 1:nrow(.)) |>
+    dplyr::mutate(ID = dplyr::row_number()) |>
     terra::vect()
   
   occ_pts <- terra::extract(r, occs, bind = TRUE) |>
     sf::st_as_sf()
-  
+
   # if pts were NA, buffer to 90m, many occupied areas were 'cut' away by the 
   # hydrologic mapping. 
-  occ_poly <- dplyr::filter(occ_pts, is.na(RASTER)) |>
-    sf::st_buffer(occ_pts, 120) # we cut out 90, but let's go a bit further for corner cases.
-  occ_poly <- terra::extract(r, occ_poly, bind = TRUE, weights = TRUE) |>
-    sf::st_as_sf() |>
-    sf::st_centroid()  |>
-    dplyr::group_by(ID) |> # now make sure we get the patch with the 'most' overlap with the polygon
-    dplyr::slice_max(WEIGHT) |>
-    dplyr::drop_na(RASTER) # these values actually NA. 
-    
-  occ_pops <- dplyr::bind_rows( # a dataframe of all raster patch ID's with populations known from within
-    # the last few decades in them. 
-    dplyr::drop_na(occ_pts), occ_poly) |>
-    dplyr::distinct(RASTER, .keep_all = TRUE) # this is multiple pts per patch - not neccessary for us. 
+  occ_poly <- dplyr::filter(occ_pts, is.na(lyr.1)) |>
+    sf::st_buffer(250) # we cut out 90, but let's go a bit further for corner cases.
   
-  write.csv(occ_pops, row.names = F,
-            file.path('../results/occupiedPatches', paste0(r_taxon, '.csv')))
+  occ_poly <- terra::extract(r, occ_poly, weights = TRUE) %>% 
+    dplyr::group_by(ID) |> # now make sure we get the patch with the 'most' overlap with the polygon
+    tidyr::drop_na(lyr.1) |> # these values actually NA. 
+    dplyr::slice_max(weight, with_ties = F) |>
+    dplyr::left_join(filter(occ_pts) |>
+                       select(-lyr.1), by = join_by('ID')) |>
+    dplyr::select(-weight)
+    
+  occ_pops <- dplyr::bind_rows( # a data frame of all raster patch ID's with populations known from within
+    # the last few decades in them. 
+    tidyr::drop_na(occ_pts, lyr.1), occ_poly) |>
+    dplyr::rename(PatchID = lyr.1)
+  
+  # write out summary values of the patch matching
+  data.frame(
+    noPres = , 
+    PresTopSuitability =, # the number of presences located in top suitability patches
+    UniquePatchID = , # the number of uniquelly identified patches
+    NoPatchesTopSuitability =  # the total number of most suitable patches from the RASTER
+  )
+  
+  occ_pops <- dplyr::distinct(occ_pops, PatchID, .keep_all = TRUE) |> # this is multiple pts per patch - not necessary for us. 
+    sf::st_drop_geometry() |>
+    dplyr::select(date, PatchID) |>
+    dplyr::arrange(PatchID) |>
+    write.csv(row.names = F,
+            file.path('../results/occupiedPatches-topSuitability', paste0(r_taxon, '.csv')))
+  
+  # for points which were not patched to a most suitable patch, put them into a hydrologic basin
   
 }
 
+patchTaggR(f[1])
 ```
 
 
 ```{r}
+PLANTS <- read.csv('../data/raw/2024sos_species.csv') |>
+  select(genus:symbol) |>
+  unite(sctfcnm, genus:infraspecies, na.rm = TRUE)
 
 p1 <- '../data/raw/2021_AIM_Terrestrial/AIMTerrestrial9-1-22.gdb'
 st_layers(dsn = p1)
