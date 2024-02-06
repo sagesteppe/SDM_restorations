@@ -85,7 +85,7 @@ hu10R <- terra::rasterize(vect(hu10), rast(slope), update = TRUE, field = 'huc10
 terra::rasterize(vect(hu10_line), rast(slope), update = TRUE, field = 'huc10', 
                  filename = '../../Geospatial_data/WBD_rast/hu10R-line.tif', overwrite = T)
 
-hu12R <- terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12', 
+terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12', 
                           filename = '../../Geospatial_data/WBD_rast/hu12R.tif', overwrite = T)
 
 terra::rasterize(vect(hu12_line), rast(slope), update = TRUE, field = 'huc12', 

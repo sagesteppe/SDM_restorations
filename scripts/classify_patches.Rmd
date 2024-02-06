@@ -134,6 +134,9 @@ recs <- lapply(
 
 r1 <- rast(f[1])
 
+hu12 <- rast('../../Geospatial_data/WBD_rast/hu12R-line.tif')
+plot(hu12)
+
 patchTaggR <- function(x){
   
   r <- terra::rast(x)
@@ -164,25 +167,49 @@ patchTaggR <- function(x){
     dplyr::rename(PatchID = lyr.1)
   
   # write out summary values of the patch matching
-  data.frame(
-    noPres = , 
-    PresTopSuitability =, # the number of presences located in top suitability patches
-    UniquePatchID = , # the number of uniquelly identified patches
-    NoPatchesTopSuitability =  # the total number of most suitable patches from the RASTER
-  )
   
-  occ_pops <- dplyr::distinct(occ_pops, PatchID, .keep_all = TRUE) |> # this is multiple pts per patch - not necessary for us. 
+  fp <- '../results/occupiedPatches'
+  data.frame(
+    noPres = nrow(occs), 
+    PresTopSuitability = nrow(occ_pops), # the number of presences located in top suitability patches
+    UniquePatchID = nrow(dplyr::distinct(occ_pops, PatchID)), # the number of uniquelly identified patches
+    NoPatchesTopSuitability = terra::minmax(r)[2] # the total number of most suitable patches from the RASTER
+  ) |>
+    write.csv(row.names = F, 
+              file.path(fp, paste0(r_taxon, '-summary', '.csv')))
+    
+  dplyr::distinct(occ_pops, PatchID, .keep_all = TRUE) |> # this is multiple pts per patch - not necessary for us. 
     sf::st_drop_geometry() |>
     dplyr::select(date, PatchID) |>
     dplyr::arrange(PatchID) |>
     write.csv(row.names = F,
-            file.path('../results/occupiedPatches-topSuitability', paste0(r_taxon, '.csv')))
+            file.path(fp, paste0(r_taxon, '-topSuitability', '.csv')))
   
   # for points which were not patched to a most suitable patch, put them into a hydrologic basin
+  marginal_pops <- sf::st_as_sf(occs)|>
+    dplyr::filter(!ID %in% occ_pops$ID)
   
+  # identify the drainages within the HU12 database
+  drain_nos <- terra::extract(r_drain, marginal_pops, bind = TRUE) |>
+    sf::st_as_sf()
+  r_drain_sub <- terra::mask()
+  
+  # mask original suitability map to these areas, and filter >60% suitable habitat
+  f1 <- list.files('suitability_maps')
+  
+  suitable <- terra::mask(suitable, r_drain_sub)
+  msk <- ifel(suitable > 55 & suitable < 80, NA, 1) # let's make sure these areas do not include existing clusters. 
+  suitable <- mask(suitable, msk) # this is now a second raster for occupied marginal populations
+  
+  writeRaster(paste0('../results/marginal_habitat', r_taxon, '.tif'))
+  return(marginal_pops)
 }
 
-patchTaggR(f[1])
+
+
+
+
+ob <- patchTaggR(f[1])
 ```
 
 
