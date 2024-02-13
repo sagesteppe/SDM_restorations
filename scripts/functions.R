@@ -571,3 +571,81 @@ patcheR <- function(x){
   terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
   
 }
+
+
+
+#' identify patches which are known to have populations of a target species in them
+patchTaggR <- function(x){
+  
+  r <- terra::rast(x)
+  r_taxon <- gsub('_', ' ', gsub('-patchIDS[.]tif', '', basename(x)))
+  occs <- dplyr::filter(recs, taxon == r_taxon) |>
+    dplyr::mutate(ID = dplyr::row_number()) |>
+    terra::vect()
+  
+  occ_pts <- terra::extract(r, occs, bind = TRUE) |>
+    sf::st_as_sf()
+  
+  # if pts were NA, buffer to 90m, many occupied areas were 'cut' away by the 
+  # hydrologic mapping. 
+  occ_poly <- dplyr::filter(occ_pts, is.na(lyr.1)) |>
+    sf::st_buffer(250) # we cut out 90, but let's go a bit further for corner cases.
+  
+  occ_poly <- terra::extract(r, occ_poly, weights = TRUE) %>% 
+    dplyr::group_by(ID) |> # now make sure we get the patch with the 'most' overlap with the polygon
+    tidyr::drop_na(lyr.1) |> # these values actually NA. 
+    dplyr::slice_max(weight, with_ties = F) |>
+    dplyr::left_join(filter(occ_pts) |>
+                       select(-lyr.1), by = join_by('ID')) |>
+    dplyr::select(-weight)
+  
+  occ_pops <- dplyr::bind_rows( # a data frame of all raster patch ID's with populations known from within
+    # the last few decades in them. 
+    tidyr::drop_na(occ_pts, lyr.1), occ_poly) |>
+    dplyr::rename(PatchID = lyr.1)
+  
+  # write out summary values of the patch matching
+  
+  fp <- '../results/occupiedPatches'
+  data.frame(
+    noPres = nrow(occs), 
+    PresTopSuitability = nrow(occ_pops), # the number of presences located in top suitability patches
+    UniquePatchID = nrow(dplyr::distinct(occ_pops, PatchID)), # the number of uniquelly identified patches
+    NoPatchesTopSuitability = terra::minmax(r)[2] # the total number of most suitable patches from the RASTER
+  ) |>
+    write.csv(row.names = F, 
+              file.path(fp, paste0(gsub(' ', '_', r_taxon), '-summary', '.csv')))
+  
+  dplyr::distinct(occ_pops, PatchID, .keep_all = TRUE) |> # this is multiple pts per patch - not necessary for us. 
+    sf::st_drop_geometry() |>
+    dplyr::select(date, PatchID) |>
+    dplyr::arrange(PatchID) |>
+    write.csv(row.names = F,
+              file.path(fp, paste0(gsub(' ', '_', r_taxon), '-topSuitability', '.csv')))
+  
+  # for points which were not patched to a most suitable patch, put them into a hydrologic basin
+  marginal_pops <- sf::st_as_sf(occs)|>
+    dplyr::filter(!ID %in% occ_pops$ID)
+  
+  # identify the drainage's within the HU12 database
+  drain_nos <- terra::extract(hu12, marginal_pops, bind = TRUE) |>
+    sf::st_as_sf()
+  r_drain <- terra::ifel(hu12 %in% drain_nos$huc12, 1, NA)
+  r_drain_sub <- terra::crop(hu12, r_drain, mask = TRUE)
+  
+  # mask original suitability map to these areas, and filter > 0.5 suitable habitat
+  f1 <- list.files('../results/suitability_maps')
+  # f1 <- f1[grepl('1k', f1)]# this for the first records
+  f1 <- f1[ grepl(pattern = gsub(' ', '_', r_taxon), gsub('1k.*$', '', f1)) ][1]
+  
+  suitable <- terra::rast(paste0('../results/suitability_maps/', f1))
+  r_drain_sub <- terra::resample(r_drain_sub, suitable, threads = 16, method = 'near')
+  suitable <- terra::crop(suitable, r_drain_sub, mask = TRUE)
+  msk <- terra::ifel(suitable > 0.5 & suitable < 0.8, 1, NA) # let's make sure these areas do not include existing clusters. 
+  suitable <- terra::mask(suitable, terra::crop(hydr_bound, suitable), inverse = TRUE)
+  terra::mask(suitable, msk, overwrite = TRUE,
+              filename = paste0('../results/marginal_habitat/', gsub(' ', '_', r_taxon), '.tif'))
+  # this is now a second raster for occupied marginal populations
+  
+  terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
+}
