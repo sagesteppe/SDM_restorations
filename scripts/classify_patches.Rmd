@@ -41,34 +41,6 @@ f <- list.files('../results/patches/')
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu12R-line.tif') )
 
-landscapR <- function(x, pout, pRout){
-
-  taxon <- gsub('[.]tif', '', basename(x))
-  x <- terra::rast(file.path('../results/patches', x))
-  x <- terra::ifel(x > 0, 1, NA)
-  x <- terra::mask(x, terra::crop(hydr_bound, x), inverse = TRUE)
-  landscape <- landscapemetrics::get_patches(x, directions = 4)
-  calcs <- landscapemetrics::calculate_lsm(x, what = c('lsm_c_enn_mn', 'lsm_c_enn_cv',
-                "lsm_p_enn", "lsm_p_cai", "lsm_p_para", "lsm_p_frac"), 
-              neighbourhood = 4, directions = 4)
-
-  p <- '../results/'
-  write.csv(
-    calcs[calcs$level == 'patch', c('id', 'metric', 'value')],
-    file = paste0(p, pout, '/', taxon, '-', 'patch_vals.csv'),  row.names = F
-  )
-
-  write.csv(
-    calcs[calcs$level == 'class', c('metric', 'value')],
-    file = paste0(p, pout, '/', taxon, '-', 'class_vals.csv'), row.names = F
-  )
-
-  writeRaster(landscape[["layer_1"]][["class_1"]], 
-    filename = paste0(p, pRout, '/', taxon, '-', 'patchIDS.tif')
-  )
-
-}
-
 lapply(f, FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 
 ```
@@ -146,67 +118,15 @@ Combine all populated patches per species, something was amiss with identifying 
 
 f <- gsub('[.]tif$', '', list.files('../results/patches'))
 
-combine_pop_patches <- function(x){
-
-  pIDs <- read.csv(paste0('../results/occupiedPatches/', x, '-topSuitability.csv'))
-  top_patches <- terra::rast(paste0('../results/fine_patches/', x, '-patchIDS.tif'))
-  highest_no <- minmax(top_patches)[2]
-  top_patches <- terra::subst(top_patches, pIDs$PatchID,  pIDs$PatchID, others = NA)
-  names(top_patches)<- 'patches'
-  pts <- st_read(paste0('../data/raw/occurrence/combined_records/', x, '.shp'), quiet = TRUE) |>
-    dplyr::filter(Occurrence == 1)
-  marg_patch <- terra::rast(paste0('../results/marginal_habitat/', x, '.tif'))
-
-  fsize <- file.info(paste0('../results/marginal_habitat/', x, '.tif'))$size/1e9
-  if(fsize < 0.025){marg_patch <- terra::patches(marg_patch, directions = 4)} else
-    if(fsize > 0.025){marge1 <- terra::patches(terra::aggregate(marg_patch, 2, fun = 'mean'), directions = 4)} else
-      if(fsize > 0.04){marge1 <- terra::patches(terra::aggregate(marg_patch, 3, fun = 'mean'), directions = 4)} else
-        if(fsize > 0.05){marge1 <- terra::patches(terra::aggregate(marg_patch, 4, fun = 'mean'), directions = 4)} else
-          if(fsize > 0.06){marge1 <- terra::patches(terra::aggregate(marg_patch, 5, fun = 'mean'), directions = 4)} else
-            if(fsize > 0.07){marge1 <- terra::patches(terra::aggregate(marg_patch, 6, fun = 'mean'), directions = 4)}
-  if(exists('marge1')){marg_patch <- terra::resample(marge1, marg_patch, threads = 16, method = 'near')} 
-  
-  occ_pts <- terra::extract(marg_patch, terra::vect(pts), bind = TRUE) |>
-    sf::st_as_sf()
-  occ_poly <- dplyr::filter(occ_pts, is.na(patches)) |>
-    sf::st_buffer(250) # we cut out 90, but let's go a bit further for corner cases.
-  occ_poly <- terra::extract(marg_patch, terra::vect(occ_poly), weights = TRUE) %>% 
-    dplyr::group_by(ID) |> # now make sure we get the patch with the 'most' overlap with the polygon
-    tidyr::drop_na(patches) |> # these values actually NA. 
-    dplyr::slice_max(weight, with_ties = F)
-
-  occ_patches <- c(
-    dplyr::filter(occ_pts, ! is.na(patches)) |>
-      dplyr::pull(patches), 
-    occ_poly$patches
-  )
-  
-  if(length(occ_patches) > 0){ 
-  
-    marg_patch <- terra::subst(marg_patch, occ_patches,  occ_patches, others = NA)
-    old_ID <- unique(marg_patch)$patches # gather and relabel patches 
-    lkp <- data.frame(
-      old_ID = old_ID,
-      new_ID = highest_no + 1:length(old_ID)
-    )
-    marg_patch <- terra::subst(marg_patch, lkp$old_ID, lkp$new_ID)
-    final_patches <- terra::cover(top_patches, marg_patch)
-  
-    terra::writeRaster(final_patches, paste0('../results/allOccupiedPatches/', x, '.tif'))
-  } else {
-    terra::writeRaster(top_patches, paste0('../results/allOccupiedPatches/', x, '.tif'))
-  }
-}
-
 # lentiformis  NTIF
 
 lapply(f[c(288:335)], combine_pop_patches) # 2:46
 ```
 
-```{r create a polygon dataset, eval = F}
+```{r create polygon datasets of patches, eval = F}
 
-  f <- paste0('../results/allOccupiedPatches/', 
-            list.files('../results/allOccupiedPatches/'))
+f <- paste0('../results/allOccupiedPatches/', 
+        list.files('../results/allOccupiedPatches/'))
 
 tif2shp <- function(x){
   
@@ -219,6 +139,21 @@ tif2shp <- function(x){
   
 }
 
+lapply(f, tif2shp)
+
+f <- paste0('../results/fine_patches/', 
+        list.files('../results/fine_patches/'))
+
+tif2shp <- function(x){
+  
+  taxon <- gsub('.tif$', '',  basename(x))
+  pg <- terra::as.polygons(rast(x)) %>% 
+    sf::st_as_sf() %>% 
+    sf::st_make_valid()
+  
+  sf::st_write(pg, paste0('../results/fine_patchesVector/', taxon, '.shp'), quiet = TRUE)
+  
+}
 lapply(f, tif2shp)
 
 ```

@@ -1,4 +1,3 @@
-
 # Introduction 
 
 A primary challenge to restoring Earths terrestrial ecosystems is the lack of available plant germplasm (@national2023assessment, @merritt2011restoration).
@@ -53,20 +52,22 @@ Random Forests models were generated for each species following several steps to
 While superfluous features generally do not notably decrease the performance of random forests, they increase the amount of time required to predict models onto gridded surfaces. 
 The Boruta algorithm was used on the full stack of 44?? independent variables to remove un-informative variables @kursa2010boruta), and the variable importance factor (VIF) scores were then used to subset the most informative features in several auto-correlated pairs, reducing the independent variables to at most 33.  
 Recursive Feature Elimination (rfe) was then used to identify the fewest number of independent variables which could either increase model performance (measured using accuracy), or only decrease it by 1.5% relative to the full set of variables, these variables were subset and used as features for random forest modelling with all default values except for optimized mtrys (@kuhn2008caret, @liaw2002randomForest). 
-Models were then predicted onto gridded surfaces which exceeded the species range by 50 miles using terra's predict. 
+Models were then predicted onto gridded surfaces which exceeded the species range by 50 miles (@terra). 
 
 ## Patch identification 
-In order to identify patches which may support populations raster values less than 0.6 were masked as NA's and a rooks case search was conducted (@hijman2023terra). 
+In order to identify patches which may support populations raster values less than 0.8 were masked as NA's and a rooks case search was conducted using @LANDSCAPEMETRICS. 
+Multiple landscape metrics were calculated the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index LANDSCAPE METRICS.
+Because the > 0.8 threshold used above did not capture all colonized patches, all patches with predicted suitability scores of >0.55 which contained species observations were then identified using Terra's patches to create a data set of known populations. 
 
-To determine whether habitat suitability could predict species abundance mean weighted patch suitability $PS =  \sum_{\text{i = 1}}^{n} {x_{i}}$ was regressed against abundance using GLM... 
-All AIM plots were queried for all occasions which a target species was observed via either the Species Richness, or Line-Point Intercept method (150 points along three equiangular transects over a 25m radius outside a 5m radius buffer zone). 
-Occurrence of a species only along SR was considered 1% cover, while the canopy cover from LPI was used. 
+## Predicting Species Occurrence in Patches
 
-To determine whether connectivity could predict the presence of a population in a patch, connectivity was calculated between every patch, and jacknife-resampled for logistic regression where connectivity scaled from 0 to 100 served as a the independent variable. 
+All patches identified above were used to identify patches nearest neighbors. The 5 nearest neighbors of each patch were detected using @SPDEP. 
+
 
 ## Variables and Sources for Environmental Niche Models
 
-Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms which the species has considerable niche overlap with. The full 'wild' models feature up to 33 variables, while the 'farm' models features ca. 26 variables. Both endeavors run step wise. 
+Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms which the species has considerable niche overlap with. 
+The full 'wild' models feature up to 33 variables, while the 'farm' models features ca. 26 variables. Both endeavors run step wise. 
 
 
 | Layer |                       Description                       |              Source                   |     Model    |      
@@ -148,3 +149,12 @@ These steps would develop this set of candidate models
 The model with the highest correlation coefficient to the occurrence data would be the final model indicating the strength of correlation between the SDM's and in field measured occurrence.
 
 In instances where multiple field observations exist per patch, patches will be decomposed so that the cells closest to the plots become the unit at which PS is calculated.
+
+
+
+To determine whether habitat suitability could predict species abundance mean weighted patch suitability $PS =  \sum_{\text{i = 1}}^{n} {x_{i}}$ was regressed against abundance using GLM. 
+All AIM plots were queried for all occasions which a target species was observed via either the Species Richness, or Line-Point Intercept method (150 points along three equiangular transects over a 25m radius outside a 5m radius buffer zone). 
+Occurrence of a species only along SR was considered 1% cover, while the canopy cover from LPI was used. 
+
+To determine whether connectivity could predict the presence of a population in a patch, connectivity was calculated between every patch, and jacknife-resampled for logistic regression where connectivity scaled from 0 to 100 served as a the independent variable. 
+
