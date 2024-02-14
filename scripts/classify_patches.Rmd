@@ -162,96 +162,21 @@ lapply(f, tif2shp)
 
 detect neighboring patches
 
-```{r detect neighboring patches up to 5 orders}
+```{r detect neighboring patches up to 5 orders, eval = F}
 
 f <- list.files('../results/allOccupiedPatchesVector', pattern = 'shp$')
 
-#' identify contiguous neighbors and count them. 
-#' @param x 
-neigh_type <- function(x){
-  
-  # assemble the data sets. 
-  taxon <- gsub('.shp$', '', basename(x))
-  pm <- read.csv(paste0('../results/patch_metrics/', taxon, '-patch_vals.csv')) %>% 
-    dplyr::filter(metric == 'cai' & value > 0) %>% 
-    dplyr::select(id)
-
-  occ <- sf::st_read(paste0('../results/allOccupiedPatchesVector/', taxon, '.shp'), quiet = T) |> 
-    dplyr::mutate(Presence = 'Known')
-  pred <- sf::st_read(paste0('../results/fine_patchesVector/', taxon, '-patchIDS.shp'), quiet = T) |> 
-    dplyr::mutate(Presence = 'Predicted') |> 
-    dplyr::filter(lyr_1 %in% pm$id) # filter for core area indexes
-
-  pred1 <- pred[ lengths(sf::st_covers(pred, occ)) == 0, ] # make this dataset distinct. 
-  pred2 <- sf::st_buffer(pred1, dist = 80) # for up north. 
-  pred2 <- sf::st_difference(pred2)
-  
-  occ <- sf::st_buffer(occ, dist = 80) # for up north. 
-  occ <- sf::st_difference(occ)
-
-  patches <- dplyr::bind_rows(occ, pred2) %>% 
-    sf::st_difference()
-  
-  # identify contiguous neighbors 
-  nblags <- spdep::nblag(
-    neighbours = spdep::poly2nb(patches, queen = TRUE), maxlag = 5)
-
-  # rows 1: here are presences. 
-  known_r <- nrow(patches[patches$Presence=='Known',])
-
-  # count the contiguous neighbors
-  nblags <- rapply(nblags, function(x){x <- length(as.numeric(x[x <= known_r & x != 0]))}, how = 'replace')
-  nblags <- data.table::rbindlist(nblags) %>% 
-    t() %>% 
-    as.data.frame() %>% 
-    setNames(., c('FirstOrder', 'SecondOrder', 'ThirdOrder', 'FourthOrder', 'FifthOrder')) 
-  rownames(nblags) <- 1:nrow(nblags)
-
-  # count the proximal neighbors
-  nbdist <- spdep::dnearneigh(x = st_centroid(patches), d1 = 0, d2 = 5000) # neighbors within 5k
-  nbdist <- lapply(nbdist, function(x){x <- length(as.numeric(x[x <= known_r & x != 0]))})
-
-  nbdist <- setNames(
-    data.frame(as.matrix(nbdist)), 'OccupiedNeighborsIn5k')
-  nbdist$OccupiedNeighborsIn5k <- as.numeric(nbdist$OccupiedNeighborsIn5k)
-
-  dat <- cbind(nbdist, nblags) %>% 
-    tibble::rownames_to_column('ROW') %>% 
-    tidyr::pivot_longer(FirstOrder:FifthOrder, names_to = 'OrderConnection', values_to = 'NoConnections') %>% 
-    dplyr::filter(ROW %in% 1:known_r | OccupiedNeighborsIn5k > 0 | NoConnections > 0)
-  
-  ranks <- dplyr::mutate(dat, 
-         Rank = dplyr::case_when(
-           OrderConnection == 'FirstOrder' & NoConnections >= 2 ~ 2, 
-           OrderConnection == 'FirstOrder' & NoConnections == 1 ~ 3, 
-           OrderConnection == 'SecondOrder' & NoConnections >= 3 ~ 4, 
-           OrderConnection == 'SecondOrder' & NoConnections <= 2 ~ 5, 
-           OrderConnection == 'ThirdOrder' & NoConnections >= 4 ~ 6, 
-           OrderConnection == 'ThirdOrder' & NoConnections <= 3 ~ 7, 
-           OccupiedNeighborsIn5k >= 3 ~ 5, 
-           OccupiedNeighborsIn5k <= 2 ~ 6, 
-           .default = as.numeric(7)
-         )) |>
-    dplyr::slice_min(Rank, n = 1, by = 'ROW') |>
-    dplyr::select(ROW, Rank) |>
-    dplyr::mutate(Rank = dplyr::if_else(ROW %in% 1:known_r, 1, Rank))
-
-  x1 <- patches |>
-    tidyr::unite('PatchIDCombined', c('patches', 'lyr_1'), na.rm = T) |>
-    tibble::rownames_to_column('ROW') |>
-    dplyr::right_join( ranks, by = 'ROW') |>
-    dplyr::select(-ROW, -Presence, PchIDComb = PatchIDCombined)
-  
-  write.csv(dat, paste0('../results/connections/', taxon, '.csv'), row.names = F)
-  sf::st_write(x1, paste0('../results/rankedPatches/', taxon, '.shp'), quiet = T, append = F)
-    
-}
-
 lapply(f, neigh_type)
-
 ```
 
 
+clip ranked patches to BLM land
+
+```{r}
+
+
+
+```
 
 
 ```{r}

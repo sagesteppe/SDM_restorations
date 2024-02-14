@@ -90,3 +90,50 @@ terra::rasterize(vect(hu12), rast(slope), update = TRUE, field = 'huc12',
 
 terra::rasterize(vect(hu12_line), rast(slope), update = TRUE, field = 'huc12', 
                  filename = '../../Geospatial_data/WBD_rast/hu12R-line.tif', overwrite = T)
+
+
+################################################################################
+### Raster of areas plants cannot grow
+r <- rast('../data/raw/nlcd/nlcd_2021_land_cover_l48_20230630.img')
+domain <- terra::project(domain, crs(r))
+r <- terra::crop(r, domain)
+ob <- terra::cats(r)
+
+will_mask <- c(11, 12, 21:24, 81, 82) 
+will_mask <- data.frame(ob[[1]]) %>% 
+  filter(value %in% will_mask) %>% 
+  pull(NLCD.Land.Cover.Class) 
+
+msk <- ifel(r %in% will_mask, 1, NA) 
+r_sub <- terra::aggregate(msk, factor = 3, fun = 'max', 
+                          filename = '../data/processed/nlcd.tif', overwrite = T) 
+
+################################################################################
+### Vector data of BLM surface administration
+
+p2gdb <- '/media/steppe/hdd/Geospatial_data/Public_land_ownership/PADUS3_0Geodatabase/PAD_US3_0.gdb'
+st_layers(p2gdb)
+
+ensure_multipolygons <- function(X) {
+  tmp1 <- tempfile(fileext = ".gpkg")
+  tmp2 <- tempfile(fileext = ".gpkg")
+  st_write(X, tmp1)
+  gdalUtilities::ogr2ogr(tmp1, tmp2, f = "GPKG", nlt = "MULTIPOLYGON")
+  Y <- st_read(tmp2)
+  st_sf(st_drop_geometry(X), geom = st_geometry(Y))
+}
+
+ownership <- st_read(p2gdb, 'PADUS3_0Fee', quiet = TRUE) %>% 
+  filter(Mang_Name == 'BLM' & State_Nm != 'AK') %>% 
+  select(Unit_Nm, Loc_Nm)
+ownership <- ensure_multipolygons(ownership) %>% 
+  st_make_valid()
+
+ownership <- st_crop(ownership, project(domain, crs(ownership)))
+own_simp <- ms_simplify(ownership, keep = 0.1, weighting = 0.6, keep_shapes = TRUE, sys = TRUE)
+
+own_simp <- own_simp[!st_is_empty(own_simp),]
+st_write(own_simp, 
+         '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp', append = F)
+
+rm(p2gdb, ensure_multipolygons, domain)
