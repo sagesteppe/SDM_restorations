@@ -1,0 +1,79 @@
+---
+title: "Download data"
+author: "steppe"
+date: "2023-10-14"
+output: html_document
+---
+
+```{r load packages}
+library(tidyverse)
+library(terra)
+library(sf)
+source('functions.R')
+```
+
+
+Identify what areas crews require data for. 
+
+```{r Crew Info}
+
+blm <- vect(
+  '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp')
+
+crew_locs <- read.csv('../data/raw/crew_locations.csv') %>% 
+  mutate(across(.cols = everything(), ~ na_if(., ''))) %>% 
+  pivot_longer(cols = FO1:FO5, names_to = 'FO', values_to = 'FieldOffice' ) %>% 
+  drop_na() %>% 
+  select(-FO)
+
+teams <- filter(crew_locs, !str_detect(Contract, 'Senior')) %>% 
+  mutate(FieldOffice = paste(FieldOffice, 'Field Office')) 
+
+seniors <- filter(crew_locs, str_detect(Contract, 'Senior')) %>% 
+  rename(Senior = Contract, Contract = FieldOffice) %>% 
+  left_join(., teams, by = 'Contract')
+
+rm(crew_locs)
+```
+
+Identify which species crews require. 
+
+```{r}
+
+spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>% 
+  filter(contract == 'SNDO') %>% 
+  unite('binomial', genus:species) %>% 
+  select(binomial, contract)
+
+```
+
+```{r import data}
+
+p <- '/media/steppe/hdd/Geospatial_data/'
+
+blm_surf <- st_read(paste0(p, 'Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp'), quiet = TRUE)
+invasives <- rast(paste0(p, 'MRLC/', '2023_InvGrassCover.tif'))
+change_intensity <- rast(paste0(p, 'MRLC/total_change_intensity_index/', 'TCII_3arc.tif'))
+fire_perimeters <- st_read(
+  paste0(p, 'NIFC_perimeters/', 'InterAgencyFirePerimeterHistory_All_Years_View-Simplified.shp'))
+
+
+```
+
+
+```{r}
+
+#' @param crew_id column in project_areas holding the crews identifier info 'e.g. UFO'
+#' @param blm_surf sf data set of surface management as multipolygon at most
+#' @param fs_surf sf data set of surface USFS land management as multipolygon at most
+#' @param fire sf data set of historic fires as multipopylgon at most
+#' @param invasive sf dataset of invasive species relative cover estimates
+#' @param historic_SOS sf dataset with historic SoS endeavors and relevant info
+#' @param roads sf dataset of roads with relevant attritbutes
+#' @param seed_transfer sf dataset of seed transfer zones 
+#' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
+#' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
+
+```
+
+

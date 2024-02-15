@@ -167,15 +167,31 @@ detect neighboring patches
 f <- list.files('../results/allOccupiedPatchesVector', pattern = 'shp$')
 
 lapply(f, neigh_type)
+
 ```
 
 
-clip ranked patches to BLM land
+These previous patches refer to pre-Colombian connectivity. We will reduce them to BLM surface areas. 
 
-```{r}
+```{r crop patches to BLM, eval = F}
+blm_admin_surf <- st_read('/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp') %>% 
+  select(geometry)
+f <- paste0('../results/rankedPatches/', list.files('../results/rankedPatches/', pattern = '.shp$'))
 
+crop2blm <- function(x){
+  
+  taxon <- gsub('.shp$', '', basename(x))
+  patches <- sf::st_read(x, quiet = TRUE) |> 
+    sf::st_make_valid()
+  blm_patches <- sf::st_intersection(patches, blm_admin_surf)
+  blm_patches <- sf::st_make_valid(blm_patches) |>
+    sf::st_collection_extract(type = c("POLYGON"))
+  
+  blm_patches <- blm_patches[!sf::st_is_empty(blm_patches),]
+  sf::st_write(blm_patches, paste0('../results/PatchesClippedBLM/', taxon, '.shp'), quiet = TRUE)
+}
 
-
+lapply(f, crop2blm)
 ```
 
 

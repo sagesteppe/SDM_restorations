@@ -131,9 +131,43 @@ ownership <- ensure_multipolygons(ownership) %>%
 
 ownership <- st_crop(ownership, project(domain, crs(ownership)))
 own_simp <- ms_simplify(ownership, keep = 0.1, weighting = 0.6, keep_shapes = TRUE, sys = TRUE)
-
 own_simp <- own_simp[!st_is_empty(own_simp),]
+
+own_simp <- st_make_valid(own_simp) %>% 
+  st_collection_extract(type = c("POLYGON"))
+
 st_write(own_simp, 
          '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp', append = F)
 
-rm(p2gdb, ensure_multipolygons, domain)
+
+
+################################################################################
+### Vector data of USFS surface administration
+
+p2gdb <- '/media/steppe/hdd/Geospatial_data/Public_land_ownership/PADUS3_0Geodatabase/PAD_US3_0.gdb'
+st_layers(p2gdb)
+
+ensure_multipolygons <- function(X) {
+  tmp1 <- tempfile(fileext = ".gpkg")
+  tmp2 <- tempfile(fileext = ".gpkg")
+  st_write(X, tmp1)
+  gdalUtilities::ogr2ogr(tmp1, tmp2, f = "GPKG", nlt = "MULTIPOLYGON")
+  Y <- st_read(tmp2)
+  st_sf(st_drop_geometry(X), geom = st_geometry(Y))
+}
+
+ownership <- st_read(p2gdb, 'PADUS3_0Fee', quiet = TRUE) %>% 
+  filter(Mang_Name == 'USFS' & State_Nm != 'AK') %>% 
+  select(Unit_Nm, Loc_Nm)
+ownership <- ensure_multipolygons(ownership) %>% 
+  st_make_valid()
+
+ownership <- st_crop(ownership, project(domain, crs(ownership)))
+own_simp <- rmapshaper::ms_simplify(ownership, keep = 0.1, weighting = 0.6, keep_shapes = TRUE, sys = TRUE)
+own_simp <- own_simp[!st_is_empty(own_simp),]
+
+own_simp <- st_make_valid(own_simp) %>% 
+  st_collection_extract(type = c("POLYGON"))
+
+st_write(own_simp, 
+         '/media/steppe/hdd/Geospatial_data/Public_land_ownership/USFS_West_simplified/USFS_West_simplified.shp', append = F)
