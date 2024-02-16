@@ -1,5 +1,6 @@
 setwd('/media/steppe/hdd/SDM_restorations/scripts')
 
+library(tidyverse)
 library(terra)
 library(sf)
 
@@ -43,19 +44,82 @@ rm(june_inv, may_inv, inv_grass, twentyThreeMean, mrlc)
 ###############################################
 # Create Roads Data set
 
+library(tigris)
 
-domain <- rast(nrows = 1, ncols = 1) # create a big empty raster, you can go in through sf too. 
-ext(domain) <- c( -125.5, -100, 27,  50) # set the extent
-crs(domain) <- "EPSG:4326"
+states <- states() %>% 
+  filter(STUSPS %in% c('NV', 'UT', 'CA', 'AZ', 'CO')) %>% 
+  select(STUSPS, ST_NAME = NAME, STATEFP) %>% 
+  st_drop_geometry()
 
+county <- counties(states$STUSPS) %>% 
+  st_transform(5070)
+county <- county[ lengths( st_intersects(county, blm)) > 0, ]
 
-p <- '/media/steppe/hdd/Geospatial_data/Transportation_National_GDB/Transportation_National_GDB.gdb'
-roads <- st_read(p, layer = 'Trans_RoadSegment', quiet = TRUE) 
+county_rds <- roads(county$STATEFP[1], county$COUNTYFP[1]) %>% 
+  st_transform(st_crs(blm))
 
-st_crop(roads, domain) # restrict to the west
-# now restrict to BLM 
+p2 <- '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/raw/'
 
+road_setter <- function(x){
   
-# mask away urban areas. 
+  statefp <- x$STATEFP[1]
+  county_rds <- lapply(X = x$STATEFP, county = x$COUNTYFP, FUN = tigris::roads) %>% 
+    dplyr::bind_rows() %>% 
+    sf::st_transform(5070)
+  blm_roads <- sf::st_intersection(county_rds, blm)
+  
+  st_write(blm_roads, paste0(p2, statefp, '.shp'))
+}
+
+rs <- split(county, f = county$STATEFP)
+lapply(rs, road_setter)
+
+roads <- lapply(paste0(p2, list.files(p2, pattern = 'shp$')), sf::st_read, quiet = TRUE) |>
+  dplyr::bind_rows() %>% 
+  select(LINEARID)
+
+roads_simp <- st_simplify(roads, dTolerance = 10)
+object.size(roads_simp)/10^9 # ~55% of original size. 
+st_write(roads_simp, '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/processed/BLM_roads.shp', append = F)
+
+rm(states, county, p2, roads, roads_simp, rs, road_setter)
 
 
+
+## simplify boundaries of allotments
+
+allottments <- st_read(paste0(p, 
+  'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/BLM_Natl_Grazing_Allotment_Polygons.shp')) %>% 
+  filter(ADMIN_ST != 'AK')
+
+allottments15.5 <- rmapshaper::ms_simplify(allottments, keep = 0.2, weighting = 0.6, keep_shapes = TRUE, sys = TRUE)
+allottments15.5 <- st_make_valid(allottments15.5)
+st_write(allottments15.5, paste0(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp'), append = F)
+#### CREATE boundaries of field offices. 
+
+p <- '/media/steppe/hdd/Geospatial_data/'
+p2gdb <- '/Public_land_ownership/BLM_National_Administrative_Unit_B.gdb'
+bounds <- st_read(paste0(p, p2gdb), layer = 'blm_natl_admu_field_poly_webpub')  %>% 
+  filter(ADMIN_ST != 'AK') %>% 
+  select(ADMU_NAME, PARENT_NAME) 
+
+bounds <- bounds %>% 
+  mutate(
+    across(ADMU_NAME:PARENT_NAME, ~ str_to_upper(.x)),
+    ADMU_NAME = paste(str_remove(ADMU_NAME, ' FIELD.*$'), 'FIELD OFFICE'), 
+    PARENT_NAME = paste(str_remove(PARENT_NAME, ' DISTRICT.*$'), 'DISTRICT OFFICE'),
+    ADMU_NAME = str_replace(ADMU_NAME, 'ROSEBURG DISTRICT SWIFTWATER FO FIELD OFFICE', 
+                            'ROSEBURG DISTRICT SWIFTWATER FIELD OFFICE'), 
+    ADMU_NAME = str_replace(ADMU_NAME, 'ROSEBURG DISTRICT SOUTH RIVER FO FIELD OFFICE', 
+                            'ROSEBURG DISTRICT SOUTH RIVER FIELD OFFICE'), 
+    ADMU_NAME = str_replace(ADMU_NAME, 'PALM SPRINGS/S. COAST FIELD OFFICE', 
+                            'PALM SPRINGS/SOUTH COAST FIELD OFFICE'), 
+    PARENT_NAME = str_replace(PARENT_NAME, 'DAKS', 'DAKOTAS')
+    )
+
+st_write(bounds, paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'))
+
+ggplot() +
+  geom_sf(data = bounds)
+
+head(bounds)

@@ -40,51 +40,34 @@ rm(crew_locs)
 ```
 
 
-Gather together roads data
-```{r Gather Roads data}
-library(tigris)
+```{r jitter the AIM data, eval = F}
+set.seed(125)
+occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records'
+occurrences <- lapply(
+  file.path(occ_p, list.files(occ_p, pattern = 'shp$')), st_read, quiet = T) |>
+  bind_rows() %>% 
+  filter(Occurrence == 1) %>% 
+  select(taxon, date, PtType)
+occ_aim <- filter(occurrences, PtType == 'AIM Presence') %>% 
+  st_jitter(amount = 250)
+occurrences <- bind_rows(
+  filter(occurrences, PtType != 'AIM Presence'), 
+  occ_aim) %>% 
+  mutate(
+    PtType = if_else(PtType == 'AIM Presence', 'jittered', 'exact'),
+    date = str_extract(date, '[0-9]{4}')
+    ) %>% 
+  rename(year = date, coord_status = PtType) %>% 
+  arrange(taxon, year, coord_status)
 
-states <- states() %>% 
-  filter(STUSPS %in% c('NV', 'UT', 'CA', 'AZ', 'CO')) %>% 
-  select(STUSPS, ST_NAME = NAME, STATEFP) %>% 
-  st_drop_geometry()
+table(occurrences$coord_status)
+st_write(occurrences, file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
 
-county <- counties(states$STUSPS) %>% 
-  st_transform(5070)
-county <- county[ lengths( st_intersects(county, blm)) > 0, ]
-
-county_rds <- roads(county$STATEFP[1], county$COUNTYFP[1]) %>% 
-  st_transform(st_crs(blm))
-
-p2 <- '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/raw/'
-
-road_setter <- function(x){
-  
-  statefp <- x$STATEFP[1]
-  county_rds <- lapply(X = x$STATEFP, county = x$COUNTYFP, FUN = tigris::roads) %>% 
-    dplyr::bind_rows() %>% 
-    sf::st_transform(5070)
-  blm_roads <- sf::st_intersection(county_rds, blm)
-  
-  st_write(blm_roads, paste0(p2, statefp, '.shp'))
-}
-
-rs <- split(county, f = county$STATEFP)
-lapply(rs, road_setter)
-
-roads <- lapply(paste0(p2, list.files(p2, pattern = 'shp$')), sf::st_read, quiet = TRUE) |>
-  dplyr::bind_rows() %>% 
-  select(LINEARID)
-
-roads_simp <- st_simplify(roads, dTolerance = 10)
-object.size(roads_simp)/10^9 # ~55% of original size. 
-st_write(roads_simp, '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/processed/BLM_roads.shp', append = F)
-
-rm(states, county, p2, roads, roads_simp, rs, road_setter)
+rm(occ_p. occ_aim)
 ```
 
-
 Identify which species crews require. 
+
 
 ```{r}
 
@@ -107,16 +90,33 @@ fire_perimeters <- st_read( quiet = T,
   paste0(p, 'NIFC_perimeters/', 'InterAgencyFirePerimeterHistory_All_Years_View-Simplified.shp'))
 SWSTZ <- st_read( quiet = T,
   paste0(p, 'provisional_SeedTransferZones/', 'desertSW/desert_southwest_provisional_seed_transfer_zones_USGS.shp')) %>% 
-  select(Zone)
+  select(seed_zone = Zone) %>% 
+  mutate(Dataset = 'SWSTZ', .before = geometry, seed_zone = as.character(seed_zone))
 BOWERSTZ <- st_read( quiet = T,
   paste0(p, 'provisional_SeedTransferZones/', 'WWETAC_STZ/GB_2013_revised_reduced.shp')) %>% 
-  select(seed_zone)
+  select(seed_zone) %>% 
+  mutate(Dataset = 'BowerRevised', .before = geometry)
+STZ <- bind_rows(BOWERSTZ, SWSTZ)
+roads <- st_read(quiet = T, paste0(p, 'blmRoadsSOS24/processed/BLM_roads.shp'))
+admin_boundaries <- st_read(paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'), quiet = TRUE)
+allotments <- st_read('Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp')
 
+patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
+patches <- lapply(
+  file.path(patches_p, list.files(patches_p, pattern = 'shp$')), st_read, quiet = T) |>
+  bind_rows()
+
+occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records'
+occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
+
+rm(SWSTZ, BOWERSTZ, occ_p)
 ```
 
 ```{r}
 
-
+ggplot() + 
+  geom_sf(data = BOWERSTZ, aes(fill = seed_zone)) +
+  geom_sf(data = SWSTZ, aes(color = Zone))
 
 ```
 
@@ -131,8 +131,17 @@ BOWERSTZ <- st_read( quiet = T,
 #' @param historic_SOS sf dataset with historic SoS endeavors and relevant info
 #' @param roads sf dataset of roads with relevant attritbutes
 #' @param seed_transfer sf dataset of seed transfer zones 
-#' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
-#' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
+
+lapply(CREWS_LIST, 
+       target_species = spp_needed,
+       blm_surf = blm_surf,
+       fs_surf = usfs_surf, 
+       fire = fire_perimeters,
+       invasive = invasives,
+       sdm_stack, 
+       occurrences,
+      # historic_SOS, 
+       roads = roads, seed_transfer = STZ)
 
 ```
 

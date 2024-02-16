@@ -848,7 +848,8 @@ project_maker <- function(x, target_species,
   
   # create directory to hold all contents
   x_df <- st_drop_geometry(x)
-  crew_dir <- paste0('../Crews/', x_df['Crew'][[1]][1])
+  
+  crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial', x_df['Crew'][[1]][1])
   
   ifelse(!dir.exists(file.path('../Crews/')), dir.create(file.path('../Crews/')), FALSE)
   ifelse(!dir.exists(file.path(crew_dir)), dir.create(file.path(crew_dir)), FALSE)
@@ -866,6 +867,7 @@ project_maker <- function(x, target_species,
   dir.create( file.path(crew_dir, 'Geodata/Disturb') ) 
   dir.create( file.path(crew_dir, 'Geodata/Disturb/Fire') ) 
   dir.create( file.path(crew_dir, 'Geodata/Disturb/Invasive') ) 
+  dir.create( file.path(crew_dir, 'Geodata/Disturb/Geodata/Disturb/TotalChangeIntensity') ) 
   
   # target species information
   dir.create( file.path(crew_dir, 'Geodata/Species') ) 
@@ -877,8 +879,8 @@ project_maker <- function(x, target_species,
   dir.create( file.path(crew_dir, 'Geodata/Roads')) 
   # Seed transfer zones
   dir.create( file.path(crew_dir, 'Geodata/STZ')) 
-  # drought 
-  dir.create( file.path(crew_dir, 'Geodata/Drought'))
+#  # drought 
+#  dir.create( file.path(crew_dir, 'Geodata/Drought'))
   
   
   #### Process geographic data to a mask of the field office ####
@@ -917,6 +919,10 @@ project_maker <- function(x, target_species,
   crop(invasives, focal_vect, mask = T, threads = T, filename =
          file.path(crew_dir, 'Geodata/Disturb/Invasive', 'Invasive.tif'))
   
+  # write out the change_intensity
+  crop(total_change, focal_vect, mask = T, threads = T, filename = 
+         file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity', 'TCII.tif'))
+  
   # write out species occurrence data
   
   occurrences_sub <- filter(occurrences, species %in% t_spp$Species)
@@ -932,7 +938,7 @@ project_maker <- function(x, target_species,
   
   lapply(occurrences_list, occ_writer)
   
-  #  st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Occurrences', 'Occurrences.shp'), quiet = T)
+  # st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Occurrences', 'Occurrences.shp'), quiet = T)
   st_intersection(historic_SOS, focal_bbox) %>% 
     st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Historic_SoS', 'Historic_SoS.shp'), quiet = T)
   
@@ -943,10 +949,10 @@ project_maker <- function(x, target_species,
     st_write(., dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T)
   
   # drought
-  crop(drought6, focal_vect, mask = T, threads = T, filename =
-         file.path(crew_dir, 'Geodata/Drought', 'drought-6.tif'))
-  crop(drought12, focal_vect, mask = T, threads = T, filename =
-         file.path(crew_dir, 'Geodata/Drought', 'drought-12.tif'))
+#  crop(drought6, focal_vect, mask = T, threads = T, filename =
+#         file.path(crew_dir, 'Geodata/Drought', 'drought-6.tif'))
+#  crop(drought12, focal_vect, mask = T, threads = T, filename =
+#         file.path(crew_dir, 'Geodata/Drought', 'drought-12.tif'))
   
   # write out original species information
   sdm_fo <- crop(sub, focal_vect, mask = T) # need to make a vect of this... 
