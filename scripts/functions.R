@@ -832,14 +832,16 @@ neigh_type <- function(x){
 #' @param historic_SOS sf dataset with historic SoS endeavors and relevant info
 #' @param roads sf dataset of roads with relevant attritbutes
 #' @param seed_transfer sf dataset of seed transfer zones 
+#' @param total_change Total Change Intensity Index from the MRLC
 #' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
 #' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
 project_maker <- function(x, target_species,
                           blm_surf, fs_surf, # ownership stuff
-                          fire,  invasive,
-                          sdm_stack,  occurrences, historic_SOS, 
-                          roads, seed_transfer, 
-                          drought6, drought12){
+                          fire,  invasive,  occurrences, historic_SOS, 
+                          total_change, 
+                          roads, seed_transfer#, 
+                     #     drought6, drought12
+                     ){
   
   defaultW <- getOption("warn")
   options(warn = -1)
@@ -847,9 +849,8 @@ project_maker <- function(x, target_species,
   #### Initiate Project Directories ####
   
   # create directory to hold all contents
-  x_df <- st_drop_geometry(x)
   
-  crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial', x_df['Crew'][[1]][1])
+  crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
   
   ifelse(!dir.exists(file.path('../Crews/')), dir.create(file.path('../Crews/')), FALSE)
   ifelse(!dir.exists(file.path(crew_dir)), dir.create(file.path(crew_dir)), FALSE)
@@ -861,13 +862,14 @@ project_maker <- function(x, target_species,
   # write out BLM and Forest Service
   dir.create( file.path(crew_dir, 'Geodata/Admin') ) 
   dir.create( file.path(crew_dir, 'Geodata/Admin/Boundaries') ) 
+  dir.create( file.path(crew_dir, 'Geodata/Admin/Allotments'))
   dir.create( file.path(crew_dir, 'Geodata/Admin/Surface') ) # both BLM and Forest Service go in here
   
   # fire and invasive species data
   dir.create( file.path(crew_dir, 'Geodata/Disturb') ) 
   dir.create( file.path(crew_dir, 'Geodata/Disturb/Fire') ) 
   dir.create( file.path(crew_dir, 'Geodata/Disturb/Invasive') ) 
-  dir.create( file.path(crew_dir, 'Geodata/Disturb/Geodata/Disturb/TotalChangeIntensity') ) 
+  dir.create( file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity') ) 
   
   # target species information
   dir.create( file.path(crew_dir, 'Geodata/Species') ) 
@@ -885,7 +887,7 @@ project_maker <- function(x, target_species,
   
   #### Process geographic data to a mask of the field office ####
   
-  focal_bbox <- x %>%  # create this to clip all data to.
+  focal_bbox <- filter(admin_boundaries, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) %>%  
     st_union() %>% 
     st_transform(5070) %>% 
     st_buffer(dist = 10000) 
@@ -894,23 +896,15 @@ project_maker <- function(x, target_species,
     vect()
   focal_bbox <- focal_bbox 
   
-  ### identify target species and pull out of the SDM stack
-  
-  t_spp <- target_species %>% 
-    filter(Crew %in% c('Universal', x_df['Crew'][[1]][1])) 
-  t <- t_spp %>% 
-    mutate(Species = str_replace(Species, " ", "_")) %>% 
-    pull(Species)
-  
-  write.csv(t_spp, file = file.path(crew_dir, 'Data', 'Target-species.csv'), row.names = F)
-  sub <- sdms[[str_remove(names(sdms), '_[0-9].*$') %in% t]]
   
   # write out ownership details
-  st_write(x, dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), quiet = T)
-  st_intersection(blm_surf, focal_bbox) %>%  
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'BLM_Surface.shp'), quiet = T)
+  st_write(x, dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), quiet = T, append = F)
+  blm_surf_sub <- st_intersection(blm_surf, focal_bbox) 
+  st_write(blm_surf_sub, dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'BLM_Surface.shp'), quiet = T, append = F)
+  st_intersection(allotments, focal_bbox) %>% 
+    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Allotments', 'Allotments.shp'), quiet = T, append = F)
   st_intersection(fs_surf , focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'USFS_Surface.shp'), quiet = T)
+    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'USFS_Surface.shp'), quiet = T, append = F)
   
   # write out invasive species
   st_intersection(fire, focal_bbox) %>% 
@@ -924,7 +918,8 @@ project_maker <- function(x, target_species,
          file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity', 'TCII.tif'))
   
   # write out species occurrence data
-  
+
+  target_species$
   occurrences_sub <- filter(occurrences, species %in% t_spp$Species)
   occurrences_list <- st_intersection(occurrences_sub, focal_bbox) %>% 
     split(., f = .$species)
@@ -938,15 +933,37 @@ project_maker <- function(x, target_species,
   
   lapply(occurrences_list, occ_writer)
   
+  ### identify target species and load their patches data set
+  t_spp <- target_species %>% 
+    filter(contract == x$Contract)  %>% 
+    pull(Species)
+  
+  patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
+  sdm_files <- file.path(patches_p, list.files(patches_p, pattern = 'shp$'))
+  sdm_files <- sdm_files[ grep(paste0(t_spp, collapse = '.shp|'), sdm_files)]
+  
+  sdm_writer <- function(x){
+    f <- sf::st_read(x)
+    f_crop <- sf::st_crop(f, focal_bbox)
+    f_crop <- f_crop[ lengths(st_intersects(f_crop, blm_surf_sub) > 0), ]
+    sf::st_write(f_crop, 
+                 file.path(crew_dir, 'Geodata/Species/SDMs', paste0(binomial, '.shp')))
+  }
+  
+  lapply(sdm_files, sdm_writer)
+  
+ # write.csv(t_spp, file = file.path(crew_dir, 'Data', 'Target-species.csv'), row.names = F)
+ # sub <- sdms[[str_remove(names(sdms), '_[0-9].*$') %in% t]]
+  
   # st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Occurrences', 'Occurrences.shp'), quiet = T)
   st_intersection(historic_SOS, focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Historic_SoS', 'Historic_SoS.shp'), quiet = T)
+    st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Historic_SoS', 'Historic_SoS.shp'), quiet = T, append = F)
   
   # write out assorted data
   st_intersection(roads, focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Roads', 'roads.shp'), quiet = T)
+    st_write(., dsn = file.path(crew_dir, 'Geodata/Roads', 'roads.shp'), quiet = T, append = F)
   st_intersection(seed_transfer, focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T)
+    st_write(., dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T, append = F)
   
   # drought
 #  crop(drought6, focal_vect, mask = T, threads = T, filename =
@@ -955,10 +972,10 @@ project_maker <- function(x, target_species,
 #         file.path(crew_dir, 'Geodata/Drought', 'drought-12.tif'))
   
   # write out original species information
-  sdm_fo <- crop(sub, focal_vect, mask = T) # need to make a vect of this... 
-  fnames <- paste0(crew_dir, '/Geodata/Species/SDM/', str_remove(names(sdm_fo),
-                                                                 '_[0-9].*$'), ".tif")
-  writeRaster(sdm_fo, fnames)
+#  sdm_fo <- crop(sub, focal_vect, mask = T) # need to make a vect of this... 
+#  fnames <- paste0(crew_dir, '/Geodata/Species/SDM/', str_remove(names(sdm_fo),
+#                                                                 '_[0-9].*$'), ".tif")
+#  writeRaster(sdm_fo, fnames)
   
   options(warn = defaultW)
 }

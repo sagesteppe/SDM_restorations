@@ -78,12 +78,12 @@ roads <- lapply(paste0(p2, list.files(p2, pattern = 'shp$')), sf::st_read, quiet
   dplyr::bind_rows() %>% 
   select(LINEARID)
 
-roads_simp <- st_simplify(roads, dTolerance = 10)
+roads_simp <- st_simplify(roads, dTolerance = 10) %>% 
+  st_transform(5070)
 object.size(roads_simp)/10^9 # ~55% of original size. 
 st_write(roads_simp, '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/processed/BLM_roads.shp', append = F)
 
 rm(states, county, p2, roads, roads_simp, rs, road_setter)
-
 
 
 ## simplify boundaries of allotments
@@ -93,8 +93,10 @@ allottments <- st_read(paste0(p,
   filter(ADMIN_ST != 'AK')
 
 allottments15.5 <- rmapshaper::ms_simplify(allottments, keep = 0.2, weighting = 0.6, keep_shapes = TRUE, sys = TRUE)
-allottments15.5 <- st_make_valid(allottments15.5)
+allottments15.5 <- st_make_valid(allottments15.5) %>% 
+  st_transform(5070)
 st_write(allottments15.5, paste0(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp'), append = F)
+
 #### CREATE boundaries of field offices. 
 
 p <- '/media/steppe/hdd/Geospatial_data/'
@@ -115,9 +117,10 @@ bounds <- bounds %>%
     ADMU_NAME = str_replace(ADMU_NAME, 'PALM SPRINGS/S. COAST FIELD OFFICE', 
                             'PALM SPRINGS/SOUTH COAST FIELD OFFICE'), 
     PARENT_NAME = str_replace(PARENT_NAME, 'DAKS', 'DAKOTAS')
-    )
+    ) %>% 
+  st_transform(5070)
 
-st_write(bounds, paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'))
+st_write(bounds, paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'), append = F)
 
 ggplot() +
   geom_sf(data = bounds)

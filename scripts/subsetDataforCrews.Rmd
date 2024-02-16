@@ -60,7 +60,6 @@ occurrences <- bind_rows(
   rename(year = date, coord_status = PtType) %>% 
   arrange(taxon, year, coord_status)
 
-table(occurrences$coord_status)
 st_write(occurrences, file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
 
 rm(occ_p. occ_aim)
@@ -72,7 +71,7 @@ Identify which species crews require.
 ```{r}
 
 spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>% 
-  filter(contract == 'SNDO') %>% 
+  filter(contract %in% c('SNDO', 'EASTERN MOJAVE')) %>% 
   unite('binomial', genus:species) %>% 
   select(binomial, contract)
 
@@ -81,6 +80,7 @@ spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>%
 ```{r import data}
 
 p <- '/media/steppe/hdd/Geospatial_data/'
+
 
 blm_surf <- st_read(paste0(p, 'Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp'), quiet = TRUE)
 usfs_surf <- st_read(paste0(p, 'Public_land_ownership/USFS_West_simplified/USFS_West_simplified.shp'), quiet = TRUE)
@@ -99,12 +99,8 @@ BOWERSTZ <- st_read( quiet = T,
 STZ <- bind_rows(BOWERSTZ, SWSTZ)
 roads <- st_read(quiet = T, paste0(p, 'blmRoadsSOS24/processed/BLM_roads.shp'))
 admin_boundaries <- st_read(paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'), quiet = TRUE)
-allotments <- st_read('Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp')
-
-patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
-patches <- lapply(
-  file.path(patches_p, list.files(patches_p, pattern = 'shp$')), st_read, quiet = T) |>
-  bind_rows()
+allotments <- st_read(
+  file.path(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp'))
 
 occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records'
 occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
@@ -112,34 +108,22 @@ occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
 rm(SWSTZ, BOWERSTZ, occ_p)
 ```
 
-```{r}
-
-ggplot() + 
-  geom_sf(data = BOWERSTZ, aes(fill = seed_zone)) +
-  geom_sf(data = SWSTZ, aes(color = Zone))
-
-```
 
 
 ```{r}
 
-#' @param crew_id column in project_areas holding the crews identifier info 'e.g. UFO'
-#' @param blm_surf sf data set of surface management as multipolygon at most
-#' @param fs_surf sf data set of surface USFS land management as multipolygon at most
-#' @param fire sf data set of historic fires as multipopylgon at most
-#' @param invasive sf dataset of invasive species relative cover estimates
-#' @param historic_SOS sf dataset with historic SoS endeavors and relevant info
-#' @param roads sf dataset of roads with relevant attritbutes
-#' @param seed_transfer sf dataset of seed transfer zones 
+teams_list <- filter(teams, str_detect(Contract, 'SNDO|Eastern Mojave')) %>% 
+  split(., f = .$Contract)
 
-lapply(CREWS_LIST, 
+lapply(teams_list, project_maker,
        target_species = spp_needed,
        blm_surf = blm_surf,
        fs_surf = usfs_surf, 
        fire = fire_perimeters,
        invasive = invasives,
-       sdm_stack, 
-       occurrences,
+       total_change = change_intensity,
+      # sdm_stack, 
+       occurrences = occurrences,
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
 

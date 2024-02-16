@@ -140,6 +140,10 @@ st_write(own_simp,
          '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp', append = F)
 
 
+own_simp <- st_read(
+  '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp') %>% 
+  st_transform(5070)
+
 
 ################################################################################
 ### Vector data of USFS surface administration
@@ -167,7 +171,8 @@ own_simp <- rmapshaper::ms_simplify(ownership, keep = 0.1, weighting = 0.6, keep
 own_simp <- own_simp[!st_is_empty(own_simp),]
 
 own_simp <- st_make_valid(own_simp) %>% 
-  st_collection_extract(type = c("POLYGON"))
+  st_collection_extract(type = c("POLYGON")) %>% 
+  st_transform(5070)
 
 st_write(own_simp, 
          '/media/steppe/hdd/Geospatial_data/Public_land_ownership/USFS_West_simplified/USFS_West_simplified.shp', append = F)
