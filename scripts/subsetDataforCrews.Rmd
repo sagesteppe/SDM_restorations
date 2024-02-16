@@ -17,8 +17,9 @@ Identify what areas crews require data for.
 
 ```{r Crew Info}
 
-blm <- vect(
-  '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp')
+blm <- st_read( quiet = T,
+  '/media/steppe/hdd/Geospatial_data/Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp') %>% 
+  st_transform(5070)
 
 crew_locs <- read.csv('../data/raw/crew_locations.csv') %>% 
   mutate(across(.cols = everything(), ~ na_if(., ''))) %>% 
@@ -33,8 +34,55 @@ seniors <- filter(crew_locs, str_detect(Contract, 'Senior')) %>%
   rename(Senior = Contract, Contract = FieldOffice) %>% 
   left_join(., teams, by = 'Contract')
 
+blm <- filter(blm, Unit_Nm %in% seniors$FieldOffice)
+
 rm(crew_locs)
 ```
+
+
+Gather together roads data
+```{r Gather Roads data}
+library(tigris)
+
+states <- states() %>% 
+  filter(STUSPS %in% c('NV', 'UT', 'CA', 'AZ', 'CO')) %>% 
+  select(STUSPS, ST_NAME = NAME, STATEFP) %>% 
+  st_drop_geometry()
+
+county <- counties(states$STUSPS) %>% 
+  st_transform(5070)
+county <- county[ lengths( st_intersects(county, blm)) > 0, ]
+
+county_rds <- roads(county$STATEFP[1], county$COUNTYFP[1]) %>% 
+  st_transform(st_crs(blm))
+
+p2 <- '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/raw/'
+
+road_setter <- function(x){
+  
+  statefp <- x$STATEFP[1]
+  county_rds <- lapply(X = x$STATEFP, county = x$COUNTYFP, FUN = tigris::roads) %>% 
+    dplyr::bind_rows() %>% 
+    sf::st_transform(5070)
+  blm_roads <- sf::st_intersection(county_rds, blm)
+  
+  st_write(blm_roads, paste0(p2, statefp, '.shp'))
+}
+
+rs <- split(county, f = county$STATEFP)
+lapply(rs, road_setter)
+
+roads <- lapply(paste0(p2, list.files(p2, pattern = 'shp$')), sf::st_read, quiet = TRUE) |>
+  dplyr::bind_rows() %>% 
+  select(LINEARID)
+
+roads_simp <- st_simplify(roads, dTolerance = 10)
+object.size(roads_simp)/10^9 # ~55% of original size. 
+st_write(roads_simp, '/media/steppe/hdd/Geospatial_data/blmRoadsSOS24/processed/BLM_roads.shp', append = F)
+
+rm(states, county, p2, roads, roads_simp, rs, road_setter)
+```
+
 
 Identify which species crews require. 
 
@@ -52,10 +100,22 @@ spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>%
 p <- '/media/steppe/hdd/Geospatial_data/'
 
 blm_surf <- st_read(paste0(p, 'Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp'), quiet = TRUE)
+usfs_surf <- st_read(paste0(p, 'Public_land_ownership/USFS_West_simplified/USFS_West_simplified.shp'), quiet = TRUE)
 invasives <- rast(paste0(p, 'MRLC/', '2023_InvGrassCover.tif'))
 change_intensity <- rast(paste0(p, 'MRLC/total_change_intensity_index/', 'TCII_3arc.tif'))
-fire_perimeters <- st_read(
+fire_perimeters <- st_read( quiet = T,
   paste0(p, 'NIFC_perimeters/', 'InterAgencyFirePerimeterHistory_All_Years_View-Simplified.shp'))
+SWSTZ <- st_read( quiet = T,
+  paste0(p, 'provisional_SeedTransferZones/', 'desertSW/desert_southwest_provisional_seed_transfer_zones_USGS.shp')) %>% 
+  select(Zone)
+BOWERSTZ <- st_read( quiet = T,
+  paste0(p, 'provisional_SeedTransferZones/', 'WWETAC_STZ/GB_2013_revised_reduced.shp')) %>% 
+  select(seed_zone)
+
+```
+
+```{r}
+
 
 
 ```
