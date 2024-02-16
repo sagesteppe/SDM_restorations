@@ -75,6 +75,9 @@ spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>%
   unite('binomial', genus:species) %>% 
   select(binomial, contract)
 
+spp_needed <- read.csv('../data/raw/contract_lkp.csv') %>% 
+  left_join(spp_needed, ., by = c('contract' = 'Contract_colloquial')) %>% 
+  select(-contract)
 ```
 
 ```{r import data}
@@ -96,11 +99,13 @@ BOWERSTZ <- st_read( quiet = T,
   paste0(p, 'provisional_SeedTransferZones/', 'WWETAC_STZ/GB_2013_revised_reduced.shp')) %>% 
   select(seed_zone) %>% 
   mutate(Dataset = 'BowerRevised', .before = geometry)
-STZ <- bind_rows(BOWERSTZ, SWSTZ)
+STZ <- bind_rows(BOWERSTZ, SWSTZ) %>% 
+  st_transform(5070)
 roads <- st_read(quiet = T, paste0(p, 'blmRoadsSOS24/processed/BLM_roads.shp'))
 admin_boundaries <- st_read(paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'), quiet = TRUE)
 allotments <- st_read(
-  file.path(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp'))
+  file.path(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp')) %>% 
+  select(ALLOT_NAME)
 
 occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records'
 occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
@@ -109,23 +114,25 @@ rm(SWSTZ, BOWERSTZ, occ_p)
 ```
 
 
-
 ```{r}
 
 teams_list <- filter(teams, str_detect(Contract, 'SNDO|Eastern Mojave')) %>% 
   split(., f = .$Contract)
 
 lapply(teams_list, project_maker,
-       target_species = spp_needed,
-       blm_surf = blm_surf,
+       admu = admin_boundaries, 
+       target_species = spp_needed, 
+       blm_surf = blm_surf, 
        fs_surf = usfs_surf, 
-       fire = fire_perimeters,
-       invasive = invasives,
-       total_change = change_intensity,
-      # sdm_stack, 
-       occurrences = occurrences,
+       fire = fire_perimeters, 
+       invasive = invasives, 
+       total_change = change_intensity, 
+       occurrences = occurrences, 
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
+
+
+ob <- st_read('/media/steppe/hdd/2024SOS_CrewGeospatial/Eastern Mojave - P102073/Geodata/Species/SDM/Salazaria_mexicana.shp')
 
 ```
 
