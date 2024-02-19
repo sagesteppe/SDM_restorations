@@ -25,11 +25,8 @@ hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
 hydr_ftr <-  rast( file.path(gd, 'river_resistance', 'water_ftR.tif') )
 rm(gd)
 
-
 lapply(f, patcheR) # roughly 72 hours. 
-
 ```
-
 
 
 Create finer scale patches which more or less are meant to represent populations
