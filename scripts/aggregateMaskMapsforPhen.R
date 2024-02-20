@@ -12,22 +12,16 @@ noGrow <- rast('../data/processed/nlcd.tif') |>
   resample(template) |>
   project(crs(template))
 
-r1 <- rast(f[1])
-r1 <- terra::ifel(r1 < 0.5, NA, r1)
-ng1 <- terra::crop(noGrow, r1)
-plot(r1)
-
-terra::mask(r1, ng1, maskvalues = 1)
-
 phenAggregator <- function(x){
   
-  taxon <- basename(x)
+  taxon <- basename(gsub('1k-.*$', '', x))
   r <- terra::rast(x)
-  r <- terra::ifel(r < 0.5, NA, r)
+  r <- terra::ifel(r < 0.5, NA, 1)
   r <- terra::resample(r, template, threads = parallel::detectCores())
-  terra::mask(r, terra::crop(noGrow, terra::ext(r)), inverse = T, 
-                   filename = file.path('../results/PhenPredSurfaces', taxon))
+  terra::mask(r, terra::crop(noGrow, terra::ext(r)), inverse = T, overwrite = T, 
+                   filename = file.path('../results/PhenPredSurfaces', paste0(taxon, '.tif')))
   
+  terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
 }
 
 lapply(f, phenAggregator)

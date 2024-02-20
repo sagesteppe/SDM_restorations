@@ -55,12 +55,12 @@ occurrences <- bind_rows(
   occ_aim) %>% 
   mutate(
     PtType = if_else(PtType == 'AIM Presence', 'jittered', 'exact'),
-    date = str_extract(date, '[0-9]{4}')
+    date = as.numeric(str_extract(date, '[0-9]{4}'))
     ) %>% 
   rename(year = date, coord_status = PtType) %>% 
   arrange(taxon, year, coord_status)
 
-st_write(occurrences, file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
+st_write(occurrences, file.path(occ_p, 'jittered_occurrences.shp'), quiet = T, append = F)
 
 rm(occ_p. occ_aim)
 ```
@@ -84,7 +84,6 @@ spp_needed <- read.csv('../data/raw/contract_lkp.csv') %>%
 
 p <- '/media/steppe/hdd/Geospatial_data/'
 
-
 blm_surf <- st_read(paste0(p, 'Public_land_ownership/BLM_West_simplified/BLM_West_simplified.shp'), quiet = TRUE)
 usfs_surf <- st_read(paste0(p, 'Public_land_ownership/USFS_West_simplified/USFS_West_simplified.shp'), quiet = TRUE)
 invasives <- rast(paste0(p, 'MRLC/', '2023_InvGrassCover.tif'))
@@ -107,7 +106,7 @@ allotments <- st_read(
   file.path(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp')) %>% 
   select(ALLOT_NAME)
 
-occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records'
+occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/jittered_occurrences'
 occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
 
 rm(SWSTZ, BOWERSTZ, occ_p)

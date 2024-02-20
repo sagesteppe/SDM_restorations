@@ -960,7 +960,8 @@ project_maker <- function(x, target_species,
       sf::st_as_sf()
     f_crop <- st_intersection(f_crop, blm_surf_sub) %>% 
       select(-Unit_Nm,-Loc_Nm)
-    
+    f_crop <- f_crop[st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
+    f_crop <- rmapshaper::ms_simplify(f_crop)
     f_crop <- f_crop[st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
     
     binomial <- paste0(gsub(' ', '_', basename(x)))
