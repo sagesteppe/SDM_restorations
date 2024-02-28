@@ -18,15 +18,18 @@ p <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
 f <- file.path(p, list.files(p))
 f <- f[grep('1k-2024', f)]
 
+f1 <- rast(f[1])
+st_bbox(f1)
+
 st <- tigris::states() %>% 
   filter(REGION == '4' | STUSPS %in% c('SD', 'ND', 'OK', 'NE', 'TX')) %>% 
   filter(! STUSPS %in% c('AK', 'HI')) %>% 
-  st_transform(5070) %>% 
+  st_transform(st_crs(f1)) %>% 
   st_intersection(., domain)
 
 ocean <- rnaturalearth::ne_download(scale = 10, type = "ocean", category = "physical") %>% 
   st_as_sf() %>% 
-  st_transform(5070) %>% 
+  st_transform(st_crs(f1)) %>% 
   st_intersection(., domain)
 
 occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/jittered_occurrences'
@@ -49,7 +52,7 @@ hill <- shade(slope, aspect, 30, 315)
 
 rm(slope, aspect)
 
-
+st_bbox(st)
 #' plot many same sdm maps
 #' 
 #' @param x a raster stack of species to plot
@@ -67,13 +70,17 @@ map_maker_fn <- function(x, y, path_dir){
   colnames(dem) <- c('x', 'y', 'elevation')
   hillshade <- as.data.frame(hill_sub, xy = T)
   
-  focal_taxon <- gsub('1k.*$', '', gsub('_', ' ', basename(f[1])))
+  focal_taxon <- gsub('1k.*$', '', gsub('_', ' ', basename(x)))
 
-  occurrence <- filter(y, taxon == focal_taxon)
+  occurrence <- filter(y, taxon == focal_taxon) %>% 
+    st_crop(st_bbox(spp))
   pred <- as.data.frame(spp, xy= T)
   
-  ggplot() +
-    geom_sf(data = ocean, fill = 'blue') +
+  st_sub <- st_crop(st, st_bbox(spp))
+  ocean_sub <- st_crop(ocean, st_bbox(spp))
+  
+  ggplot() + #3C6997
+    geom_sf(data = ocean_sub, fill = '#3C6997') + # #97DFFC
     geom_tile(data = hillshade, aes(x = x, y = y, fill = hillshade))  +
     scale_fill_gradient(low = "grey50", high = "grey100") +
     guides(fill = 'none') +
@@ -84,17 +91,15 @@ map_maker_fn <- function(x, y, path_dir){
     guides(fill = 'none') +
     ggnewscale::new_scale_fill() + 
     
-    geom_tile(data = pred, aes(x = x, y = y, fill = predicted_suitability)) + 
+    geom_sf(data = occurrence, shape = 5, alpha = 0.8) + 
+    geom_tile(data = pred, aes(x = x, y = y, fill = predicted_suitability), alpha =0.9) + 
     scale_fill_distiller('Probability of suitable habitat      ', 
-                         palette = "RdPu", direction = 1, 
-                         breaks=c(1, 2.5, 4), limits = c(0.9,4.1),
+                        palette = "RdPu", direction = 1, 
+                         breaks=c(0.625, 0.75, 0.875), limits = c(0.5, 1.0),
                          labels=c("Mild", "Medium", "High")) + 
     
-    geom_sf(data = st, fill = NA, lwd = 1) + 
-#    geom_sf(data = occurrence, shape = 5) + 
+    geom_sf(data = st_sub, fill = NA, lwd = 1) + 
     
- #   coord_sf(xlim = c(gb_bb[[1]], gb_bb[[3]]), 
-  #           ylim = c(gb_bb[[2]], gb_bb[[4]]), expand = F) + 
     theme_void() + 
     
     theme(legend.position = 'bottom', 
@@ -112,22 +117,10 @@ map_maker_fn <- function(x, y, path_dir){
   
 }
 
-
-map_maker_fn(f[2], y = occurrences, path_dir = '/media/steppe/hdd/SDM_maps_CBG_guidebooks2024')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+lapply(f[7], FUN = map_maker_fn, 
+       y = occurrences,
+       path_dir = '/media/steppe/hdd/SDM_maps_CBG_guidebooks2024'
+       )
 
 
 

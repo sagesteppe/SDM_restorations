@@ -888,7 +888,7 @@ project_maker <- function(x, target_species,
   
   #### Process geographic data to a mask of the field office ####
   
-  focal_bbox <- filter(admin_boundaries, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) %>%  
+  focal_bbox <- filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) %>%  
     st_union() %>% 
     st_transform(5070)
   
@@ -987,4 +987,97 @@ project_maker <- function(x, target_species,
 #  writeRaster(sdm_fo, fnames)
   
   options(warn = defaultW)
+}
+
+############################################################################
+# write out whether a model says a species is flowering or not.
+#' @param x a list od data.frames of crews which need the estimates.
+#' @param path a path to the raster phenology estimate summaries from `spat_summarize` in sagesteppe::SeedPhenology
+#' @param admu 
+#' @param target_species 
+phen_tabulator <- function(x, path, project_areas, admu, target_species){
+  
+  # subset to field offices
+  focal_area <- dplyr::filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) |>
+    sf::st_union() |>
+    sf::st_transform(5070) |>
+    vect()
+  
+  # determine which species we want estimates for.
+  t_spp <- target_species |>
+    dplyr::filter(Requisition == x$Contract[1]) |>
+    dplyr::pull(binomial)
+  
+  # determine which species we have estimates for
+  f <- list.files(path, pattern = '.tif$', recursive = T)
+  f <- f[grep('summary_doys', f)]
+  f_name <- gsub('[.]tif', '', basename(f))
+  f <- file.path(path, na.omit(f[match(t_spp, f_name)]))
+  missing <- data.frame(
+    taxon = setdiff(t_spp, f_name))
+    
+  # basically lapply this through the taxa
+  
+  summarizer <- function(x){
+    focal_r <- terra::rast(x)
+   # focal_r <- terra::crop(focal_r, focal_area, mask = TRUE)
+    out_v <- terra::extract(focal_r, focal_area, method = 'simple', fun = table)
+  }
+  
+  test <- lapply(f[[1]], summarizer)
+  return(test)
+
+  # write out to this location
+  crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
+  ifelse(!dir.exists(file.path(crew_dir, 'Data', 'Phenology')), 
+         dir.create(file.path(crew_dir, 'Data', 'Phenology')), FALSE)
+  crew_dir <- paste0(crew_dir, 'Data/Phenology')
+  
+}
+
+#' create reporting event dates for helping crews assess phenology
+date_maker <- function(){
+  
+  # subset to the period which the crew is active until-from
+  #' rolling fill from using nearest known value. from someone on stackoverflow
+  f1 <- function(dat) {
+    N <- length(dat)
+    na.pos <- which(is.na(dat))
+    if (length(na.pos) %in% c(0, N)) {
+      return(dat)
+    }
+    non.na.pos <- which(!is.na(dat))
+    intervals  <- findInterval(na.pos, non.na.pos,
+                               all.inside = TRUE)
+    left.pos   <- non.na.pos[pmax(1, intervals)]
+    right.pos  <- non.na.pos[pmin(N, intervals+1)]
+    left.dist  <- na.pos - left.pos
+    right.dist <- right.pos - na.pos
+    
+    dat[na.pos] <- ifelse(left.dist <= right.dist,
+                          dat[left.pos], dat[right.pos])
+    return(dat)
+  }
+  
+  dates <- as.Date(0:365, origin = '2024-01-01')
+  dates <- data.frame(
+    month = as.numeric(gsub('2024-|-[0-9]{2}', '', dates)),
+    day = as.numeric(gsub('2024-[0-9]{2}-', '', dates)),
+    doy = 0:365,
+    dates
+  )
+  
+  reporting_dates <- dates |>
+    dplyr::filter(day %in% c(1,15)) |>
+    dplyr::mutate(reporting_event = 1:dplyr::n())
+  
+  dates <- dplyr::left_join(dates, reporting_dates) |>
+    dplyr::mutate(reports_to = f1(reporting_event)) |>
+    dplyr::select(doy, reports_to)
+  
+  reporting_dates <- reporting_dates |>
+    dplyr::mutate(
+      month = format(as.Date(doy, origin = '2024-01-01'), format = '%B'))
+  
+  return(list(dates, reporting_dates))
 }

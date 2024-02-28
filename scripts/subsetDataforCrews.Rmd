@@ -12,7 +12,6 @@ library(sf)
 source('functions.R')
 ```
 
-
 Identify what areas crews require data for. 
 
 ```{r Crew Info}
@@ -67,7 +66,6 @@ rm(occ_p. occ_aim)
 
 Identify which species crews require. 
 
-
 ```{r}
 
 spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>% 
@@ -103,7 +101,7 @@ STZ <- bind_rows(BOWERSTZ, SWSTZ) %>%
 roads <- st_read(quiet = T, paste0(p, 'blmRoadsSOS24/processed/BLM_roads.shp'))
 admin_boundaries <- st_read(paste0(p, 'Public_land_ownership/BLM_ADMU/BLM_ADMU_BOUNDARIES.shp'), quiet = TRUE)
 allotments <- st_read(
-  file.path(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp')) %>% 
+  file.path(p, 'Public_land_ownership/BLM_Natl_Grazing_Allotment_Polygons/Allotment-simp.shp'), quiet = T) %>% 
   select(ALLOT_NAME)
 
 occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/jittered_occurrences'
@@ -113,7 +111,7 @@ rm(SWSTZ, BOWERSTZ, occ_p)
 ```
 
 
-```{r}
+```{r generate projects for crews}
 
 teams_list <- filter(teams, str_detect(Contract, 'SNDO|Eastern Mojave')) %>% 
   split(., f = .$Contract)
@@ -130,9 +128,33 @@ lapply(teams_list, project_maker,
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
 
-
 ob <- st_read('/media/steppe/hdd/2024SOS_CrewGeospatial/Eastern Mojave - P102073/Geodata/Species/SDM/Salazaria_mexicana.shp')
 
+```
+
+Now we can generate estimates of flowering duration in certain field offices
+
+```{r generate phenology spreadsheet for crews}
+
+p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
+lapply(X = teams_list[1], 
+       FUN = phen_tabulator,
+       path = p2ts, 
+       admu = admin_boundaries, 
+       target_species = spp_needed
+       )
+
+focal_area <- dplyr::filter(admin_boundaries, ADMU_NA == str_to_upper('St. George Field Office' )) |>
+  sf::st_union() |>
+  sf::st_transform(5070) |>
+  vect()
+
+focal_r <- rast(file.path(path, f[[1]]))
+out_v <- terra::extract(focal_r, focal_area, method = 'simple', fun = table, na.rm = T, ID = FALSE)
+pos <- unlist(lapply(out_v, function(x){x1 <- colnames(x)[which.max(x)]})) # most common doy for event
+
+
+#names(out_v) <- c('Initation', 'Peak', 'Cessation')
 ```
 
 
