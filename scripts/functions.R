@@ -1017,14 +1017,19 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
     taxon = setdiff(t_spp, f_name))
     
   # basically lapply this through the taxa
-  
   summarizer <- function(x){
     focal_r <- terra::rast(x)
-   # focal_r <- terra::crop(focal_r, focal_area, mask = TRUE)
-    out_v <- terra::extract(focal_r, focal_area, method = 'simple', fun = table)
+    taxon <- gsub('[.]tif', '', basename(x))
+    out_v <- terra::extract(focal_r, focal_area, method = 'simple', fun = table, na.rm = T, ID = FALSE)
+    pos <- unlist(lapply(out_v, function(x){x1 <- colnames(x)[which.max(x)]})) # most common doy for event
+    summy <- data.frame(
+      taxon = taxon,
+      doy = as.numeric(pos), 
+      event = c('Initiation', 'Peak', 'Cessation'))
+    return(summy)
   }
   
-  test <- lapply(f[[1]], summarizer)
+  test <- dplyr::bind_rows(lapply(f, summarizer))
   return(test)
 
   # write out to this location

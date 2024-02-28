@@ -137,22 +137,19 @@ Now we can generate estimates of flowering duration in certain field offices
 ```{r generate phenology spreadsheet for crews}
 
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
-lapply(X = teams_list[1], 
+oppy <- lapply(X = teams_list[1], 
        FUN = phen_tabulator,
        path = p2ts, 
        admu = admin_boundaries, 
        target_species = spp_needed
        )
 
-focal_area <- dplyr::filter(admin_boundaries, ADMU_NA == str_to_upper('St. George Field Office' )) |>
-  sf::st_union() |>
-  sf::st_transform(5070) |>
-  vect()
+tdf <- oppy[[1]] |>
+  dplyr::arrange(taxon)
 
-focal_r <- rast(file.path(path, f[[1]]))
-out_v <- terra::extract(focal_r, focal_area, method = 'simple', fun = table, na.rm = T, ID = FALSE)
-pos <- unlist(lapply(out_v, function(x){x1 <- colnames(x)[which.max(x)]})) # most common doy for event
+tdf <- dplyr::left_join(tdf, dates[[1]], by = 'doy')
 
+dates <- date_maker()
 
 #names(out_v) <- c('Initation', 'Peak', 'Cessation')
 ```
