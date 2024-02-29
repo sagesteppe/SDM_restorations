@@ -1,0 +1,606 @@
+genus,species,infrarank,infraspecies,symbol,stz,ind_stz,contract
+Astragalus,lonchocarpus,,,ASLO3,Climate-matched species specific,"1,2,3,4",COPL
+Bouteloua,gracilis,,,BOGR2,Climate-matched species specific,"5,8,10",COPL
+Cleome,lutea,,,CLLU2,Landscape genetic,"1,2",COPL
+Heliomeris,multiflora,,,HEMU3,Climate-matched species specific,"9,10",COPL
+Macheranthera,canescens,,,DICA18,Landscape genetic,"1,2",COPL
+Macheranthera,tanacetifolia,,,MATA2,Desert SW provisional,"1,2,3,4,8",COPL
+Packera,multilobata,,,PAMU11,Desert SW provisional,"1,2,3,4,8",COPL
+Pascopyrum,smithii,,,PASM,Desert SW provisional,"1,2,3,4",COPL
+Pleuraphis,jamesii,,,PLJA,Landscape genetic,3,COPL
+Sporobolus,cryptandrus,,,SPCR,Landscape genetic,2,COPL
+Astragalus,lentiginosus,var. ,chartaceus,ASLEC,Desert SW provisional,"1,2,3,4,8",COPL
+Aristida,purpurea,,,ARPU9,Desert SW provisional,"1,2,3,4,8",COPL
+Chaenactis,douglasii,,,CHDO,Desert SW provisional,"1,2,3,4,8",COPL
+Cleome,serrulata,,,CLSE,Desert SW provisional,"1,2,3,4,8",COPL
+Cymopterus,bulbosus,,,CYBU,Desert SW provisional,"1,2,3,4,8",COPL
+Cymopterus,purpureus,,,CYPU2,Desert SW provisional,"1,2,3,4,8",COPL
+Eriogonum,cernuum,,,ERCE2,Desert SW provisional,"1,2,3,4,8",COPL
+Eriogonum,fusiforme,,,ERFU3,Desert SW provisional,"1,2,3,4,8",COPL
+Eriogonum,shockleyi,,,ERSH,Desert SW provisional,"1,2,3,4,8",COPL
+Helianthus,annuus,,,HEAN3,Desert SW provisional,"1,2,3,4,8",COPL
+Heliomeris,multiflora,,,HEMU3,Desert SW provisional,"1,2,3,4,8",COPL
+Hesperostipa,comata,,,HECO26,Desert SW provisional,"1,2,3,4,8",COPL
+Heterotheca,villosa,,,HEVI4,Desert SW provisional,"1,2,3,4,8",COPL
+Lomatium,grayi,,,LOGR,Desert SW provisional,"1,2,3,4,8",COPL
+Lomatium,dissectum,,,LODI,Desert SW provisional,"1,2,3,4,8",COPL
+Machaeranthera,gracilis,,,MAGR10,Desert SW provisional,"1,2,3,4,8",COPL
+Machaeranthera,pinnatifida,,,MAPI,Desert SW provisional,"1,2,3,4,8",COPL
+Mentzelia,albicaulis,,,MEAL6,Desert SW provisional,"1,2,3,4,8",COPL
+Mentzelia,multiflora,,,MEMU3,Desert SW provisional,"1,2,3,4,8",COPL
+Penstemon,palmeri,,,PEPA8,Desert SW provisional,"1,2,3,4,8",COPL
+Phacelia,crenulata,,,PHCR,Desert SW provisional,"1,2,3,4,8",COPL
+Pseudoroegneria,spicata,,,PSSP6,Desert SW provisional,"1,2,3,4",COPL
+Senecio,spartioides,,,SESP3,Desert SW provisional,"1,2,3,4,8",COPL
+Sphaeralcea,coccinea,,,SPCO,Desert SW provisional,"1,2,3,4,8",COPL
+Sporobolus,airoides,,,SPAI,Desert SW provisional,"1,2,3,4,8",COPL
+Stanleya,pinnata,,,STPI,Desert SW provisional,"1,2,3,4,8",COPL
+Thelesperma,megapotamicum,,,THME,Desert SW provisional,"1,2,3,4,8",COPL
+Vulpia,octoflora,,,VUOC,Desert SW provisional,"1,2,3,4,8",COPL
+Achnatherum,hymenoides,,,ACHY,Empirical,"M1H2L3,L1H2H3",COPL
+Elymus,elymoides,,,ELEL5,Climate-matched species specific,"3,4",COPL
+Koeleria,macrantha,,,KOMA,Climate-matched species specific,"1,2",COPL
+Achnatherum,hymenoides,,,ACHY,Empirical,"L1L2H3, M1L2H3, M1H2H3",CEDAR CITY
+Elymus,elymoides,,,ELEL5,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Hesperostipa,comata,,,HECO26,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Poa,secunda,,,POSE,Empirical,"M1L2L3M M1H2L3, L1H2L3, L1L2L3",CEDAR CITY
+Chaenactis,douglasii,,,CHDO,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Machaeranthera,canescens,,,MACA2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Phacelia,hastata,,,PHHA,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Agoseris,glauca,,,AGGL,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Asclepias,speciosa,,,ASSP,Provisional,AZ Strip - P102075,CEDAR CITY
+Balsamorhiza,sagitatta,,,BASA3,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Crepis,acuminata,,,CRAC2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Eriogonum,ovalifolium,,,EROV,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Eriogonum,umbellatum,,,ERUM,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Lomatium,dissectum,,,LODI,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Lomatium,nudicaule,,,LONU2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Sphaeralcea,grossulariifolia,,,SPGR,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Sphaeralcea,munroana,,,SPMU2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Achnatherum,thurberianum,,,ACTH7,Empirical,"4, 8, 5",CEDAR CITY
+Festuca,idahoensis,,,FEID,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Koeleria,macrantha,,,KOMA,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Pleuraphis,jamesii,,,PLJA,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Pseudoroegneria,spicata,,,PSSP6,Empirical,"3a, 4, 2a, 6a",CEDAR CITY
+Sporobolus,cryptandrus,,,SPCR,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Achillea,millefolium,var.,occidentalis,ACMIO,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Agoseris,grandiflora,,,AGGR,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-12",CEDAR CITY
+Asclepias,fascicularis,,,ASFA,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-13",CEDAR CITY
+Astragalus,eremiticus,,,ASER4,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-14",CEDAR CITY
+Astragalus,filipes,,,ASFI,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-15",CEDAR CITY
+Balsamorhiza,hookeri,,,BAHO,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-16",CEDAR CITY
+Cleome,lutea,,,CLLU2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-17",CEDAR CITY
+Cleome,serrulata,,,CLSE,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-18",CEDAR CITY
+Crepis,occidentalis,,,CROC,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-19",CEDAR CITY
+Dalea,ornata,,,DAOR2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-20",CEDAR CITY
+Dalea,searlsiae,,,DASE3,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-21",CEDAR CITY
+Erigeron,bloomeri,,,ERBL,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-22",CEDAR CITY
+Erigeron,linearis,,,ERLI,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-23",CEDAR CITY
+Erigeron,pumilus,,,ERPU2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-24",CEDAR CITY
+Erigeron,speciosus,,,ERSP4,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-25",CEDAR CITY
+Eriogonum,heracleoides,,,ERHE2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-26",CEDAR CITY
+Heliomeris,multiflora,,,HEMU3,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-27",CEDAR CITY
+Lomatium,triternatum,,,LOTR2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-28",CEDAR CITY
+Penstemon,acuminatus,,,PEAC,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-29",CEDAR CITY
+Penstemon,deustus,,,PEDE4,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-30",CEDAR CITY
+Penstemon,eatonii,,,PEEA,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-31",CEDAR CITY
+Penstemon,pachyphyllus,,,PEPA6,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-32",CEDAR CITY
+Penstemon,palmeri,,,PEPA8,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-33",CEDAR CITY
+Penstemon,speciosus,,,PESP,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-34",CEDAR CITY
+Sphaeralcea,ambigua,,,SPAM2,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-35",CEDAR CITY
+Sphaeralcea,coccinea,,,SPCO,Provisional,"15-20 Deg/3-6, 15-20 Deg/6-12, 10-15 Deg/6-12, 20-25 Deg. F./3-6, 20-25 Deg. F./6-36",CEDAR CITY
+Collinsia,grandiflora,,,COGR2,Provisional,35 -40 Deg. F. / 2 -3,UKIAH
+Collinsia,heterophylla,,,COHE,Provisional,35 -40 Deg. F. / 2 -3,UKIAH
+Anaphalis,margaritacea,,,ANMA,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Asclepias,cordifolia,,,ASCO,Provisional,any,UKIAH
+Asclepias,eriocarpa,,,ASER,Provisional,any,UKIAH
+Asclepias,fascicularis,,,ASFA,Provisional,any,UKIAH
+Asclepias,solanoana,,,ASSO,Provisional,any,UKIAH
+Asclepias,speciosa,,,ASSP,Provisional,any,UKIAH
+Dudleya,cymosa,ssp.,cymosa,DUCY,Provisional,any,UKIAH
+Dudleya,farinosa,,,DUFA,Provisional,any,UKIAH
+Grindelia,stricta,,,GRST3,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Lomatium,macrocarpum,,,LOMA3,Provisional,35 -40 Deg. F. / 2 -3,UKIAH
+Symphyotrichum,chilense,,,SYCH4,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Danthonia,californica,,,DACA3,Provisional,"35 -40 Deg. F. / 2 -3, 40 -45 Deg. F. / 2 -3",UKIAH
+Deschampsia,cespitosa,,,DECE,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Eleocharis,macrostachya,,,ELMA5,Provisional,35 -40 Deg. F. / 2 -3,UKIAH
+Elymus,multisetus,,,ELMU3,Provisional,35 -40 Deg. F. / 2 -3,UKIAH
+Pickeringia,montana,,,PIMO5,Provisional,35 -40 Deg. F. / 2 -3,UKIAH
+Bromus,sitchensis,,,BRSI,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Baccharis,pilularis,,,BAPI,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Calamagrostis,nutkaensis,,,CANU,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Cercis,occidentalis,,,CEOC3,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Eriogonum,latifolium,,,ERLA5,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Lupinus,arboreus,,,LUAR,Provisional,40 -45 Deg. F. / 2 -3,UKIAH
+Clarkia,purpurea,,,CLPU2,Provisional,"30 -35 Deg. F. / 3 -6 , 35 -40 Deg. F. / < 2,  35-40 Deg. F  3-6",REDDING
+Clarkia,rhomboidea,,,CLRH,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / 2 -3,  35 -40 Deg. F. / < 2,  35-40 Deg. F  3-6 ",REDDING
+Helianthus,annuus,,,HEAN3,Provisional,35-40 Deg. F. 3-6,REDDING
+Madia,elegans,,,MAEL,Provisional,"30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35 -40 Deg. F. / < 2,  35-40 Deg. F  3-6 ",REDDING
+Madia,gracilis,,,MAGR3,Provisional,"30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35 -40 Deg. F. / < 2,  35-40 Deg. F  3-6 ",REDDING
+Deschampsia,danthonioides,,,DEDA,Provisional,"30 -35 Deg. F. / 2 -3,  35-40 Deg. F  3-6 ",REDDING
+Vulpia,microstachys,,,VUMI,Provisional,"25 -30 Deg. F. / 2 -3 , 30 -35 Deg. F. / < 2,  30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35 -40 Deg. F. / 3 -6,  35-40 Deg. F  3-6",REDDING
+Lupinus,bicolor,,,LUBI,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / 2 -3,  30-35 Deg. F. / 3 -6,  35-40 Deg. F  3-6 ",REDDING
+Achillea,millefolium,,,ACMI2,Provisional,"25 -30 Deg. F. / 3 -6,  30 -35 Deg. F. / < 2,  35-40 Deg. F  3-6 ",REDDING
+Artemisia,douglasiana,,,ARDO3,Provisional,35-40 Deg. F / 3-6,REDDING
+Asclepias,fascicularis,,,ASFA,Provisional,"30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35-40 Deg. F  3-6",REDDING
+Asclepias,speciosa,,,ASSP,Provisional,"30 -35 Deg. F. / 3 -6,  35-40 Deg. F  3-6",REDDING
+Asclepias,cordifolia,,,ASCO,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / 2 -3,  35-40 Deg. F  3-6 ",REDDING
+Asclepias,eriocarpa,,,ASER,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / 2 -3,  35-40 Deg. F  3-6 ",REDDING
+Dudleya,cymosa,,,DUCY,Provisional,any,REDDING
+Eriophyllum,lanatum,,,ERLA6,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / < 2,  30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6 , 35 -40 Deg. F. / 2 -3,  35-40 Deg. F  3-6 ",REDDING
+Solidago,velutina,,,SOVE6,Provisional,"30 -35 Deg. F. / 3 -6,  35-40 Deg. F  3-6,  35 –40 Deg. F/ 2 –3",REDDING
+Grindelia,camporum,,,GRCA,Provisional,"35 -40 Deg. F. / 3 -6,  35-40 Deg. F  3-6 ",REDDING
+Mentzelia,laevicaulis,,,MELA2,Provisional,"30 -35 Deg. F. / 2 -3,  35-40 Deg. F  3-6",REDDING
+Urtica,dioica,,,URDI,Provisional,35-40 Deg. F  3-6 ,REDDING
+Achnatherum,lemmonii,,,ACLE8,Provisional,"25 -30 Deg. F/ 2 -3,  30 -35 Deg. F. / 2 -3,  35-40 Deg. F  3-6 ",REDDING
+Bromus,carinatus,,,BRCA5,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / 2 -3,  35 -40 Deg. F. / 2 -3,  35-40 Deg. F  3-6",REDDING
+Elymus,elymoides,,,ELEL5,Provisional,35-40 Deg. F. 3-6,REDDING
+Elymus,glaucus,,,ELGL,Provisional,"30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35-40 Deg. F  3-6 ",REDDING
+Muhlenbergia,rigens,,,MURI2,Provisional,35-40 Deg. F. 3-6,REDDING
+Poa,secunda,,,POSE,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / < 2,  30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35 -40 Deg. F. 3/ 3 -6,  35-40 Deg. F  3-6",REDDING
+Aristolochia,californica,,,ARCA10,Provisional,"35 -40 Deg. F. / < 2,  35 -40 Deg. F. / 2 -3,  35-40 Deg. F  3-6 ",REDDING
+Baccharis,pilularis,,,BAPI,Provisional,35-40 Deg. F  3-6 ,REDDING
+Baccharis,salicifolia,,,BASA4,Provisional,35-40 Deg. F  3-6 ,REDDING
+Cercis,occidentalis,,,CEOC3,Provisional,"25 -30 Deg. F. / 2 -3,  30 -35 Deg. F. / < 2,  30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35 -40 Deg. F. / < 2,  35 -40 Deg. F. / 2 -3,  35-40 Deg. F  3-6",REDDING
+Clematis,ligusticifolia,,,CLLI2,Provisional,"30 -35 Deg. F. / 2 -3,  30 -35 Deg. F. / 3 -6,  35-40 Deg. F  3-6",REDDING
+Rhamnus,californica,,,RHCA,Provisional,35 -40 Deg. F. / < 2  35-40 Deg. F  3-6 ,REDDING
+Rosa,californica,,,ROCA2,Provisional,35 -40 Deg. F. / 2 -3  35-40 Deg. F  3-6 ,REDDING
+Rubus,ursinus,,,RUUR,Provisional,30 -35 Deg. F. / 3 -6  35 -40 Deg. F. / < 2  35-40 Deg. F  3-6 ,REDDING
+Sambucus,mexicana,,,SAME5,Provisional,35-40 Deg. F  3-6 ,REDDING
+Acer,negundo,,,ACNE2,Provisional,35-40 Deg. F  3-6 ,REDDING
+Fraxinus,latifolia,,,FRLA,Provisional,30 -35 Deg. F. / 3 -6  35 -40 Deg. F. / 2 -3  35-40 Deg. F  3-6,REDDING
+Platanus,racemosa,,,PLRA,Provisional,35-40 Deg. F. / 3-6,REDDING
+Nassella,pulchra,,,NAPU4,Provisional,35-40 Deg. F. / 3-6,REDDING
+Leymus,triticoides,,,LETR5,Provisional,"30 -35 Deg. F. / 3 -6,  35-40 Deg. F  3-6",REDDING
+Hordeum,brachyantherum,,,HOBR2,Provisional,35-40 Deg. F. / 3-6,REDDING
+Cleome,lutea,,,CLLU2,Provisional,any,NE CALIFORNIA
+Phacelia,linearis,,,PHLI,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Agoseris,glauca,,,AGGL,Provisional,any,NE CALIFORNIA
+Agoseris,parviflora,,,AGPA14,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Asclepias,speciosa,,,ASSP,Provisional,any,NE CALIFORNIA
+Asclepias,fascicularis,,,ASFA,Provisional,any,NE CALIFORNIA
+Asclepias,cordifolia,,,ASCO,Provisional,any,NE CALIFORNIA
+Astragalus,filipes,,,ASFI,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Astragalus,whitneyi,,,ASWH,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Balsamorhiza,hookeri,,,BAHO,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Balsamorhiza,sagitatta,,,BASA3,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Balsamorhiza,serrata,,,BASE2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Crepis,acuminata,,,CROC,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Crepis,occidentalis,,,CRAC2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Eriogonum,ovalifolium,,,EROV,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Eriogonum,strictum,,,ERST4,Provisional,any,NE CALIFORNIA
+Eriophyllum,lanatum,,,ERLA6,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Erythranthe,guttata,,,MIGU,Provisional,any,NE CALIFORNIA
+Lomatium,nevadense,,,LONE,Provisional,any,NE CALIFORNIA
+Lomatium,nudicaule,,,LONU2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Lomatium,triternatum,,,LOTR2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Phacelia,hastata,,,PHHA,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Phacelia,heterophylla,,,PHHE2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Senecio,integerrimus,,,SEIN2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Achnatherum,hymenoides,,,ACHY,Provisional,any,NE CALIFORNIA
+Achnatherum,occidentale,,,ACOC3,Provisional,any,NE CALIFORNIA
+Achnatherum,thurberianum,,,ACHT7,Empirical,"2, 5, 8",NE CALIFORNIA
+Carex,nebrascensis,,,CANE2,Provisional,any,NE CALIFORNIA
+Distichlis,spicata,,,DISP,Provisional,any,NE CALIFORNIA
+Elymus,elymoides,,,ELEL5,Empirical,"5, 6, 7, 8, 10",NE CALIFORNIA
+Festuca,idahoensis,,,FEID,Provisional,any,NE CALIFORNIA
+Koeleria,macrantha,,,KOMA,Provisional,any,NE CALIFORNIA
+Leymus,cinereus,,,LECI4,Empirical,"3, 9",NE CALIFORNIA
+Poa,secunda,,,POSE,Empirical,"M1L2L3, M1H2L3, L1L2L3",NE CALIFORNIA
+Pseudoroegneria,spicata,,,PSSP6,Empirical,"1, 3a, 4, 6a, 7b, 5",NE CALIFORNIA
+Atriplex,canescens,,,ATCA2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Atriplex,confertifolia,,,ATCO,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Cercocarpus,ledifolius,,,CELE3,Provisional,NOT 25 Deg. F. / 3 -6,NE CALIFORNIA
+Eriogonum,umbellatum,,,ERUM,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Purshia,tridentata,,,PUTR2,Provisional,"15-20/6-12,  20-25/6-12",NE CALIFORNIA
+Fraxinus,latifolia,,,FRLA,Provisional,any,NE CALIFORNIA
+Eriogonum,microthecum,,,ERMI4,Provisional,any,NE CALIFORNIA
+Perideridia,bolanderi,,,PEBO2,Provisional,any,NE CALIFORNIA
+Achnatherum,hymenoides,,,ACHY,Empirical,"M1L2H3, L1L2H3",BISHOP
+Achnatherum,hymenoides,,,ACHY,Provisional,15-20 Deg. /6-12,BISHOP
+Achnatherum,occidentale,,,ACOC3,Provisional,any,BISHOP
+Achnatherum,speciosum,,,ACSP12,Provisional,any,BISHOP
+Achnatherum,thurberianum,,,ACHT7,Provisional,any,BISHOP
+Elymus,elymoides,,,ELEL5,Empirical,"2, 5, 7, 10",BISHOP
+Hesperostipa,comata,,,HECO26,Provisional,any,BISHOP
+Koeleria,macrantha,,,KOMA,Provisional,any,BISHOP
+Leymus,cinereus,,,LECI4,Empirical,"2, 5, ",BISHOP
+Poa,secunda,,,POSE,Empirical,"L1L2L3, M1L2L3",BISHOP
+Acamptopappus,sphaerocephalus,,,ACSP,Provisional,any,BISHOP
+Ambrosia,dumosa,,,AMDU2,Provisional,any,BISHOP
+Artemisia,tridentata,ssp.,tridentata,ARTRT,Provisional,any,BISHOP
+Artemisia,tridentata,ssp.,vaseyana,ARTRV,Provisional,any,BISHOP
+Atriplex,canescens,,,ATCA2,Provisional,any,BISHOP
+Atriplex,confertifolia,,,ATCO,Provisional,any,BISHOP
+Atriplex,parryi,,,ATPA3,Provisional,any,BISHOP
+Atriplex,polycarpa,,,ATPO,Provisional,any,BISHOP
+Encelia,actoni,,,ENAC,Provisional,any,BISHOP
+Ericameria,cooperi,,,ERCO23,Provisional,any,BISHOP
+Ericameria,teretifolia,,,ERTE18,Provisional,any,BISHOP
+Eriogonum,umbellatum,,,ERUM,Provisional,any,BISHOP
+Purshia,tridentata,,,PUTR2,Provisional,15-20 Deg. /6-12,BISHOP
+Agoseris,glauca,,,AGGL,Provisional,any,BISHOP
+Agoseris,parviflora,,,AGPA14,Provisional,any,BISHOP
+Apocynum,cannabinum,,,APCA,Provisional,any,BISHOP
+Asclepias,cryptoceras,,,ASCR,Provisional,any,BISHOP
+Asclepias,fascicularis,,,ASFA,Provisional,any,BISHOP
+Asclepias,speciosa,,,ASSP,Provisional,any,BISHOP
+Astragalus,iodanthus,,,ASIO,Provisional,any,BISHOP
+Astragalus,whitneyi,,,ASWH,Provisional,any,BISHOP
+Balsamorhiza,sagitatta,,,BASA3,Provisional,any,BISHOP
+Cirsium,mohavense,,,CIMO,Provisional,any,BISHOP
+Cirsium,occidentale,,,CIOC,Provisional,any,BISHOP
+Crepis,occidentalis,,,CROC,Provisional,any,BISHOP
+Cryptantha,flavoculata,,,CRFL6,Provisional,any,BISHOP
+Dieteria,canescens,,,DICA18,Provisional,any,BISHOP
+Erigeron,aphanactis,,,ERAP,Provisional,any,BISHOP
+Erigeron,breweri,,,ERBR4,Provisional,any,BISHOP
+Eriogonum,ovalifolium,,,EROV,Provisional,any,BISHOP
+Eriophyllum,lanatum,,,ERLA6,Provisional,any,BISHOP
+Ionactis,alpina,,,IOAL,Provisional,any,BISHOP
+Lomatium,dissectum,,,LODI,Provisional,any,BISHOP
+Lomatium,nevadense,var.,nevadense,LONEN,Provisional,any,BISHOP
+Lupinus,argenteus,,,LUAR3,Provisional,any,BISHOP
+Packera,multilobata,,,PAMU11,Provisional,any,BISHOP
+Penstemon,speciosus,,,PESP,Provisional,any,BISHOP
+Phacelia,heterophylla,,,PHHA,Provisional,any,BISHOP
+Pleiacanthus,spinosus,,,PLSP7,Provisional,any,BISHOP
+Senecio,integerrimus,,,SEIN2,Provisional,any,BISHOP
+Stenotus,acaulis,,,STAC,Provisional,any,BISHOP
+Anisocoma,acaulis,,,ANAC,Provisional,any,BISHOP
+Calycoseris,parryi,,,CAPA7,Provisional,any,BISHOP
+Chaenactis,fremontii,,,CHFR,Provisional,any,BISHOP
+Chaenactis,douglasii,,,CHDO,Provisional,any,BISHOP
+Chaenactis,stevioides,,,CHST,Provisional,any,BISHOP
+Chaenactis,xantiana,,,CHXA,Provisional,any,BISHOP
+Eriophyllum,wallacei,,,ERWA7,Provisional,any,BISHOP
+Layia,glandulosa,,,LAGL5,Provisional,any,BISHOP
+Malacothrix,glabrata,,,MAGL3,Provisional,any,BISHOP
+Phlox,stansburyi,,,PHST11,Provisional,any,BISHOP
+Syntrichopappus,fremontii,,,SYFR,Provisional,any,BISHOP
+Lupinus,flavoculatus,,,LUFL,Provisional,any,BISHOP
+Stephanomeria,exigua,ssp.,exigua,STEXE,Provisional,any,BISHOP
+Stephanomeria,exigua,ssp.,coronaria,STEXC3,Provisional,any,BISHOP
+Stephanomeria,parryi,,,STPA3,Provisional,any,BISHOP
+Stephanomeria,pauciflora,,,STPA4,Provisional,any,BISHOP
+Amsinckia,tessellata,,,AMTE3,Provisional,any,BISHOP
+Cryptantha,micrantha,,,CRMI,Provisional,any,BISHOP
+Cryptantha,pterocarya,,,CRPT,Provisional,any,BISHOP
+Lupinus,odoratus,,,LUOD,Provisional,any,BISHOP
+Phacelia,bicolor,var.,bicolor,PHBIB2,Provisional,any,BISHOP
+Phacelia,distans,,,PHDI,Provisional,any,BISHOP
+Phacelia,fremontii,,,PHFR2,Provisional,any,BISHOP
+Phacelia,humilis,,,PHU2,Provisional,any,BISHOP
+Erigeron,divergens,,,ERDI4,Provisional,any,BISHOP
+Penstemon,incertus,,,PEIN3,Provisional,any,BISHOP
+Stanleya,pinnata,var.,pinnata,STPIP,Provisional,any,BISHOP
+Fraxinus,velutina,,,FRVE2,Provisional,any,BISHOP
+Achillea,millefolium,,,ACMI2,Provisional,any,COSUMNES
+Acmispon,americanus,,,LOUNU,Provisional,any,COSUMNES
+Alisma,triviale,,,ALTR7,Provisional,any,COSUMNES
+Ambrosia,psilostachya,,,AMPS,Provisional,any,COSUMNES
+Amsinckia,menziesii,,,ANME,Provisional,any,COSUMNES
+Aristolochia,californica,,,ARCA10,Provisional,any,COSUMNES
+Artemisia,douglasiana,,,ARDO3,Provisional,any,COSUMNES
+Asclepias,fascicularis,,,ASFA,Provisional,any,COSUMNES
+Baccharis,pilularis,,,BAPI,Provisional,any,COSUMNES
+Bidens,frondosa,,,BIFR,Provisional,any,COSUMNES
+Brodiaeae,elegans,,,BREL,Provisional,any,COSUMNES
+Calandrinia,menziesii,,,CACI2,Provisional,any,COSUMNES
+Centromadia,fitchii,,,CEFI2,Provisional,any,COSUMNES
+Centromadia,pungens,,,CEPU14,Provisional,any,COSUMNES
+Cephalanthus,occidentalis,,,CEOC2,Provisional,any,COSUMNES
+Claytonia,perfoliata,,,CLPE,Provisional,any,COSUMNES
+Clematis,ligusticifolia,,,CLLI2,Provisional,any,COSUMNES
+Croton,setiger,,,CRSE11,Provisional,any,COSUMNES
+Epilobium,brachycarpum,,,EPBR3,Provisional,any,COSUMNES
+Epilobium,ciliatum,,,EPCI,Provisional,any,COSUMNES
+Epilobium,densiflorum,,,EPDE4,Provisional,any,COSUMNES
+Erigeron,canadensis,,,ERCA20,Provisional,any,COSUMNES
+Eryngium,aristulatum,,,ERAR11,Provisional,any,COSUMNES
+Erythranthe,guttata,,,MIGU,Provisional,any,COSUMNES
+Euthamia,occidentalis,,,EUOC4,Provisional,any,COSUMNES
+Galium,aparine,,,GAAP2,Provisional,any,COSUMNES
+Glycyrrhiza,lepidota,,,GLLE3,Provisional,any,COSUMNES
+Grindelia,camporum,,,GRCA,Provisional,any,COSUMNES
+Helenium,puberulum,,,HEPU2,Provisional,any,COSUMNES
+Helianthus,annuus,,,HEAN3,Provisional,any,COSUMNES
+Hemizonia,congesta,,,HECO7,Provisional,any,COSUMNES
+Heterotheca,grandiflora,,,HEGR7,Provisional,any,COSUMNES
+Madia,elegans,,,MAEL,Provisional,any,COSUMNES
+Malvella,leprosa,,,MALE3,Provisional,any,COSUMNES
+Mentha,canadensis,,,MECA7,Provisional,any,COSUMNES
+Persicaria,amphibia,,,PEAM8,Provisional,any,COSUMNES
+Persicaria,lapathifolia,,,PELA22,Provisional,any,COSUMNES
+Phyla,nodiflora,,,PHNO2,Provisional,any,COSUMNES
+Ranunculus,californicus,,,RACA2,Provisional,any,COSUMNES
+Rosa,californica,,,ROCA2,Provisional,any,COSUMNES
+Rubus,ursinus,,,RUUR,Provisional,any,COSUMNES
+Rumex,salicifolius,,,RUSA,Provisional,any,COSUMNES
+Sagittaria,latifolia,,,SALA2,Provisional,any,COSUMNES
+Sisyrinchium,bellum,,,SIBE,Provisional,any,COSUMNES
+Solanum,americanum,,,SOAM,Provisional,any,COSUMNES
+Symphyotrichum,subulatum,,,SYSU5,Provisional,any,COSUMNES
+Triteleia,hyacinthina,,,TRHY3,Provisional,any,COSUMNES
+Triteleia,laxa,,,PRLA16,Provisional,any,COSUMNES
+Wyethia,angustifolia,,,WYAN,Provisional,any,COSUMNES
+Adenostoma,fasiculatum,,,ADFA,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Adenostoma,sparsifolium,,,ADSP,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Ambrosia,dumosa,,,AMDU2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Amsinckia,menziesii,var.,intermedia,AMME,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Antirrhinum,coulterianum,,,ANCO4,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Arctostaphylos,glauca,,,ARGL4,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Artemisia,tridentata,,,ARTR,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Asclepias,albicans,,,ASAL,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Asclepias,erosa,,,ASER2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Asclepias,fascicularis,,,ASFA,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Asclepias,subulata,,,ASSU,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Bebbia,juncea,,,BEJU,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Calliandra,eriophylla,,,CAER,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Camissonia,strigulosa,,,CAST20,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Ceanothus,perplexans,,,CEPE6,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Ceanothus,greggii,,,CEGR,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Chaenactis,artemiisifolia,,,CHAR,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Chaenactis,glabriuscula,,,CHGL,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Collinsia,concolor,,,COCO,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Condalia,globosa,var.,pubescens,COGLP,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Cordylanthus,rigidus,,,CORI2,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Croton,californicus,,,CRCA5,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Cryptantha,intermedia,,,CRIN8,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Cryptantha,micrantha,,,CRMI,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Cylindropuntia,ramosissima,,,CYRA9,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Cylindropuntia,acanthocarpa,var.,acanthocarpa,CYACA2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Cylindropuntia,bigelovii,,,CYBI9,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Dalea,mollis,,,DAMO,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Dichelostemma,capitatum,,,DICA14,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Ephedra,californica,,,EPCA2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Ericamerica,brachylepsis,,,ERBR13,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Ericameria,linearifolia,,,ERLI6,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Eriogonum,fasciculatum,var.,polifolium,ERFAP,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Ferocactus,cylindraceus,,,FECY,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Fourquieria,splendens,,,FOSP2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Fraxinus,velutina,,,FRVE2,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Geraea,canescens,,,GECA2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Heliotropium,curassavicum,,,HECU3,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Hilaria,rigida,,,PLRI3,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Hymenoclea,salsola,,,HYSA,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Hyptis,emoryi,,,HYEM,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Krameria,bicolor,,,KRGR,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Larrea,tridentata,,,LATR2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Lasthenia,gracilis,,,LAGR10,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Layia,glandulosa,,,LAGL5,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Lycium,andersonii,,,LYAN,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Olneya,tesota,,,OLTE,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Parkinsonia,florida,,,PAFL6,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Peucephyllum,schottii,,,PESC4,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Phacelia,cicutaria,var. ,hispida,PHCIH2,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Plantago,erecta,,,PLER3,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Plantago,ovata,,,PLOV,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Prosopis,pubescens,,,PRPU,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Prosopis,glandulosa,var.,torreyana,PRGLT,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Psathyrotes,ramosissima,,,PSRA,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Psorothamnus,schottii,,,PSSC5,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Psorothamnus,spinosus,,,PSSP3,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Salvia,columbariae,,,SACO6,Provisional,30 - 35 Deg. / 3-6,EL CENTRO
+Senegalia,greggii,,,SEGR4,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Sphaeralcea,ambigua,,,SPAM2,Provisional,40 - 45 Deg. F. / > 30,EL CENTRO
+Abronia,villosa,,,ABVI,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Achnatherum,aridum,,,ACAR14,Mojave Provisional,20,EASTERN MOJAVE
+Achnatherum,hymenoides,,,ACHY,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Achnatherum,speciosum,,,ACSP12,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Acmispon,rigidus,,,LORI3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Acmispon,humistratus,,,LOHU2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Acmispon,strigosus,,,LOST4,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Amaranthus,fimbriatus,,,AMFI,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Ambrosia,salsola,,,AMSA7,Mojave Provisional,20,EASTERN MOJAVE
+Ambrosia,dumosa,,,AMDU2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Amsinckia,tessellata,,,AMTE3,Mojave Provisional,20,EASTERN MOJAVE
+Anisocoma,acaulis,,,ANAC,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Aristida,purpurea,,,ARPU9,Mojave Provisional,20,EASTERN MOJAVE
+Asclepias,erosa,,,ASER2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Asclepias,subulata,,,ASSU,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Astragalus,didymocarpus,,,ASDI3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Astragalus,layneae,,,ASLA8,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Atriplex,canescens,,,ATCA2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Atriplex,hymenelytra,,,ATHY,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Atriplex,lentiformis,,,ATLE,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Atriplex,polycarpa,,,ATPO,Mojave Provisional,20,EASTERN MOJAVE
+Baileya,multiradiata,,,BAMU,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Bouteloua,aristidoides,,,BOAR,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Bouteloua,barbata,,,BOBA2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Bouteloua,gracilis,,,BOGR2,Mojave Provisional,20,EASTERN MOJAVE
+Chaenactis,fremontii,,,CHFR,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Chilopsis,linearis,,,CHLI2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Chylismia,brevipes,,,CABR23,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Chylismia,claviformis,,,CACL4,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Coleogyne,ramosissima,,,CORA,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Cryptantha,micrantha,,,CRMI,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Cryptantha,nevadensis,,,CRNE2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Dasyochloa,pulchella,,,DAPU7,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Descurainia,pinnata,,,DEPI,Mojave Provisional,20,EASTERN MOJAVE
+Echinocereus,engelmannii,,,ECEN,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Elymus,elymoides,,,ELEL5,Mojave Provisional,20,EASTERN MOJAVE
+Encelia,actoni,,,ENAC,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Encelia,farinosa,,,ENFA,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Encelia,virginensis,,,ENVI,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Ephedra,nevadensis,,,EPNE,Mojave Provisional,20,EASTERN MOJAVE
+Eremothera,refracta,,,CARE2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Ericameria,cooperi,,,ERCO23,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Ericameria,laricifolia,,,ERLA12,Mojave Provisional,20,EASTERN MOJAVE
+Eriogonum,fasciculatum,,,ERFA2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Eriogonum,inflatum,,,ERIN4,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Euphorbia,albomarginata,,,EUAL4,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Euphorbia,micromera,,,EUMI3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Euphorbia,polycarpa,,,EUPO3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Fraxinus,anomala,,,FRAN2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Fraxinus,velutina,,,FRVE2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Gutierrezia,microcephala,,,GUMI,Mojave Provisional,20,EASTERN MOJAVE
+Pleuraphis,jamesii,,,PLJA,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Hilaria,rigida,,,HIRI,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Krameria,bicolor,,,KRGR,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Krameria,erecta,,,KRER,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Krascheninnikovia,lanata,,,KRLA2,Mojave Provisional,20,EASTERN MOJAVE
+Larrea,tridentata,,,LATR2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lepidium,fremontii,,,LEFR2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lepidium,lasiocarpum,,,LELA,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lomatium,parryi,,,LOPA,Mojave Provisional,20,EASTERN MOJAVE
+Lupinus,arizonicus,,,LUAR4,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lupinus,odoratus,,,LUOD,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lycium,andersonii,,,LYAN,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lycium,cooperi,,,LYCO2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Lycium,pallidum,,,LYPA,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Malacothrix,glabrata,,,MAGL3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Menodora,spinescens,,,MESP2,Mojave Provisional,20,EASTERN MOJAVE
+Mentzelia,affinis,,,MEAF2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Mirabilis,laevis,,,MILA6,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Muhlenbergia,porteri,,,MUPO2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Nicotiana,attenuata,,,NIAT,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Oenothera,caespitosa,,,OECA10,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Oenothera,deltoides,,,OEDE2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Oenothera,primiveris,,,OEPR,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Opuntia,basilaris,,,OPBA2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Oxystylis,lutea,,,OXLU,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Pectis,papposa,,,PEPA2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Penstemon,palmeri,,,PEPA8,Mojave Provisional,20,EASTERN MOJAVE
+Peritoma,arborea,,,CLIS,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Phacelia,crenulata,,,PHCR,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Phacelia,distans,,,PHDI,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Phacelia,fremontii,,,PHFR2,Mojave Provisional,20,EASTERN MOJAVE
+Picrothamnus,desertorum,,,PIDE4,Mojave Provisional,20,EASTERN MOJAVE
+Plantago,ovata,,,PLOV,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Prosopis,glandulosa,,,PRGL2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Prosopis,pubescens,,,PRPU,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Psorothamnus,fremontii,,,PSFR,Mojave Provisional,20,EASTERN MOJAVE
+Purshia,glandulosa,,,PUGL2,Mojave Provisional,20,EASTERN MOJAVE
+Salazaria,mexicana,,,SAME,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Salvia,columbariae,,,SACO6,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Senna,armata,,,SEAR8,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Sphaeralcea,ambigua,,,SPAM2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Sphaeralcea,angustifolia,,,SPAN3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Stephanomeria,exigua,,,STEX,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Stephanomeria,parryi,,,STPA3,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Stephanomeria,pauciflora,,,SPTA4,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Vulpia,octoflora,,,VUOC,Mojave Provisional,20,EASTERN MOJAVE
+Xylorhiza,tortifolia,,,XYTO2,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Yucca,jaegeriana,,,YUBRJ,Mojave Provisional,"14, 18, 20, 21, 25, 30, 32, 33",EASTERN MOJAVE
+Yucca,schidigera,,,YUSC2,Mojave Provisional,20,EASTERN MOJAVE
+Abronia,villosa,,,ABVI,Mojave Provisional,,SNDO
+Achnatherum,hymenoides,,,ACHY,Mojave Provisional,,SNDO
+Acmispon,humistratus,,,LOHU2,Mojave Provisional,,SNDO
+Acmispon,rigidus,,,LORI3,Mojave Provisional,,SNDO
+Acmispon,strigosus,,,LOST4,Mojave Provisional,,SNDO
+Amaranthus,fimbriatus,,,AMFI,Mojave Provisional,,SNDO
+Ambrosia,dumosa,,,AMDU2,Mojave Provisional,,SNDO
+Amsinckia,tessellata,,,AMTE3,Mojave Provisional,,SNDO
+Asclepias,erosa,,,ASER,Mojave Provisional,,SNDO
+Astragalus,didymocarpus,,,ASDI3,Mojave Provisional,,SNDO
+Astragalus,layneae,,,ASLA8,Mojave Provisional,,SNDO
+Atriplex,hymenelytra,,,ATHY,Mojave Provisional,,SNDO
+Atriplex,polycarpa,,,ATPO,Mojave Provisional,,SNDO
+Baileya,multiradiata,,,BAMU,Mojave Provisional,,SNDO
+Bouteloua,aristidoides,,,BOAR,Mojave Provisional,,SNDO
+Bouteloua,barbata,,,BOBA2,Mojave Provisional,,SNDO
+Chaenactis,fremontii,,,CHFR,Mojave Provisional,,SNDO
+Chilopsis,linearis,,,CHLI2,Mojave Provisional,,SNDO
+Chylismia,brevipes,,,CABR23,Mojave Provisional,,SNDO
+Chylismia,claviformis,,,CACL4,Mojave Provisional,,SNDO
+Coleogyne,ramosissima,,,CORA,Mojave Provisional,,SNDO
+Cryptantha,micrantha,,,CRMI,Mojave Provisional,,SNDO
+Cryptantha,nevadensis,,,CRNE2,Mojave Provisional,,SNDO
+Descurainia,pinnata,,,DEPI,Mojave Provisional,,SNDO
+Echinocereus,engelmannii,,,ECEN,Mojave Provisional,,SNDO
+Encelia,farinosa,,,ENFA,Mojave Provisional,,SNDO
+Encelia,virginensis,,,ENVI,Mojave Provisional,,SNDO
+Ephedra,nevadensis,,,EPNE,Mojave Provisional,,SNDO
+Eremothera,refracta,,,CARE2,Mojave Provisional,,SNDO
+Ericameria,cooperi,,,ERCO23,Mojave Provisional,,SNDO
+Eriogonum,fasciculatum,,,ERFA2,Mojave Provisional,,SNDO
+Eriogonum,inflatum,,,ERIN4,Mojave Provisional,,SNDO
+Euphorbia,albomarginata,,,EUAL4,Mojave Provisional,,SNDO
+Euphorbia,micromera,,,EUMI3,Mojave Provisional,,SNDO
+Euphorbia,polycarpa,,,EUPO3,Mojave Provisional,,SNDO
+Gutierrezia,microcephala,,,GUMI,Mojave Provisional,,SNDO
+Pleuraphis,jamesii,,,PLJA,Mojave Provisional,,SNDO
+Hilaria,rigida,,,HIRO,Mojave Provisional,,SNDO
+Hymenoclea,salsola,,,HYSA,Mojave Provisional,,SNDO
+Krameria,bicolor,,,KRGR,Mojave Provisional,,SNDO
+Krameria,erecta,,,KRER,Mojave Provisional,,SNDO
+Larrea,tridentata,,,LATR2,Mojave Provisional,,SNDO
+Lepidium,fremontii,,,LEFR2,Mojave Provisional,,SNDO
+Lepidium,lasiocarpum,,,LELA,Mojave Provisional,,SNDO
+Lomatium,parryi,,,LOPA,Mojave Provisional,,SNDO
+Lupinus,odoratus,,,LUOD,Mojave Provisional,,SNDO
+Lycium,andersonii,,,LYAN,Mojave Provisional,,SNDO
+Lycium,cooperi,,,LYCO2,Mojave Provisional,,SNDO
+Lycium,pallidum,,,LYPA,Mojave Provisional,,SNDO
+Malacothrix,glabrata,,,MAGL3,Mojave Provisional,,SNDO
+Mirabilis,laevis,,,MILA6,Mojave Provisional,,SNDO
+Muhlenbergia,porteri,,,MUPO2,Mojave Provisional,,SNDO
+Nicotiana,attenuata,,,NIAT,Mojave Provisional,,SNDO
+Nicotiana,obtusifolia,,,NIOB,Mojave Provisional,,SNDO
+Oenothera,caespitosa,,,OECA10,Mojave Provisional,,SNDO
+Oenothera,deltoides,,,OEDE2,Mojave Provisional,,SNDO
+Oenothera,primiveris,,,OEPR,Mojave Provisional,,SNDO
+Opuntia,basilaris,,,OPBA2,Mojave Provisional,,SNDO
+Pectis,papposa,,,PEPA2,Mojave Provisional,,SNDO
+Penstemon,palmeri,,,PEPA8,Mojave Provisional,,SNDO
+Phacelia,crenulata,,,PHCR,Mojave Provisional,,SNDO
+Phacelia,distans,,,PHDI,Mojave Provisional,,SNDO
+Plantago,ovata,,,PLOV,Mojave Provisional,,SNDO
+Prosopis,glandulosa,,,PRGL2,Mojave Provisional,,SNDO
+Prosopis,pubescens,,,PRPU,Mojave Provisional,,SNDO
+Psorothamnus,fremontii,,,PSFR,Mojave Provisional,,SNDO
+Salvia,columbariae,,,SACO6,Mojave Provisional,,SNDO
+Senna,armata,,,SEAR8,Mojave Provisional,,SNDO
+Sphaeralcea,ambigua,,,SPAM2,Mojave Provisional,,SNDO
+Sphaeralcea,angustifolia,,,SPAN3,Mojave Provisional,,SNDO
+Stephanomeria,exigua,,,STEX,Mojave Provisional,,SNDO
+Stephanomeria,parryi,,,STPA3,Mojave Provisional,,SNDO
+Stephanomeria,pauciflora,,,STPA4,Mojave Provisional,,SNDO
+Achnatherum,speciosum,,,ACSP12,Mojave Provisional,,SNDO
+Vulpia,octoflora,,,VUOC,Mojave Provisional,,SNDO
+Xylorhiza,tortifolia,,,XYTO2,Mojave Provisional,,SNDO
+Yucca,brevifolia,,,YUBR,Mojave Provisional,,SNDO
+Yucca,schidigera,,,YUSC2,Mojave Provisional,,SNDO
+Achnatherum,hymenoides ,,,ACHY,Empirical Seed Transfer Zone ,"M1L2H3, M1H2H3 ",ARIZONA STRIP
+Aristida,purpurea ,,,ARPU9,Desert Southwest Provisional ,5,ARIZONA STRIP
+Artemisia,tridentata ,,,ARTR,Desert Southwest Provisional ,5,ARIZONA STRIP
+Atriplex,canescens ,,,ATCA2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Bouteloua,curtipendula ,,,BOCU,Desert Southwest Provisional ,5,ARIZONA STRIP
+Bouteloua,eriopoda ,,,BOER4,Desert Southwest Provisional ,5,ARIZONA STRIP
+Bouteloua,gracilis ,,,BOGR2,Climate Similarity Zone ,"3, 6 ",ARIZONA STRIP
+Cleome,lutea ,,,CLLU2,Genetic Seed Transfer Zone ,4,ARIZONA STRIP
+Purshia,stansburiana ,,,PUST,Desert Southwest Provisional ,5,ARIZONA STRIP
+Elymus,elymoides ,,,ELEL5,Climate Similarity Zone ,"1, 2, 5, 6 ",ARIZONA STRIP
+Elymus,trachycaulus ,,,ELTR7,Desert Southwest Provisional ,5,ARIZONA STRIP
+Eriogonum,inflatum ,,,ERIN4,Desert Southwest Provisional ,5,ARIZONA STRIP
+Eriogonum,racemosum ,,,ERRA3,Desert Southwest Provisional ,5,ARIZONA STRIP
+Eriogonum,ovalifolium ,,,EROV,Desert Southwest Provisional ,5,ARIZONA STRIP
+Festuca,idahoensis ,,,FEID,Desert Southwest Provisional ,5,ARIZONA STRIP
+Grayia,spinosa ,,,GRSP,Desert Southwest Provisional ,5,ARIZONA STRIP
+Heliomeris,multiflora ,,,HEMU3,Climate Similarity Zone ,3,ARIZONA STRIP
+Hesperostipa,comata ,,,HECO26,Desert Southwest Provisional ,5,ARIZONA STRIP
+Hillaria,jamesii ,,,PLJA,Genetic Seed Transfer Zone ,8,ARIZONA STRIP
+Hillaria,rigida ,,,PLRI3,Desert Southwest Provisional ,5,ARIZONA STRIP
+Krascheninnikovia,lanata ,,,KRLA2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Leymus,cinereus ,,,LECI4,Desert Southwest Provisional ,5,ARIZONA STRIP
+Lupinus,argenteus ,,,LUAR3,Desert Southwest Provisional ,5,ARIZONA STRIP
+Lupinus,caudatus ,,,LUCA,Desert Southwest Provisional ,5,ARIZONA STRIP
+Machaeranthera,canescens ,,,DICA18,Climate Similarity Zone ,1,ARIZONA STRIP
+Muhlenbergia,porteri ,,,MUPO2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Muhlenbergia,richardsonis ,,,MURI,Desert Southwest Provisional ,5,ARIZONA STRIP
+Muhlenbergia,torreyi ,,,MUTO2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Nicotiana,attenuata ,,,NIAT,Desert Southwest Provisional ,5,ARIZONA STRIP
+Pascopyrum,smithii ,,,PASM,Desert Southwest Provisional ,5,ARIZONA STRIP
+Penstemon,palmeri ,,,PEPA8,Desert Southwest Provisional ,5,ARIZONA STRIP
+Penstemon,parryi ,,,PEPA24,Desert Southwest Provisional ,5,ARIZONA STRIP
+Poa,secunda ,,,POSE,Desert Southwest Provisional ,5,ARIZONA STRIP
+Purshia,glandulosa ,,,PUGL2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Purshia,stansburiana ,,,PUST,Desert Southwest Provisional ,5,ARIZONA STRIP
+Purshia,tridentata ,,,PUTR2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Ribes,cereum ,,,RICE,Desert Southwest Provisional ,5,ARIZONA STRIP
+Scleropogon,brevifolius ,,,SCBR2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Sphaeralcea,ambigua ,,,SPAM2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Sphaeralcea,rusbyi ,,,SPRU2,Desert Southwest Provisional ,5,ARIZONA STRIP
+Sporobolus,cryptandrus ,,,SPCO4,Genetic Seed Transfer Zone ,"2, 3 ",ARIZONA STRIP

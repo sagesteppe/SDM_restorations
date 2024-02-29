@@ -61,21 +61,21 @@ occurrences <- bind_rows(
 
 st_write(occurrences, file.path(occ_p, 'jittered_occurrences.shp'), quiet = T, append = F)
 
-rm(occ_p. occ_aim)
+rm(occ_p, occ_aim)
 ```
 
 Identify which species crews require. 
 
 ```{r}
 
-spp_needed <- read.csv('../data/raw/2024sos_species.csv') %>% 
-  filter(contract %in% c('SNDO', 'EASTERN MOJAVE')) %>% 
+spp_needed <- read.csv('../data/raw/2024sos_species-FIXED.csv') %>% 
   unite('binomial', genus:species) %>% 
   select(binomial, contract)
 
 spp_needed <- read.csv('../data/raw/contract_lkp.csv') %>% 
   left_join(spp_needed, ., by = c('contract' = 'Contract_colloquial')) %>% 
-  select(-contract)
+  select(-contract) %>% 
+  distinct()
 ```
 
 ```{r import data}
@@ -110,10 +110,8 @@ occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
 rm(SWSTZ, BOWERSTZ, occ_p)
 ```
 
-
 ```{r}
-teams_list <- filter(teams, str_detect(Contract, 'SNDO|Eastern Mojave')) %>% 
-  split(., f = .$Contract)
+teams_list <- split(teams, f = teams$Contract)
 ```
 
 ```{r generate projects for crews, eval= F}
@@ -138,53 +136,15 @@ Now we can generate estimates of flowering duration in certain field offices
 
 ```{r generate phenology spreadsheet for crews}
 
+spp_needed <- rename(spp_needed, taxon = binomial)
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
-oppy <- lapply(X = teams_list[1], 
+lapply(X = teams_list, 
        FUN = phen_tabulator,
        path = p2ts, 
        admu = admin_boundaries, 
        target_species = spp_needed
        )
 
-tdf <- oppy[[1]] |>
-  dplyr::arrange(taxon) |>
-  dplyr::distinct()
-
-dates <- date_maker()
-tdf1 <- dplyr::left_join(tdf, dates[[1]], by = 'doy') |>
-  dplyr::left_join(
-    dplyr::select(dates[[2]], -doy), by = c('reports_to' = 'reporting_event')) |>
-  dplyr::group_by(taxon) #|>
-  tidyr::pivot_wider(names_from = reports_to, values_from = event, id_cols = 'taxon',
-                     values_fill = NA)
-
-report_pts_rep <- sort(as.numeric(colnames(tdf1)[grep('[0-9]', colnames(tdf1))]))
-miss_wk <- setdiff(min(report_pts_rep):max(report_pts_rep), report_pts_rep) # see if some 
-# weeks are missing by default. 
-if(length(miss_wk)>0){
-
-  empty_cols <- setNames(
-    data.frame(
-      matrix(
-        NA, nrow = nrow(tdf1), ncol = length(miss_wk))), 
-    miss_wk)
-  
-  tdf2 <- cbind(tdf1, empty_cols)
-  rm(empty_cols)
-}
-
-tdf2 <- tdf2[, c(
-  colnames(tdf2)[grep('[A-z]', colnames(tdf2))], 
-  sort(as.numeric(colnames(tdf2)[ grep('[0-9]', colnames(tdf2)) ]))) ]
-
-tdf2 <- tdf2[2:nrow(tdf2), ]
-
-tdf_peak <- dplyr::filter(tdf, event == 'Peak') %>% 
-  dplyr::mutate(
-    Early_Peak = reports_to - 1, 
-    Late_Peak = reports_to + 1 )
-
-#names(out_v) <- c('Initation', 'Peak', 'Cessation')
 ```
 
 

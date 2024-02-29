@@ -960,14 +960,16 @@ project_maker <- function(x, target_species,
       sf::st_as_sf()
     f_crop <- st_intersection(f_crop, blm_surf_sub) %>% 
       select(-Unit_Nm,-Loc_Nm)
-    f_crop <- f_crop[st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
-    f_crop <- rmapshaper::ms_simplify(f_crop)
-    f_crop <- f_crop[st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
+    f_crop <- f_crop[sf::st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
+  #  f_crop <- f_crop[!sf::st_is_empty(f_crop), ]
+  #  f_crop <- rmapshaper::ms_simplify(f_crop, keep = 0.9)
+  #  f_crop <- f_crop[!sf::st_is_empty(f_crop), ]
+  #  f_crop <- f_crop[st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
     
     binomial <- paste0(gsub(' ', '_', basename(x)))
     if(nrow(f_crop) > 1){
     sf::st_write(f_crop, 
-                 file.path(crew_dir, 'Geodata/Species/SDM', binomial), quiet = TRUE)
+                 file.path(crew_dir, 'Geodata/Species/SDM', binomial), append = F, quiet = TRUE)
     }
   }
   
@@ -991,7 +993,7 @@ project_maker <- function(x, target_species,
 
 ############################################################################
 # write out whether a model says a species is flowering or not.
-#' @param x a list od data.frames of crews which need the estimates.
+#' @param x a list of data.frames of crews which need the estimates.
 #' @param path a path to the raster phenology estimate summaries from `spat_summarize` in sagesteppe::SeedPhenology
 #' @param admu 
 #' @param target_species 
@@ -1006,8 +1008,8 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   # determine which species we want estimates for.
   t_spp <- target_species |>
     dplyr::filter(Requisition == x$Contract[1]) |>
-    dplyr::pull(binomial)
-  
+    dplyr::pull(taxon)
+
   # determine which species we have estimates for
   f <- list.files(path, pattern = '.tif$', recursive = T)
   f <- f[grep('summary_doys', f)]
@@ -1015,7 +1017,7 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   f <- file.path(path, na.omit(f[match(t_spp, f_name)]))
   missing <- data.frame(
     taxon = setdiff(t_spp, f_name))
-    
+  
   # basically lapply this through the taxa
   summarizer <- function(x){
     focal_r <- terra::rast(x)
@@ -1031,12 +1033,92 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   
   test <- dplyr::bind_rows(lapply(f, summarizer))
   return(test)
+  dates <- date_maker()
+  # now prepare the date in a format for reporting.
+  tdf <- test |>
+    dplyr::arrange(taxon) |>
+    dplyr::distinct() |>
+    dplyr::group_by(taxon) |>
+    dplyr::mutate( # peak cannot be the same as cessation or initation
+      doy = dplyr::if_else( 
+        dplyr::lead(doy, n = 1) == doy, doy-28, doy, missing = doy ), 
+      doy = dplyr::if_else( 
+        dplyr::lag(doy, n = 1) == doy, doy+28, doy, missing = doy ))
+  
+  dates <- date_maker()
+  tdf <- dplyr::left_join(tdf, dates[[1]], by = 'doy') |>
+    dplyr::left_join(
+      dplyr::select(dates[[2]], -doy), by = c('reports_to' = 'reporting_event')) |>
+    dplyr::group_by(taxon) 
+  
+  tdf_peak <- filter(tdf, event == 'Peak') |>
+    dplyr::select(taxon, doy) |>
+    dplyr::slice(rep(1:dplyr::n(), each = 3)) |>
+    dplyr::mutate(
+      event = c('Early.Peak', 'Peak', 'Late.Peak'),
+      doy = case_when(
+        event == 'Early.Peak' ~ doy - 15, # one extra day to ensure we stretch outside
+        event == 'Late.Peak' ~ doy + 15, # the current range. 
+        .default = doy)
+    ) |>
+    dplyr::left_join( dates[[1]], by = 'doy') |>
+    dplyr::left_join(
+      dplyr::select(dates[[2]], -doy), by = c('reports_to' = 'reporting_event')) 
+  
+  tdf1 <- dplyr::bind_rows(
+    dplyr::filter(tdf, event != 'Peak'),
+    tdf_peak
+  ) |>
+    dplyr::arrange(taxon, doy, event) |>
+    dplyr::group_by(taxon, reports_to) |>
+    dplyr::mutate(
+      multiples = dplyr::n()) |>
+    dplyr::filter(! ( multiples==2 & str_detect(event, 'Late[.]|Early[.]'))) |>
+    dplyr::select(-multiples) |>
+    dplyr::arrange(doy) |>
+    tidyr::pivot_wider(names_from = reports_to, values_from = event, id_cols = 'taxon',
+                       values_fill = NA)
+  
+  report_pts_rep <- sort(as.numeric(colnames(tdf1)[grep('[0-9]', colnames(tdf1))]))
+  miss_wk <- setdiff(min(report_pts_rep):max(report_pts_rep), report_pts_rep) # see if some 
+  # weeks are missing by default. 
+  if(length(miss_wk)>0){
+    
+    empty_cols <- setNames(
+      data.frame(
+        matrix(
+          NA, nrow = nrow(tdf1), ncol = length(miss_wk))), 
+      miss_wk)
+    
+    tdf2 <- cbind(tdf1, empty_cols)
+    rm(empty_cols)
+  }
+  
+  tdf2 <- tdf2[, c(
+    colnames(tdf2)[grep('[A-z]', colnames(tdf2))], 
+    sort(as.numeric(colnames(tdf2)[ grep('[0-9]', colnames(tdf2)) ]))) ]
+  
+  # now update the column names
+  colnames(tdf2)[ grep('[0-9]', colnames(tdf2))] <-  paste0(
+    dates[[2]]$month, '-', dates[[2]]$day)[
+      as.numeric(colnames(tdf2)[ grep('[0-9]', colnames(tdf2))])
+    ]
+  
+  tdf2 <- cbind(tdf2, setNames(
+    data.frame(
+      matrix(NA, 
+           nrow = nrow(tdf2), 
+           ncol = 1)), 'Reliability')
+  ) |>
+    dplyr::relocate(Reliability, .after = taxon)
 
   # write out to this location
   crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
   ifelse(!dir.exists(file.path(crew_dir, 'Data', 'Phenology')), 
          dir.create(file.path(crew_dir, 'Data', 'Phenology')), FALSE)
-  crew_dir <- paste0(crew_dir, 'Data/Phenology')
+  crew_dir <- paste0(crew_dir, '/Data/Phenology')
+  
+  write.csv(tdf2, paste0(crew_dir, '/Phenology_Estimates.csv'), na = "", row.names = F)
   
 }
 
