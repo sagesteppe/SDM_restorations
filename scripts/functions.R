@@ -1032,19 +1032,22 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   }
   
   test <- dplyr::bind_rows(lapply(f, summarizer))
-  return(test)
+  
   dates <- date_maker()
   # now prepare the date in a format for reporting.
   tdf <- test |>
     dplyr::arrange(taxon) |>
     dplyr::distinct() |>
     dplyr::group_by(taxon) |>
-    dplyr::mutate( # peak cannot be the same as cessation or initation
+    dplyr::mutate( # peak cannot be the same as cessation or initiation
       doy = dplyr::if_else( 
-        dplyr::lead(doy, n = 1) == doy, doy-28, doy, missing = doy ), 
+        dplyr::lead(doy, n = 1) <= (doy - 27), doy-28, doy, missing = doy ), 
       doy = dplyr::if_else( 
-        dplyr::lag(doy, n = 1) == doy, doy+28, doy, missing = doy ))
-  
+        dplyr::lag(doy, n = 1) >= (doy - 27), doy+28, doy, missing = doy ), 
+      doy = dplyr::if_else(
+        (le = dplyr::lead(doy, n = 1)) - (la =dplyr::lag(doy, n = 1)) <= 57, ((le+la)/2), doy, missing = doy)
+      )
+
   dates <- date_maker()
   tdf <- dplyr::left_join(tdf, dates[[1]], by = 'doy') |>
     dplyr::left_join(
@@ -1071,13 +1074,15 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   ) |>
     dplyr::arrange(taxon, doy, event) |>
     dplyr::group_by(taxon, reports_to) |>
-    dplyr::mutate(
-      multiples = dplyr::n()) |>
-    dplyr::filter(! ( multiples==2 & str_detect(event, 'Late[.]|Early[.]'))) |>
+    dplyr::mutate(multiples = dplyr::n()) |>
+    dplyr::filter(! ( multiples>=2 & str_detect(event, 'Late[.]|Early[.]'))) |>
+    dplyr::mutate(multiples = dplyr::n()) |>
+    dplyr::filter(! ( multiples>=2 & str_detect(event, 'Peak'))) |>
     dplyr::select(-multiples) |>
     dplyr::arrange(doy) |>
     tidyr::pivot_wider(names_from = reports_to, values_from = event, id_cols = 'taxon',
                        values_fill = NA)
+ 
   
   report_pts_rep <- sort(as.numeric(colnames(tdf1)[grep('[0-9]', colnames(tdf1))]))
   miss_wk <- setdiff(min(report_pts_rep):max(report_pts_rep), report_pts_rep) # see if some 
@@ -1092,7 +1097,8 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
     
     tdf2 <- cbind(tdf1, empty_cols)
     rm(empty_cols)
-  }
+  } else {tdf2 <- tdf1}
+  
   
   tdf2 <- tdf2[, c(
     colnames(tdf2)[grep('[A-z]', colnames(tdf2))], 
@@ -1111,7 +1117,11 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
            ncol = 1)), 'Reliability')
   ) |>
     dplyr::relocate(Reliability, .after = taxon)
-
+  
+  positions <- apply(X = tdf2, MARGIN = 1, function(x)as.numeric(grep("^Peak", x)))
+  positions <- sort(positions, index.return = T)
+  tdf2 <- tdf2[positions$ix,]
+  
   # write out to this location
   crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
   ifelse(!dir.exists(file.path(crew_dir, 'Data', 'Phenology')), 

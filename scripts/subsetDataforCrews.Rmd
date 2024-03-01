@@ -70,7 +70,8 @@ Identify which species crews require.
 
 spp_needed <- read.csv('../data/raw/2024sos_species-FIXED.csv') %>% 
   unite('binomial', genus:species) %>% 
-  select(binomial, contract)
+  select(binomial, contract) %>% 
+  mutate(binomial = str_trim(binomial))
 
 spp_needed <- read.csv('../data/raw/contract_lkp.csv') %>% 
   left_join(spp_needed, ., by = c('contract' = 'Contract_colloquial')) %>% 
@@ -137,14 +138,16 @@ Now we can generate estimates of flowering duration in certain field offices
 ```{r generate phenology spreadsheet for crews}
 
 spp_needed <- rename(spp_needed, taxon = binomial)
+
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
-lapply(X = teams_list, 
-       FUN = phen_tabulator,
-       path = p2ts, 
-       admu = admin_boundaries, 
-       target_species = spp_needed
-       )
+lapply(
+  X = teams_list, 
+  FUN = phen_tabulator,
+  path = p2ts, 
+  admu = admin_boundaries, 
+  target_species = spp_needed
+  )
+
 
 ```
-
 
