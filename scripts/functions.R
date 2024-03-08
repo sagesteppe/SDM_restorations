@@ -999,11 +999,12 @@ project_maker <- function(x, target_species,
 #' @param target_species 
 phen_tabulator <- function(x, path, project_areas, admu, target_species){
   
+  dates <- date_maker()
   # subset to field offices
-  focal_area <- dplyr::filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) |>
-    sf::st_union() |>
-    sf::st_transform(5070) |>
-    vect()
+  focal_area <- dplyr::filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) |> 
+    sf::st_union() |> 
+    sf::st_transform(5070) |> 
+    vect() 
   
   # determine which species we want estimates for.
   t_spp <- target_species |>
@@ -1018,6 +1019,58 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   missing <- data.frame(
     taxon = setdiff(t_spp, f_name))
   
+  # gather the simple density estimates. 
+
+  if(length(missing) >0){
+    
+  path <- '/media/steppe/hdd/SeedPhenology/data/processed/lowest_priority_sheets'
+  dat <- sf::st_read(file.path(path, 'lowest_priority_sheets.shp'), quiet = TRUE) |>
+    dplyr::filter(scntfcnm %in% gsub('_', ' ', missing$taxon)) |>
+    dplyr::group_by(scntfcnm) |>
+    tidyr::drop_na(doy) |>
+    dplyr::mutate(
+      q95 = quantile(doy, 0.95), # trim the last %5 
+      q25 = quantile(doy, 0.025)) |> # trim only the first 2.5%
+    dplyr::filter(doy > q25 & doy < q95) |>
+    dplyr::select(-q25, -q95) |>
+    sf::st_transform(sf::st_crs(focal_area))
+  
+  dat_sub <- sf::st_buffer(sf::st_as_sf(focal_area), 120000) |> # ~75 miles
+    sf::st_intersection(dat)
+  dat_sub <- split(dat_sub, f = dat_sub$scntfcnm)
+  
+  simple_summarizer <- function(x){
+    if(nrow(x) > 5){d <- density(x$doy)} else {d <- median(x$doy)}
+    if(length(d)==1){mid <- d} else{mid <- d$x[which.max(d$y)]}
+    
+    summy <- data.frame(
+      taxon = x$scntfcnm[1], 
+      doy = round(c(min(x$doy), mid, max(x$doy)), 0),
+      event = c('Initiation', 'Peak', 'Cessation')
+    ) |> dplyr::mutate( # peak cannot be the same as cessation or initiation
+      doy = dplyr::if_else( 
+        dplyr::lead(doy, n = 1) <= (doy - 27), doy-28, doy, missing = doy ), 
+      doy = dplyr::if_else( 
+        dplyr::lag(doy, n = 1) >= (doy - 27), doy+28, doy, missing = doy ), 
+      doy = dplyr::if_else(
+        (le = dplyr::lead(doy, n = 1)) - (la =dplyr::lag(doy, n = 1)) <= 57, ((le+la)/2), doy, missing = doy)
+    )
+    return(summy)
+  }
+  
+  if(length(dat_sub)>0){
+    s_sum <- dplyr::bind_rows(lapply(dat_sub, simple_summarizer))
+  
+    s_sum <- dplyr::left_join(s_sum, dates[[1]], by = 'doy') |>
+      dplyr::left_join(
+        dplyr::select(dates[[2]], -doy), by = c('reports_to' = 'reporting_event'))
+
+  } else {summy <- setNames(data.frame(
+    matrix(ncol = 3, nrow = 0)), c('Initiation', 'Peak', 'Cessation'))}
+  
+  } else {summy <- setNames(data.frame(
+    matrix(ncol = 3, nrow = 0)), c('Initiation', 'Peak', 'Cessation'))}
+  
   # basically lapply this through the taxa
   summarizer <- function(x){
     focal_r <- terra::rast(x)
@@ -1028,8 +1081,8 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
       taxon = taxon,
       doy = as.numeric(pos), 
       event = c('Initiation', 'Peak', 'Cessation'))
-    return(summy)
-  }
+    
+  } 
   
   test <- dplyr::bind_rows(lapply(f, summarizer))
   
@@ -1048,7 +1101,6 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
         (le = dplyr::lead(doy, n = 1)) - (la =dplyr::lag(doy, n = 1)) <= 57, ((le+la)/2), doy, missing = doy)
       )
 
-  dates <- date_maker()
   tdf <- dplyr::left_join(tdf, dates[[1]], by = 'doy') |>
     dplyr::left_join(
       dplyr::select(dates[[2]], -doy), by = c('reports_to' = 'reporting_event')) |>
@@ -1068,10 +1120,20 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
     dplyr::left_join(
       dplyr::select(dates[[2]], -doy), by = c('reports_to' = 'reporting_event')) 
   
-  tdf1 <- dplyr::bind_rows(
-    dplyr::filter(tdf, event != 'Peak'),
-    tdf_peak
-  ) |>
+  if(exists('s_sum')){
+    tdf1 <- dplyr::bind_rows(
+      dplyr::filter(tdf, event != 'Peak'),
+      s_sum,
+      tdf_peak
+    )
+  } else {
+    tdf1 <- dplyr::bind_rows(
+      dplyr::filter(tdf, event != 'Peak'),
+      tdf_peak
+    )
+  }
+  
+  tdf1 <- tdf1 |>
     dplyr::arrange(taxon, doy, event) |>
     dplyr::group_by(taxon, reports_to) |>
     dplyr::mutate(multiples = dplyr::n()) |>
@@ -1083,9 +1145,9 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
     tidyr::pivot_wider(names_from = reports_to, values_from = event, id_cols = 'taxon',
                        values_fill = NA)
  
-  
   report_pts_rep <- sort(as.numeric(colnames(tdf1)[grep('[0-9]', colnames(tdf1))]))
   miss_wk <- setdiff(min(report_pts_rep):max(report_pts_rep), report_pts_rep) # see if some 
+
   # weeks are missing by default. 
   if(length(miss_wk)>0){
     
@@ -1115,13 +1177,17 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
       matrix(NA, 
            nrow = nrow(tdf2), 
            ncol = 1)), 'Reliability')
-  ) |>
+  ) |> 
     dplyr::relocate(Reliability, .after = taxon)
   
   positions <- apply(X = tdf2, MARGIN = 1, function(x)as.numeric(grep("^Peak", x)))
-  positions <- sort(positions, index.return = T)
-  tdf2 <- tdf2[positions$ix,]
+  if(any(is.na(as.numeric(positions)))) {
+    positions[which(lapply(positions, length) == 0)] <- median(as.numeric(positions), na.rm = T)
+  }
   
+  positions <- sort(as.numeric(positions), index.return = T)
+  tdf2 <- tdf2[positions$ix,]
+
   # write out to this location
   crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
   ifelse(!dir.exists(file.path(crew_dir, 'Data', 'Phenology')), 

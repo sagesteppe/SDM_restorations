@@ -117,44 +117,7 @@ map_maker_fn <- function(x, y, path_dir){
   
 }
 
-lapply(f[7], FUN = map_maker_fn, 
+lapply(f, FUN = map_maker_fn, 
        y = occurrences,
        path_dir = '/media/steppe/hdd/SDM_maps_CBG_guidebooks2024'
        )
-
-
-
-breaks <- c(121, 152, 182, 213, 244)
-labels <- c('May', 'June', 'July', 'Aug.', 'Sept.')
-
-spliecies <- split(records, records$species)
-
-phen_maker_fn <- function(x){
-  
-  species <- gsub('_', ' ', x$species[1])
-  
-  ggplot(x) +
-    geom_density(aes(x = DOY), fill = '#FF7B9C', color = '#FFC759', alpha = 0.5) +
-    theme_bw() + 
-    labs(title = 'Estimated Flowering') + 
-    theme(aspect.ratio = 6/16, 
-          plot.title = element_text(
-            hjust = 0.5, colour = "black", size = 7, face = "bold"),
-          axis.text.x= element_text(
-            family = "Tahoma", face = "bold", colour = "black", size=5),
-          panel.background = element_rect(fill='#607196'),
-          plot.background = element_rect(fill='#607196'),
-          panel.border = element_blank(),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.title.y = element_blank(),
-          axis.title.x = element_blank(),
-          panel.grid.major.x = element_blank(),
-          panel.grid.major.y = element_blank(),
-          panel.grid.minor.x = element_blank(), 
-          panel.grid.minor.y = element_blank()) +
-    scale_x_continuous(breaks = breaks, labels=labels, limits = c(120, 245) )
-  
-  ggsave(filename = paste0('../results/phen/', species, '.png'), plot = last_plot(), 
-         dpi = 150, width = 260, height = 150,  units = "px",  bg = 'transparent')
-}
