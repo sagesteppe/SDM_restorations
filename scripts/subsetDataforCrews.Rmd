@@ -157,14 +157,13 @@ spp_needed <- rename(spp_needed, taxon = binomial)
 
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
 ott1 <- lapply(
-  X = teams_list[5], # 5 throws an error
+  X = teams_list, # 5 throws an error
   FUN = phen_tabulator,
   path = p2ts, 
   admu = admin_boundaries, 
   target_species = spp_needed
   ) # row 67
 
-ott1[[1]]
 ```
 
 

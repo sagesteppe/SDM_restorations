@@ -1,10 +1,19 @@
 idig_records <- function(query){
   
-  result <- ridigbio::idig_search_records(rq = list(scientificname = query)) |> 
-    dplyr::select(scientificname, datecollected, collector, geopoint.lon, geopoint.lat) |> 
-    tidyr::drop_na(geopoint.lon, geopoint.lat) |> 
-    dplyr::mutate(datecollected = as.Date(datecollected)) |> 
-    dplyr::filter(datecollected > '1950-01-01')
+  
+  fields2getrecord <- c(
+    "data.dwc:scientificName",  "data.dwc:decimalLatitude", 
+    "data.dwc:decimalLongitude", "collector", "uuid",
+    "data.dwc:year", "data.dwc:month", "data.dwc:day")
+  names(fields2getrecord) <- c(
+    'scientificname', 'geopoint.lat', 'geopoint.lon', 'collector', 'uuid', 'year', 'month', 'day')
+  
+  result <- ridigbio::idig_search_records(rq = 
+                                            list(scientificname = query), fields = fields2getrecord) |> 
+    dplyr::rename(all_of(fields2getrecord)) |>
+    dplyr::select(scientificname, year, collector, geopoint.lon, geopoint.lat) |> 
+    tidyr::drop_na(geopoint.lon, geopoint.lat, year) |> 
+    dplyr::filter(year >= 1950)
   
   if(nrow(result) > 0) {result$status = 'found'} else {
     result <- data.frame(
@@ -156,8 +165,6 @@ absence_drawer <- function(x, bg_abs, terrestrial, rand_dist){
 
 
 
-
-
 quantile_flagger <- function(x, quant, flag_threshold){
   
   if(missing(quant)){quant <- 0.025}
@@ -295,7 +302,8 @@ lda_PA_dropper <- function(x, path, col_names){
     removals <- conflicted$ID
   }
   
-  if(!is.na(removals)){data_out <- dplyr::filter(x, ! ID %in% removals)}
+  
+  if(!is.na(removals[1])){data_out <- dplyr::filter(x, ! ID %in% removals)}
   
   metrics <- data.frame(
     Train_Presences = nrow(pres), 
@@ -309,6 +317,7 @@ lda_PA_dropper <- function(x, path, col_names){
     Flagged = nrow(conflicted), 
     Removed = length(removals)
   )
+  
   
   species <- x1$taxon[1]
   message(length(removals), ' records dropped from ', species)

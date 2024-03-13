@@ -29,7 +29,7 @@ names(layers) <- basename(paths)
 rm(paths, files)
 ```
 
-```{r read in response data and model}
+```{r read in response data and model, eval = F}
 p <- '../data/raw/occurrence/combined_records'
 p2f <- file.path(p, list.files(p, pattern = '.shp$'))
 train_dat <- lapply(p2f, sf::st_read, quiet = TRUE)
@@ -43,7 +43,38 @@ lapply(splicies, modeller)
 
 ```
 
+Model the missing AZ strip species
+```{r re run on missing az strip species, eval = F}
 
+targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
+  
+  ## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon))
+
+target_taxa1 <- c('Brodiaea elegans', 'Krameria bicolor', 'Lotus humistratus', 'Adenostoma fasciculatum')
+
+target_taxa <- read.csv('../data/raw/2024sos_species-FIXED.csv', na.strings = "") %>% 
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon)) %>% 
+  filter(! taxon %in% c(targets$taxon, target_taxa1)) %>% 
+  pull(taxon)
+
+p <- '../data/raw/occurrence/combined_records'
+p2f <- file.path(p, list.files(p, pattern = '.shp$'))
+p2f <- p2f[grep(paste(paste0(gsub(' ', '_', target_taxa), '.shp'), collapse = '|'), basename(p2f))]
+
+train_dat <- lapply(p2f, sf::st_read, quiet = TRUE)
+train_dat <- bind_rows(train_dat) %>% 
+  st_transform(crs(layers))
+
+splicies <- split(train_dat, f = train_dat$taxon)
+
+cores <- parallel::detectCores()
+lapply(splicies, modeller) 
+```
 
 
 

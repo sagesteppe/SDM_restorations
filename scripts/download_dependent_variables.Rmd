@@ -37,6 +37,20 @@ target_symbols <- targets %>%
 ## these species had initial errors, fix on Dec 14th, 
 target_taxa <- c('Brodiaea elegans', 'Krameria bicolor', 'Lotus humistratus', 'Adenostoma fasciculatum')
 
+## these species missed, fixed on March 13th
+target_taxa <- read.csv('../data/raw/2024sos_species-FIXED.csv', na.strings = "") %>% 
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon)) %>% 
+  filter(! taxon %in% c(targets$taxon, target_taxa)) %>% 
+  pull(taxon)
+  
+targets <- target_taxa <- read.csv('../data/raw/2024sos_species-FIXED.csv', na.strings = "") %>% 
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon)) %>% 
+  filter(! taxon %in% c(targets$taxon, c('Brodiaea elegans', 'Krameria bicolor', 'Lotus humistratus', 'Adenostoma fasciculatum')))
+
 ```
 
 ```{r Perform gbif queries, eval = F}
@@ -65,7 +79,7 @@ rm(user, pwd, email, gbif_taxon_keys, dl_key)
 ```
 
 
-BIEN is pretty finicky these days and is prone to crashing. There is a paper by Maitner with Enquist, Wilson, Merow etc. about the need for open source devs to be rewarded academically, I take that has a sign of Brian stepping away from it. We will use a for loop to download from BIEN. 
+BIEN is pretty finicky these days and is prone to crashing. There is a paper by Maitner with Enquist, Wilson, Merow etc. about the need for open source devs to be rewarded academically, I take that as a sign of Brian stepping away from it. We will use a for loop to download from BIEN. 
 
 ```{r Perform bien queries, eval = F}
 
@@ -108,13 +122,27 @@ bien_data <-  do.call(rbind, lapply(files, read.csv)) %>%
 write.csv(bien_data, '../data/raw/occurrence/BIEN_records2.csv', row.names = FALSE)
 ```
 
+```{r stitch together BIEN queries 3, eval = F}
+
+p <- '../data/raw/occurrence/bien'
+files <- file.path(p, list.files(p))
+files <- files[grep(paste(paste0(gsub(' ', '_', target_taxa), '.csv'), collapse = '|'), basename(files))]
+
+bien_data <-  do.call(rbind, lapply(files, read.csv)) %>% 
+  filter(datasource != 'GBIF' & date_collected > '1950-01-01', ! scrubbed_species_binomial %in% c('Acer negundo', 'Prosopis glandulosa')) %>%
+  drop_na(date_collected, latitude) %>% 
+  select(scrubbed_species_binomial:datasource, observation_type)
+
+write.csv(bien_data, '../data/raw/occurrence/BIEN_records3.csv', row.names = FALSE)
+```
+
 ```{r Perform idigbio queries, eval = F}
 
 ob <- lapply(target_taxa, idig_records)
 idig <- bind_rows(ob) %>% 
-  filter(datecollected > '1950-01-01')
+  filter(year > 1950)
 
-write.csv(idig, '../data/raw/occurrence/IDIG2.csv')
+write.csv(idig, '../data/raw/occurrence/IDIG3.csv')
 ```
 
 ```{r Import and Query AIM data, eval = F}
@@ -128,10 +156,6 @@ AIM_points <- st_read(dsn = p1,
   select(PrimaryKey, DateVisited, geometry = Shape) %>% 
   st_transform(5070) 
 
-target_symbols <- c('ADFA', 'ADFAF', 'ADFAO', 'BREL', 'BRELE', 'KRGR', 'LOHU2')
-targets <- filter(targets, symbol %in% target_symbols) %>% 
-  distinct()
-
 spp_richness <- st_read(dsn = p1, 
         layer = 'tblSpecRichDetail', quiet = T) %>% 
   select(SpeciesList, PrimaryKey) %>% 
@@ -144,7 +168,9 @@ spp_richness <- st_read(dsn = p1,
   right_join(., select(targets, taxon, symbol) %>% 
                distinct(), by = c('SpeciesList' = 'symbol' ))
 
-st_write(spp_richness, '../data/raw/occurrence/AIM/AIM_records2.shp', append = F)
+spp_richness <- spp_richness[!st_is_empty(spp_richness),,drop=FALSE]
+
+st_write(spp_richness, '../data/raw/occurrence/AIM/AIM_records3.shp', append = F)
 
 rm(p1, AIM_points)
 ```
@@ -264,6 +290,56 @@ st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurre
 rm(ONEperCELL, multiplesPERcell, records, splicies, repeated_occurrences, base_p)
 ```
 
+
+```{r Create consensus presence records 3, eval = F}
+
+base_p <- '../data/raw/occurrence'
+
+bien <- read.csv(file.path(base_p, 'BIEN_records3.csv')) %>% 
+  st_as_sf(coords = c('longitude', 'latitude'), crs = 4326) %>% 
+  mutate(date = as.Date(date_collected)) %>% 
+  select(taxon = scrubbed_species_binomial, date)
+
+idig <- read.csv(file.path(base_p, 'IDIG3.csv')) %>% 
+  st_as_sf(coords = c('geopoint.lon', 'geopoint.lat'), crs = 4326) %>% 
+  mutate(date = as.Date(datecollected)) %>% 
+  select(taxon = scientificname, date)
+
+aim <- st_read(file.path(base_p, 'AIM', 'AIM_records3.shp'), quiet = TRUE) %>% 
+  mutate(date = as.Date(DatVstd)) %>% 
+  select(taxon, date, PrmryKy) %>% 
+  st_transform(4326)
+
+gbif3 <- read.delim(file.path(base_p, 'gbif4', 'occurrence.txt'), na.strings = "") %>% 
+  drop_na(decimalLongitude, decimalLatitude) %>% 
+  filter(str_detect(decimalLatitude, '[A-Z]|[a-z]', negate = T)) %>% 
+  st_as_sf(coords = c('decimalLongitude', 'decimalLatitude'), crs = 4326) %>% 
+  mutate(date = as.Date(eventDate), .before = geometry, 
+         coordinateUncertaintyInMeters = as.numeric(coordinateUncertaintyInMeters)) %>% 
+  filter(coordinateUncertaintyInMeters <= 250) %>% 
+  select(taxon = species, date)
+
+records <- bind_rows(aim, bien, gbif3,  idig) %>% 
+  drop_na(taxon) %>% 
+  mutate(taxon = str_to_sentence(taxon), 
+         taxon = if_else(taxon == 'Wyethia sagittata', 'Balsamorhiza sagittata', taxon)) %>%
+  arrange(taxon)
+
+rm(aim, bien, gbif3,  idig)
+
+splicies <- split(records, records$taxon)
+thinned <- lapply(splicies, ONEperCELL)
+thinned <- bind_rows(thinned)
+st_write(thinned, '../data/raw/occurrence/thinned/thinned_occurrences3.shp', append = F)
+repeated_occurrences <- lapply(splicies, multiplesPERcell)
+repeated_occurrences <- purrr::discard(repeated_occurrences, ~nrow(.) < 2)
+repeated_occurrences <- bind_rows(repeated_occurrences)
+st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurrences3.shp', append = F)
+
+rm(ONEperCELL, multiplesPERcell, records, splicies, repeated_occurrences, base_p)
+```
+
+
 ```{r remove points outside analytical area, eval = F}
 library(terra)
 domain <- rast(nrows = 1, ncols = 1) # create a big empty raster, you can go in through sf too. 
@@ -302,3 +378,21 @@ repeated_occurrences <- thinned[lengths(st_disjoint(repeated_occurrences, domain
 st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurrences2.shp', append = FALSE)
 ```
 
+```{r remove points outside analytical area3, eval = F}
+library(terra)
+domain <- rast(nrows = 1, ncols = 1) # create a big empty raster, you can go in through sf too. 
+ext(domain) <- c( -125.5, -100, 27, 50) # set the extent
+crs(domain) <- "EPSG:4326" # define the projection
+
+domain <- as.polygons(domain) |>  # convert to vector data
+  st_as_sf() |> # convert to simple feature
+  st_transform(5070) 
+
+thinned <- st_read('../data/raw/occurrence/thinned/thinned_occurrences3.shp', quiet = TRUE)
+thinned <- thinned[lengths(st_disjoint(thinned, domain)) ==  0, ]
+st_write(thinned, '../data/raw/occurrence/thinned/thinned_occurrences3.shp', append = FALSE)
+
+repeated_occurrences <- st_read('../data/raw/occurrence/repeated/repeated_occurrences3.shp', quiet = TRUE)
+repeated_occurrences <- thinned[lengths(st_disjoint(repeated_occurrences, domain)) ==  0, ]
+st_write(repeated_occurrences, '../data/raw/occurrence/repeated/repeated_occurrences3.shp', append = FALSE)
+```
