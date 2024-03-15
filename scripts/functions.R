@@ -366,6 +366,7 @@ Boruta_var_selector <- function(x){
 #' test_data output from Boruta_var_selector
 randomForests <- function(train_data, test_data, species, suffix){
   
+  if(missing(suffix)){suffix <- '1k'}
   # identify the appropriate mtry
   opt_mtry <- data.frame(
     randomForest::tuneRF(train_data[,-1], train_data[,1], stepFactor=1.5))
@@ -421,6 +422,7 @@ randomForests <- function(train_data, test_data, species, suffix){
 
 modeller <- function(x, suffix){
   
+  if(missing(suffix)){suffix <- '1k'}
   species <- sf::st_drop_geometry(x) %>% 
     dplyr::pull(taxon)
   species <- species[1]

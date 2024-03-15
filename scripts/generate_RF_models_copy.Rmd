@@ -73,7 +73,7 @@ train_dat <- bind_rows(train_dat) %>%
 splicies <- split(train_dat, f = train_dat$taxon)
 
 cores <- parallel::detectCores()
-lapply(splicies, modeller) 
+lapply(splicies[2:19], modeller) 
 ```
 
 

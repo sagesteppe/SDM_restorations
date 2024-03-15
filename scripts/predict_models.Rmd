@@ -33,28 +33,35 @@ rm(paths, files)
 
 ```{r read in models}
 
+targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
+  
+  ## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon))
+
+target_taxa <- c('Brodiaea elegans', 'Krameria bicolor', 'Lotus humistratus', 'Adenostoma fasciculatum')
+
+## these species missed, fixed on March 13th
+target_taxa <- read.csv('../data/raw/2024sos_species-FIXED.csv', na.strings = "") %>% 
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon)) %>% 
+  filter(! taxon %in% c(targets$taxon, target_taxa)) %>% 
+  pull(taxon)
+
 pmodels <- '../results/rf_models'
 f <- file.path(pmodels, list.files(pmodels))
-f <- data.frame(
-  path = f,  
-  species = gsub('-.*$', '', basename(f)), 
-  time = gsub('[A-Za-z]', '', basename(f))
-  ) |>
-  mutate(time = gsub('_-|[.]', '', time),
-         time = gsub('_', ' ', time), 
-         time = trimws(time),
-         time = gsub('^.1-|^1-', '', time), 
-         time = as.POSIXct(time)) |>
- # group_by(species) |>
-  filter(str_detect(species, '1k$')) |>
- # slice_max(order_by = time, n = 1) #|>
-  pull(path)
+files <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), basename(f))]
+
+rm(target_taxa)
 
 occpath <- '../data/raw/occurrence/combined_records'
-occ_files <- list.files(occpath, pattern = 'shp$')
+
+occ_files <- paste0( basename(gsub('1k.*', '', files)), '.shp')
 
 models_occ <- data.frame(
-  path2model = f, occurrence_data = occ_files
+  path2model = files, occurrence_data = occ_files
 ) %>% 
   mutate(
     species = gsub('-.*$', '', basename(path2model)),
@@ -92,6 +99,78 @@ predict_wrapper <- function(x){
 }
 
 lapply(models_occ, predict_wrapper)
+```
 
+
+
+
+```{r predict second set of models}
+
+targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
+  
+  ## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon))
+
+target_taxa <- c('Brodiaea elegans', 'Krameria bicolor', 'Lotus humistratus', 'Adenostoma fasciculatum')
+
+## these species missed, fixed on March 13th
+target_taxa <- read.csv('../data/raw/2024sos_species-FIXED.csv', na.strings = "") %>% 
+  filter(!species %in% c('tridentata', 'millefolium', 'dioica', 'negundo')) %>%  # purshia,
+  unite('taxon', genus:infraspecies, na.rm = T, sep = ' ') %>% # artemisia, and larrea !
+  mutate(taxon = str_squish(taxon)) %>% 
+  filter(! taxon %in% c(targets$taxon, target_taxa)) %>% 
+  pull(taxon)
+
+pmodels <- '../results/rf_models'
+f <- file.path(pmodels, list.files(pmodels))
+files <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), basename(f))]
+
+rm(target_taxa)
+
+occpath <- '../data/raw/occurrence/combined_records'
+
+occ_files <- paste0( basename(gsub('1k.*', '', files)), '.shp')
+
+models_occ <- data.frame(
+  path2model = files, occurrence_data = occ_files
+) %>% 
+  mutate(
+    species = gsub('-.*$', '', basename(path2model)),
+    match = if_else(species == gsub('[.]shp$', '', occurrence_data), T, F )
+  ) # all look good!
+
+models_occ <- split(models_occ, f = models_occ$species)
+
+predict_wrapper <- function(x){
+  
+  sdm <- readRDS(x$path2model)
+  occ_path <- file.path(occpath, x$occurrence_data)
+  
+  # read in occurrences and subset prediction to 100 miles from border
+  bound <- sf::st_read(occ_path, quiet = TRUE) |>
+    dplyr::filter(Occurrence == 1) |>
+    sf::st_union() |>
+    sf::st_convex_hull() |>
+    sf::st_buffer(80467) |>
+    sf::st_bbox()
+  
+  pout <- '~/Documents/suitability_maps'
+  layer_subset <- terra::subset(layers, term_grab(sdm))
+  layer_subset <- terra::crop(layer_subset, bound)
+  
+  OneClass <- \(...) predict(...)[,2]
+  terra::predict(
+    layer_subset, sdm, cpkgs="randomForest",
+    type = 'prob', cores = 1, f = OneClass,
+    filename = file.path(pout, paste0(x$species, '-', gsub(' ', '_', Sys.time()), '.tif')),
+    wopt = c(names = 'predicted_suitability'))
+  
+   terra::tmpFiles(current = FALSE, orphan = TRUE, old = TRUE, remove = TRUE)
+  
+}
+
+lapply(models_occ, predict_wrapper)
 ```
 
