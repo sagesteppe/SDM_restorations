@@ -34,7 +34,6 @@ lapply(f, patcheR) # roughly 72 hours.
 p <- '../results/suitability_maps'
 f <- file.path(p, list.files(p, pattern = '1k-'))
 
-
 targets <- read.csv('../data/raw/2024sos_species.csv', na.strings = "") %>% 
   
   ## we will not model a few species which are widely abundant, hence do not require modelling, and would utilize enormous computational resources.
@@ -67,7 +66,6 @@ lapply(files, patcheR) # roughly 5 hours.
 ```
 
 
-
 Create finer scale patches which more or less are meant to represent populations
 
 ```{r eval = F}
@@ -97,8 +95,7 @@ files <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), base
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu12R-line.tif') )
 
-lapply(files, FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
-
+lapply(files[9:18], FUN = landscapR, pout = 'patch_metrics', pRout = 'fine_patches')
 ```
 
 
@@ -161,6 +158,9 @@ recs <- lapply(
   bind_rows() %>% 
   filter(Occurrence == 1)
 
+# recs <- filter(recs, taxon %in% target_taxa)
+# f <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), basename(f))]
+
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu12R-line.tif') )
 hu12 <- rast('../../Geospatial_data/WBD_rast/hu12R.tif')
@@ -173,10 +173,9 @@ Combine all populated patches per species, something was amiss with identifying 
 ```{r, eval = F}
 
 f <- gsub('[.]tif$', '', list.files('../results/patches'))
+# f <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), basename(f))]
 
-# lentiformis  NTIF
-
-lapply(f, combine_pop_patches) # 2:46
+lapply(f, combine_pop_patches) 
 ```
 
 ```{r create polygon datasets of patches, eval = F}
@@ -212,9 +211,7 @@ tif2shp <- function(x){
 }
 
 lapply(f, tif2shp)
-
 ```
-
 
 detect neighboring patches
 
@@ -223,9 +220,7 @@ detect neighboring patches
 f <- list.files('../results/allOccupiedPatchesVector', pattern = 'shp$')
 
 lapply(f, neigh_type)
-
 ```
-
 
 These previous patches refer to pre-Colombian connectivity. We will reduce them to BLM surface areas. 
 
@@ -249,6 +244,9 @@ crop2blm <- function(x){
 
 lapply(f, crop2blm)
 ```
+
+
+
 
 
 ```{r}

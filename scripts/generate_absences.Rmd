@@ -81,7 +81,7 @@ out <- bind_rows(out1) %>%
   rename(taxon = Taxon) %>% 
   mutate(date = as.Date('2023-01-09'), .before = geometry)
   
-st_write(out, '../data/raw/occurrence/absences/absences1km3.shp', append = FALSE)
+st_write(out, '../data/raw/occurrence/absences/absences1km.shp', append = FALSE)
 
 rm(out1, blm_surf, AIM_points, records)
 ```
@@ -143,35 +143,23 @@ rm(p, paths, files)
 ```{r import potential records}
 
 collinear_probs <- read_rds('../results/VIF_PA_drop.rda')
-layers <- usdm::exclude(layers, collinear_probs)
+bio <- usdm::exclude(bio, collinear_probs)
 
-absences <- st_read('../data/raw/occurrence/absences/absences1km3.shp', quiet = TRUE)
-presences <- st_read('../data/raw/occurrence/thinned/thinned_occurrences3.shp', quiet = TRUE) %>% 
+absences <- st_read('../data/raw/occurrence/absences/absences.shp', quiet = TRUE)
+presences <- st_read('../data/raw/occurrence/thinned/thinned_occurrences.shp', quiet = TRUE) %>% 
   mutate(Occurrence = 1, 
          PtType = if_else(is.na(PrmryKy), 'AIM Presence', 'Opportunistic Presence'), .before = geometry)
-
 
 recs <- bind_rows(absences, presences) %>% 
   mutate(taxon = str_replace(taxon, 'Dudleya cymosa ssp. cymosa', 'Dudleya cymosa')) %>% 
   group_by(taxon) %>% 
   mutate(ID = 1:n()) 
 
-recs <- recs %>% 
-  mutate(
-  taxon = str_replace(taxon, 'Aslcepias subulata', 'Asclepias subulata'),
-  taxon = str_replace(taxon, 'Elymus violaceus', 'Elymus trachycaulus'),
-  taxon = str_replace(taxon, 'Encelia actonii$', 'Encelia actoni'),
-  taxon = str_replace(taxon, 'Hillaria', 'Hilaria')
-  ) %>% 
-  filter(! taxon %in% c('Ephedra antisyphilitica', 'Ephedra fasciculata', 'Ephedra coryi', 'Ephedra cutleri',
-                        'Ephedra funerea', 'Ephedra nevadensis', 'Ephedra torreyana', 'Ephedra californica',
-                        'Ephedra trifurca', 'Ephedra trifurcata', 'Ephedra viridis', 'Ephedra aspera'))
-
 set.seed(27)
 cn <- names(layers)
 splicies <- split(recs, f = recs$taxon)
-names(splicies)
-lapply(splicies[8:23], lda_PA_dropper, path = '../results/lda3/', col_names = cn)
+
+lapply(splicies, lda_PA_dropper, path = '../results/lda2/', col_names = cn)
 
 rm(absences, presences, collinear_probs)
 ```

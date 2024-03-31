@@ -621,7 +621,7 @@ patchTaggR <- function(x){
   data.frame(
     noPres = nrow(occs), 
     PresTopSuitability = nrow(occ_pops), # the number of presences located in top suitability patches
-    UniquePatchID = nrow(dplyr::distinct(occ_pops, PatchID)), # the number of uniquelly identified patches
+    UniquePatchID = nrow(dplyr::distinct(occ_pops, PatchID)), # the number of uniquely identified patches
     NoPatchesTopSuitability = terra::minmax(r)[2] # the total number of most suitable patches from the RASTER
   ) |>
     write.csv(row.names = F, 
@@ -835,6 +835,7 @@ neigh_type <- function(x){
 #'
 #' @param project_areas split sf data set, with each crews field office(s), and name
 #' @param admu administrative boundaries
+#' @param intype one of 'crew' or 'senior', defaults to crew
 #' @param target_species a dataframe containing possible target species
 #' @param crew_id column in project_areas holding the crews identifier info 'e.g. UFO'
 #' @param blm_surf sf data set of surface management as multipolygon at most
@@ -847,7 +848,7 @@ neigh_type <- function(x){
 #' @param total_change Total Change Intensity Index from the MRLC
 #' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
 #' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
-project_maker <- function(x, target_species,
+project_maker <- function(x, target_species, intype,
                           admu, 
                           blm_surf, fs_surf, # ownership stuff
                           fire,  invasive,  occurrences, historic_SOS, 
@@ -858,12 +859,14 @@ project_maker <- function(x, target_species,
   
   defaultW <- getOption("warn")
   options(warn = -1)
+  if(missing(intype)){intype <- 'crew'}
   
   #### Initiate Project Directories ####
-  
   # create directory to hold all contents
   
-  crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
+  if(intype == 'crew'){
+    crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
+  } else {crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Senior'][[1]][1])}
   
   ifelse(!dir.exists(file.path('../Crews/')), dir.create(file.path('../Crews/')), FALSE)
   ifelse(!dir.exists(file.path(crew_dir)), dir.create(file.path(crew_dir)), FALSE)
@@ -899,41 +902,43 @@ project_maker <- function(x, target_species,
   
   #### Process geographic data to a mask of the field office ####
   
-  focal_bbox <- filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) %>%  
-    st_union() %>% 
-    st_transform(5070)
+  focal_bbox <- dplyr::filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) %>%  
+    sf::st_union() %>% 
+    sf::st_transform(5070)
   
   focal_vect  <- focal_bbox %>%  
-    vect()
+    terra::vect()
   focal_bbox <- focal_bbox 
   
   # write out ownership details
-  filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice)) %>% 
-    st_cast("MULTILINESTRING") %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), quiet = T, append = F)
-  blm_surf_sub <- st_intersection(blm_surf, focal_bbox) 
-  st_write(blm_surf_sub, dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'BLM_Surface.shp'), quiet = T, append = F)
-  st_intersection(allotments, focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Allotments', 'Allotments.shp'), quiet = T, append = F)
-  st_intersection(fs_surf , focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'USFS_Surface.shp'), quiet = T, append = F)
+  filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice)) |>
+    sf::st_cast("MULTILINESTRING") |> 
+    sf::st_write( dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), quiet = T, append = F)
+  blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox) 
+  sf::st_write(blm_surf_sub, dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'BLM_Surface.shp'), quiet = T, append = F)
+  sf::st_intersection(allotments, focal_bbox) |> 
+    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Allotments', 'Allotments.shp'), quiet = T, append = F)
+  sf::st_intersection(fs_surf, focal_bbox) |>
+    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'USFS_Surface.shp'), quiet = T, append = F)
   
   # write out invasive species and fire
-  st_intersection(fire, blm_surf_sub) %>% 
-    st_write(., dsn =  file.path(crew_dir, 'Geodata/Disturb/Fire', 'Fire.shp'), quiet = T, append = F)
+  fire <- sf::st_intersection(fire, blm_surf_sub)
+  fire |> 
+    dplyr::mutate(FIRE_YEAR = as.numeric(FIRE_YEAR)) |>  
+    sf::st_write(dsn =  file.path(crew_dir, 'Geodata/Disturb/Fire', 'Fire.shp'), quiet = T, append = F)
   
-  crop(invasives, focal_vect, mask = T, threads = T, overwrite = T, filename =
+  terra::crop(invasives, focal_vect, mask = T, threads = T, overwrite = T, filename =
          file.path(crew_dir, 'Geodata/Disturb/Invasive', 'Invasive.tif'))
   
   # write out the change_intensity
-  crop(total_change, focal_vect, mask = T, threads = T, overwrite = T, filename = 
+  terra::crop(total_change, focal_vect, mask = T, threads = T, overwrite = T, filename = 
          file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity', 'TCII.tif'))
   
   # write out assorted data 
-  st_intersection(roads, focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/Roads', 'roads.shp'), quiet = T, append = F)
-  st_intersection(seed_transfer, focal_bbox) %>% 
-    st_write(., dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T, append = F)
+  roads[lengths(sf::st_intersects(roads, focal_bbox)) > 0,] |>
+    sf::st_write( dsn = file.path(crew_dir, 'Geodata/Roads', 'roads.shp'), quiet = T, append = F)
+  sf::st_intersection(seed_transfer, focal_bbox) |>  
+    sf::st_write( dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T, append = F)
   
   # drought
   #  crop(drought6, focal_vect, mask = T, threads = T, filename =
@@ -942,12 +947,16 @@ project_maker <- function(x, target_species,
   #         file.path(crew_dir, 'Geodata/Drought', 'drought-12.tif'))
   
   # write out species occurrence data
-  t_spp <- target_species %>% 
-    filter(Requisition == x$Contract[1])  %>% 
-    pull(binomial)
+  if(intype == 'crew'){ContractInfo <- x$Contract[1]} else{ContractInfo <- unique(x$Contract)}
+
+  t_spp <- target_species |> 
+    dplyr::filter(Requisition %in% ContractInfo) |> 
+    dplyr::pull(binomial)
   
-  occurrences_sub <- filter(occurrences, taxon %in% gsub('_', ' ', t_spp))
-  occurrences_sub <- st_intersection(occurrences_sub, blm_surf_sub)
+  if(intype == 'senior'){t_spp <- unique(unlist(t_spp))}
+  
+  occurrences_sub <- dplyr::filter(occurrences, taxon %in% gsub('_', ' ', t_spp))
+  occurrences_sub <- sf::st_intersection(occurrences_sub, blm_surf_sub)
   occurrences_list <- split(occurrences_sub, f = occurrences_sub$taxon)
   occ_writer <- function(x){
     
@@ -962,13 +971,13 @@ project_maker <- function(x, target_species,
   patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
   sdm_files <- file.path(patches_p, list.files(patches_p, pattern = 'shp$'))
   sdm_files <- sdm_files[ grep(paste0(gsub(' ', '_', t_spp), collapse = '.shp|'), sdm_files)]
-
+  
   sdm_writer <- function(x){
     f <- sf::st_read(x, quiet = TRUE)
     f_crop <- sf::st_crop(f, focal_bbox)
     f_crop <- f_crop[ lengths(st_intersects(f_crop, blm_surf_sub)) > 0, ] %>% 
-      filter(!st_is_empty(.)) %>% 
-      sf::st_as_sf()
+      dplyr::filter(!st_is_empty(.)) %>% 
+      sf::st_as_sf() 
     f_crop <- st_intersection(f_crop, blm_surf_sub) %>% 
       select(-Unit_Nm,-Loc_Nm)
     f_crop <- f_crop[sf::st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
@@ -986,6 +995,12 @@ project_maker <- function(x, target_species,
   
   lapply(sdm_files, sdm_writer)
   
+  # now copy the qgis project template. 
+  
+  fs::dir_copy('/media/steppe/hdd/2024SOS_CrewGeospatial/qml_styles',
+               paste0(crew_dir, '/Geodata/qml_styles'), overwrite = TRUE)
+  fs::file_copy('/media/steppe/hdd/2024SOS_CrewGeospatial/HitchPlanner.qgz',
+                paste0(crew_dir, '/Geodata/HitchPlanner.qgz'), overwrite = TRUE)
  # write.csv(t_spp, file = file.path(crew_dir, 'Data', 'Target-species.csv'), row.names = F)
  # sub <- sdms[[str_remove(names(sdms), '_[0-9].*$') %in% t]]
   
@@ -1206,7 +1221,8 @@ phen_tabulator <- function(x, path, project_areas, admu, target_species){
   crew_dir <- paste0(crew_dir, '/Data/Phenology')
   
   write.csv(tdf2, paste0(crew_dir, '/Phenology_Estimates.csv'), na = "", row.names = F)
-  
+
+
 }
 
 #' create reporting event dates for helping crews assess phenology

@@ -129,6 +129,7 @@ rm(SWSTZ, BOWERSTZ, occ_p)
 
 ```{r}
 teams_list <- split(teams, f = teams$Contract)
+seniors_list <- split(seniors, f = seniors$Senior)
 ```
 
 ```{r generate projects for crews, eval= F}
@@ -145,8 +146,18 @@ lapply(teams_list, project_maker,
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
 
-table(STZ$Dataset) 
-head(STZ)
+lapply(seniors_list,  project_maker,
+       admu = admin_boundaries, intype = 'senior',
+       target_species = spp_needed, 
+       blm_surf = blm_surf, 
+       fs_surf = usfs_surf, 
+       fire = fire_perimeters, 
+       invasive = invasives, 
+       total_change = change_intensity, 
+       occurrences = occurrences, 
+      # historic_SOS, 
+       roads = roads, seed_transfer = STZ)
+
 ```
 
 Now we can generate estimates of flowering duration in certain field offices
@@ -156,7 +167,7 @@ Now we can generate estimates of flowering duration in certain field offices
 spp_needed <- rename(spp_needed, taxon = binomial)
 
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
-ott1 <- lapply(
+lapply(
   X = teams_list, # 5 throws an error
   FUN = phen_tabulator,
   path = p2ts, 
@@ -165,6 +176,9 @@ ott1 <- lapply(
   ) # row 67
 
 ```
+
+
+
 
 
 
