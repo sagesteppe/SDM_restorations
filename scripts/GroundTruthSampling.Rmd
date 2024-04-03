@@ -1,0 +1,44 @@
+---
+title: "Ground Truth Sampling Cells Colorado Plateau"
+author: "steppe"
+date: "2024-03-31"
+output: html_document
+---
+
+To determine whether SDM's and hydrological basins can help find native plant populations field tests were conducted on the Northern Colorado Plateau. 
+
+
+```{r}
+library(sf)
+library(terra)
+```
+
+```{r import species data}
+p <- '/media/steppe/hdd/2024SOS_CrewGeospatial/Plateau – Senior Botanist/Geodata'
+f <- paste0(p, '/Species/SDM/', 
+       list.files(paste0(p, '/Species/SDM/'), pattern = '.shp$'))
+dat <- lapply(f, st_read, quiet = T) 
+dat <- lapply(dat, '[', 2) 
+dat <- lapply(dat, terra::vect)
+names(dat) <- gsub('.shp$', '', basename(f))
+# dat <- bind_rows(dat, .id = 'Taxon')
+
+rm(f)
+```
+
+
+```{r import study extent and convert polygons to rasters}
+
+blm_surf <- st_read(paste0(p, '/Admin/Surface/BLM_Surface.shp'), quiet = T) |>
+  dplyr::filter(Unit_Nm %in% c('Grand Junction Field Office', 'Uncompahgre Field Office', 'Vernal Field Office', 'Price Field Office'))
+
+r <- rast(blm_surf, resolution = 90, nlyrs = 3) # create 30 meter resolution raster
+datr <- lapply(dat, rasterize, r, field = 'Rank')
+datr <- rast(datr)
+r[[1]] <- app(ifel(datr == 1, 1, NA), sum, na.rm = TRUE)
+r[[2]] <- app(ifel(datr %in% c(2, 3, 4), 1, NA, na.rm = TRUE))
+datr2 <- 
+
+rm(dat)
+```
+
