@@ -11,6 +11,7 @@ To determine whether SDM's and hydrological basins can help find native plant po
 ```{r}
 library(sf)
 library(terra)
+set.seed(23)
 ```
 
 ```{r import species data}
@@ -69,4 +70,82 @@ writeRaster(r, '../results/Summary_Rasters/COPL.tif')
 
 rm(datr, tab, i)
 ```
+
+```{r mask areas with fewer predicted species}
+samples <- spatSample(r, 10000, na.rm = T)
+
+lyr1 <- as.numeric(quantile(samples$SumOccupiedPatches, probs = 0.75))
+lyr2 <- as.numeric(quantile(samples$Sum1stOrderNeighboringPatches, probs = 0.75))
+lyr3 <- as.numeric(quantile(samples$CommonessInversion, probs = 0.75))
+
+r[[1]] <- ifel(r[[1]] < lyr1, NA, r[[1]])
+r[[2]] <- ifel(r[[2]] < lyr2, NA, r[[2]])
+r[[3]] <- ifel(r[[3]] < lyr3, NA, r[[3]])
+
+# we will need to sample 2 '1's per species, 3 '2-4's per species. 
+
+rm(lyr1, lyr2, lyr3)
+```
+
+```{r}
+datr <- lapply(dat, rasterize, r, field = 'Rank')
+datr <- rast(datr)
+```
+
+```{r}
+
+samplesFocal <- vector(mode = 'list', length = dim(datr)[3])
+samples1stOrder <- vector(mode = 'list', length = dim(datr)[3])
+
+for (i in seq_along(1:dim(datr)[3])){ 
+  
+  samplesFocal[[i]] <- spatSample(ifel(datr[[i]] == 1, 1, NA), 50, na.rm = TRUE, exhaustive = TRUE, as.points = TRUE)
+  samplesFocal[[i]] <- extract(r, samplesFocal[[i]], method = 'bilinear', xy = TRUE)
+  samples1stOrder[[i]] <- spatSample(ifel(datr[[i]] %in% c(2, 3, 4), 1, NA), 50, na.rm = TRUE, exhaustive = TRUE, as.points = TRUE)
+  samples1stOrder[[i]] <- extract(r, samples1stOrder[[i]], method = 'bilinear', xy = TRUE)
+  names(samplesFocal) <- names(datr) ; names(samples1stOrder) <- names(datr)
+
+}
+
+# now we determine which are within X distance of each other... 
+ob <- data.frame(
+  rbind(
+  data.table::rbindlist(samplesFocal, idcol = 'taxon') |>
+    dplyr::mutate('Target' = 'Populated'),
+  data.table::rbindlist(samples1stOrder, idcol = 'taxon') |>
+    dplyr::mutate('Target' = '1stOrder')
+)) %>% 
+  dplyr::arrange(taxon) %>% 
+  sf::st_as_sf(coords = c('x', 'y'), crs = 5070)
+
+ob<- split(ob, f = ob$taxon)
+
+identify_unqiue_pts <- function(x){
+  # determine which pairs are unique. 
+  DAT <- nngeo::st_nn(x, x, k = 5, maxdist = 2500, sparse = TRUE, returnDist = TRUE)
+  names(DAT$nn) <- 1:length(DAT$nn)
+  dd <- DAT$nn[ lengths( DAT$nn ) >= 2 ]
+
+  # now we need to remove records which are within this distance from each other... 
+  pairs <- vector(mode = 'list', length = length(dd))
+  for (i in 1:length(dd)){
+    pairs[[i]] <- which ( lapply(dd, setequal, dd[[i]]) == TRUE)
+  }
+
+  chosen_pts <- c(
+    DAT$nn[ lengths( DAT$nn ) == 1 ],
+    DAT$nn[as.numeric(names( unlist(lapply(unique(pairs), sample, 1)) ) )]
+  ) |> 
+    names() |>
+    as.numeric() |>
+    sort()
+
+  out <- x[chosen_pts,]
+  return(out)
+  
+}
+
+lapply(ob, identify_unqiue_pts)
+```
+
 
