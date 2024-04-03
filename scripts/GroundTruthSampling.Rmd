@@ -33,12 +33,40 @@ blm_surf <- st_read(paste0(p, '/Admin/Surface/BLM_Surface.shp'), quiet = T) |>
   dplyr::filter(Unit_Nm %in% c('Grand Junction Field Office', 'Uncompahgre Field Office', 'Vernal Field Office', 'Price Field Office'))
 
 r <- rast(blm_surf, resolution = 90, nlyrs = 3) # create 30 meter resolution raster
+names(r) <- c('SumOccupiedPatches', 'Sum1stOrderNeighboringPatches', 'CommonessInversion')
 datr <- lapply(dat, rasterize, r, field = 'Rank')
 datr <- rast(datr)
-r[[1]] <- app(ifel(datr == 1, 1, NA), sum, na.rm = TRUE)
-r[[2]] <- app(ifel(datr %in% c(2, 3, 4), 1, NA, na.rm = TRUE))
-datr2 <- 
 
-rm(dat)
+# count the occupied patches by overlap  
+r[[1]] <- app(ifel(datr == 1, 1, NA), sum, na.rm = TRUE)
+
+# count the patches which are first order neighbors from a known-populated locality  
+r[[2]] <- app(ifel(datr %in% c(2, 3, 4), 1, NA), sum, na.rm = TRUE)
+
+# How common are occupied + 1st order neighbors for each species? i.e. which are less common
+# and should be considered more importantly during scouting ??
+
+datr <- ifel(datr <= 4, 1, NA)
+tab <- freq(datr)
+
+tab$InverseWt <- 1 - ( tab$count / max(tab$count))
+tab$NegativeInverseWt <- round( 1 / (max(tab$InverseWt+1) - tab$InverseWt), 2) * 100
+# extreme skew rescale with 'negative transform', keep digits few for memory.
+
+par(mfrow=c(1,2)) 
+hist(tab$InverseWt, main = 'Raw', xlab = 'Weight') 
+hist(tab$NegativeInverseWt, main = 'Negative Transform', xlab = 'Weight')  
+
+for (i in seq_along(1:dim(datr)[3])){ 
+  datr[[i]] <- ifel(datr[[i]] == 1, tab$NegativeInverseWt[i], NA) 
+} 
+
+r[[3]] <- app(datr, sum, na.rm = TRUE)
+names(r) <- c('SumOccupiedPatches', 'Sum1stOrderNeighboringPatches', 'SumInverseCommonness')
+plot(r)
+
+writeRaster(r, '../results/Summary_Rasters/COPL.tif')
+
+rm(datr, tab, i)
 ```
 
