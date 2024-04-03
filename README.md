@@ -55,14 +55,19 @@ Recursive Feature Elimination (rfe) was then used to identify the fewest number 
 Models were then predicted onto gridded surfaces which exceeded the species range by 50 miles (@terra). 
 
 ## Patch identification 
-In order to identify patches which may support populations raster values less than 0.8 were masked as NA's and a rooks case search was conducted using @LANDSCAPEMETRICS. 
-Multiple landscape metrics were calculated the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index LANDSCAPE METRICS.
+To identify putative metapopulations raster cells predicted as having less than 0.8 probability of suitable habitat were masked as NA's, and then areas which were crossed by streams with Strahler orders of three of more (DATASET), and the divides of HU10 watersheds (DATASET) were 'burnt' away from the raster. 
+The resulting rasters were aggregated by a factor of 2 to 5, depending of their sizes (< 300 MiB 2, < 500 3, < 700 4, > 700 5) to accomodate, a rooks case search using terra in a practical time period. 
+Resultant patches < 5 acres were then discarded, and the rasters was resampled to it's input resolution.  
+
+Putative populations were identified using the patches generated above. These patches followed the same processing, except that HU12 watersheds were used to delineate populations. 
+
 Because the > 0.8 threshold used above did not capture all colonized patches, all patches with predicted suitability scores of >0.55 which contained species observations were then identified using Terra's patches to create a data set of known populations. 
+
+Multiple landscape metrics were calculated the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index (landscapemetrics).
 
 ## Predicting Species Occurrence in Patches
 
 All patches identified above were used to identify patches nearest neighbors. The 5 nearest neighbors of each patch were detected using @SPDEP. 
-
 
 ## Variables and Sources for Environmental Niche Models
 
