@@ -28,7 +28,7 @@ rm(f)
 ```
 
 
-```{r import study extent and convert polygons to rasters}
+```{r import study extent and convert polygons to rasters, eval = F}
 
 blm_surf <- st_read(paste0(p, '/Admin/Surface/BLM_Surface.shp'), quiet = T) |>
   dplyr::filter(Unit_Nm %in% c('Grand Junction Field Office', 'Uncompahgre Field Office', 'Vernal Field Office', 'Price Field Office'))
@@ -72,11 +72,13 @@ rm(datr, tab, i)
 ```
 
 ```{r mask areas with fewer predicted species}
+
+r <- rast( '../results/Summary_Rasters/COPL.tif')
 samples <- spatSample(r, 10000, na.rm = T)
 
-lyr1 <- as.numeric(quantile(samples$SumOccupiedPatches, probs = 0.75))
-lyr2 <- as.numeric(quantile(samples$Sum1stOrderNeighboringPatches, probs = 0.75))
-lyr3 <- as.numeric(quantile(samples$CommonessInversion, probs = 0.75))
+lyr1 <- as.numeric(quantile(samples$SumOccupiedPatches, probs = 0.5))
+lyr2 <- as.numeric(quantile(samples$Sum1stOrderNeighboringPatches, probs = 0.5))
+lyr3 <- as.numeric(quantile(samples$CommonessInversion, probs = 0.5))
 
 r[[1]] <- ifel(r[[1]] < lyr1, NA, r[[1]])
 r[[2]] <- ifel(r[[2]] < lyr2, NA, r[[2]])
@@ -87,12 +89,14 @@ r[[3]] <- ifel(r[[3]] < lyr3, NA, r[[3]])
 rm(lyr1, lyr2, lyr3)
 ```
 
-```{r}
+```{r reload data to consider each species independently}
 datr <- lapply(dat, rasterize, r, field = 'Rank')
 datr <- rast(datr)
 ```
 
-```{r}
+We will consider three attributes of each sampled population... 
+
+```{r draw random points for each species}
 
 samplesFocal <- vector(mode = 'list', length = dim(datr)[3])
 samples1stOrder <- vector(mode = 'list', length = dim(datr)[3])
@@ -145,7 +149,36 @@ identify_unqiue_pts <- function(x){
   
 }
 
-lapply(ob, identify_unqiue_pts)
+ob1 <- lapply(ob, identify_unqiue_pts) |>
+  bind_rows()
 ```
 
+Let's determine which sites have useful info
+
+```{r}
+
+obbies <- ob1 %>% 
+  rowwise() %>% 
+  mutate(sum_na = sum(is.na(c_across(SumOccupiedPatches:CommonessInversion)))) %>% 
+  group_by(taxon, Target) %>% 
+  arrange(taxon, Target, sum_na, -SumOccupiedPatches, -Sum1stOrderNeighboringPatches, -CommonessInversion) %>% 
+  slice_head(n = 3)
+
+```
+
+
+Create site indexes for all sample points
+
+```{r}
+
+ggplot() + 
+  geom_sf(data = obbies) 
+
+disties <- st_nearest_feature(obbies)  
+dd <- st_distance(obbies, obbies[disties,], by_element = TRUE) 
+
+p <- '/media/steppe/hdd/2024SOS_CrewGeospatial/species_check_play/'
+st_write(obbies, dsn = paste0(p, 'test.shp'))
+
+```
 

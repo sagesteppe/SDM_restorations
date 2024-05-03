@@ -40,6 +40,7 @@ rm(crew_locs)
 
 
 ```{r jitter the AIM data, eval = F}
+
 set.seed(125)
 occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records'
 occurrences <- lapply(
@@ -79,20 +80,30 @@ spp_needed <- read.csv('../data/raw/contract_lkp.csv') %>%
   distinct()
 ```
 
-```{r seed zones, eval = F}
+```{r seed zones}
 seed_zones <- read.csv('../data/raw/2024sos_species-FIXED.csv') %>% 
     unite('binomial', genus:species)
 
-seed_zones %>% 
-  filter(stz == 'BowerRevised') %>% 
-  distinct(ind_stz) %>% 
+seed_zones <- seed_zones %>% 
   mutate(
     ind_stz = str_replace(ind_stz, '  ', ' ')
   ) %>% 
-  separate_wider_delim(ind_stz, delim = ',', names= LETTERS[1:7], too_few = "align_start")
+  mutate(commas = max(str_count(ind_stz, pattern = ','))+1) %>% 
+  separate_wider_delim(ind_stz, delim = ',', names= LETTERS[1:.$commas], too_few = "align_start") %>% 
+  mutate(across(everything(), ~ str_trim(.))) %>% 
+  relocate(contract, .before = 'A') %>% 
+  pivot_longer(cols = LETTERS[1:.$commas], values_to = 'st_zone') %>% 
+  select(-commas, -name) %>% 
+  drop_na(st_zone) %>% 
+  mutate(stz = case_when(
+    stz == 'Desert SW provisional' ~ 'DesertSW', 
+    stz == 'BowerRevised' ~ 'Bower2013', 
+    .default = as.character(stz)
+  )) 
 
+seed_zones <- read.csv('../data/raw/contract_lkp.csv') %>% 
+  left_join(seed_zones, ., by = c('contract' = 'Contract_colloquial'))
 
-  #  ind_stz = str_replace(ind_stz, ' -[0-9]|[0-9]- |[0-9]-[0-9]', ' - ') )
 ```
 
 ```{r import data}
@@ -124,17 +135,52 @@ allotments <- st_read(
 occ_p <- '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/jittered_occurrences'
 occurrences <- st_read(file.path(occ_p, 'jittered_occurrences.shp'), quiet = T)
 
+prov_stz <- rast('/media/steppe/hdd/EmpiricalSeedZones/data/geodata/final_provisional/provisional_stack.tif')
+
 rm(SWSTZ, BOWERSTZ, occ_p)
 ```
 
 ```{r}
 teams_list <- split(teams, f = teams$Contract)
 seniors_list <- split(seniors, f = seniors$Senior)
+
+t <- filter(occurrences, taxon == 'Abronia villosa') |>
+  vect() |>
+  project(crs(prov_stz))
+
+class(t)[1] == 'sf' 
+unique(st_geometry_type(t))[1] == 'POINT'
+
+
+# need to be able to dispatch to both raster and vector data, and both point and
+# polygon data. 
+if(class(x) == 'SpatRaster'){
+  
+  # dispatch method for raster
+  
+} else if(class(x) == 'sf'){ # determine type of vector data and dispatch. 
+  
+  if(unique(sf::st_geometry_type(x))[1] == 'POINT'){
+    
+  } else {
+    
+  }
+} else {
+  message('This class not expected by this small function. Small overhaul needed?')
+  }
+
+# this identified the occurrence records which we want to keep. 
+which(
+  !is.na(
+    terra::extract(prov_stz[[2]], t, method = 'simple', ID = F)))
+
 ```
 
 ```{r generate projects for crews, eval= F}
 
-lapply(teams_list, project_maker,
+unique(seed_zones$stz)
+
+lapply(teams_list[13], project_maker,
        admu = admin_boundaries, 
        target_species = spp_needed, 
        blm_surf = blm_surf, 
@@ -146,7 +192,7 @@ lapply(teams_list, project_maker,
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
 
-lapply(seniors_list,  project_maker,
+lapply(seniors_list[3],  project_maker,
        admu = admin_boundaries, intype = 'senior',
        target_species = spp_needed, 
        blm_surf = blm_surf, 
@@ -157,7 +203,6 @@ lapply(seniors_list,  project_maker,
        occurrences = occurrences, 
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
-
 ```
 
 Now we can generate estimates of flowering duration in certain field offices
@@ -168,7 +213,7 @@ spp_needed <- rename(spp_needed, taxon = binomial)
 
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
 lapply(
-  X = teams_list, # 5 throws an error
+  X = teams_list[13], # 5 throws an error
   FUN = phen_tabulator,
   path = p2ts, 
   admu = admin_boundaries, 
