@@ -148,31 +148,6 @@ t <- filter(occurrences, taxon == 'Abronia villosa') |>
   vect() |>
   project(crs(prov_stz))
 
-class(t)[1] == 'sf' 
-unique(st_geometry_type(t))[1] == 'POINT'
-
-
-# need to be able to dispatch to both raster and vector data, and both point and
-# polygon data. 
-if(class(x) == 'SpatRaster'){
-  
-  # dispatch method for raster
-  
-} else if(class(x) == 'sf'){ # determine type of vector data and dispatch. 
-  
-  if(unique(sf::st_geometry_type(x))[1] == 'POINT'){
-    
-  } else {
-    
-  }
-} else {
-  message('This class not expected by this small function. Small overhaul needed?')
-  }
-
-# this identified the occurrence records which we want to keep. 
-which(
-  !is.na(
-    terra::extract(prov_stz[[2]], t, method = 'simple', ID = F)))
 
 ```
 

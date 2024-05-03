@@ -1070,27 +1070,47 @@ function(x, target_stz, prov){
                             unique(prov_taxa[prov_taxa$stz_zone != 'any', 'stz_zone']), 
                           prov_crop, NA)) 
 
-  # first step, see if stz are irrelevant for the taxon 
-  # determine whether 'target zones' are absent, e.g. if any STZ is fine, we do 
-  # not to do anything with these records. 
-  if(! x$binomial %in% prov_taxa$binomial){return(y)} else{
+  # need to be able to dispatch to both raster and vector data, and both point and
+  # polygon data. 
+  if(class(x) == 'SpatRaster'){
     
-    # determine which provisional seed transfer zone to use so we are sub-setting the 
-    # raster stack correctly 
+    # we can simply mask non target seed zones in our stz rasters, and then mask
+    # our species raster to that raster.
+    msk <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
+    targeted_st_zones <- terra::mask(prov_crop, msk, inverse = TRUE)
+    raw_sdm_masked_to_target_stzs <- terra::mask(x, targeted_st_zones)
+    return(raw_sdm_masked_to_target_stzs)
     
-    i = which(names(prov) == target_stz$stz)
+  } else if(class(x) == 'sf'){ # determine type of vector data and dispatch. 
     
-    # subset raster to the area of interest. 
-    m <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
-    targeted <- terra::mask(prov_crop, m, inverse = TRUE)
-    
-    taxon_in_target_stz <- x[which( # identify point records overlapping target stz. 
-      !is.na(
-        terra::extract(prov_crop, terra::project(terra::vect(x), crs(prov_crop)), 
-                       method = 'simple', ID = F))), ]
-    
-    # species by species subset to the target zones
-    return(taxon_in_target_stz)
+    if(unique(sf::st_geometry_type(x[1,])) == 'POINT'){
+      
+      msk <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
+      targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
+      taxon_in_target_stz <- x[which( # identify point records overlapping target stz. 
+        !is.na(
+          terra::extract(prov_crop, terra::project(terra::vect(x), crs(prov_crop)), 
+                         method = 'simple', ID = F))), ]
+      # species by species subset to the target zones
+      return(taxon_in_target_stz)
+      
+    } else { # now essentially intersect the areas of polygons. 
+      
+      msk <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
+      targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
+      targeted_v <- sf::st_as_sf(
+        terra::as.polygons(targeted, dissolve = FALSE, values = FALSE))
+      
+      drainages_in_target_stz <- st_intersection(x, targeted_v)
+      
+    }
+  } else {
+    message('This class not expected by this small function\n 
+          we take sf and SpatRaster objects. Small overhaul needed?')
+  }
+  
+  
+  
     
   }
   
