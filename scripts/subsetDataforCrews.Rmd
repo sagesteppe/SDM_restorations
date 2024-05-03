@@ -144,16 +144,13 @@ rm(SWSTZ, BOWERSTZ, occ_p)
 teams_list <- split(teams, f = teams$Contract)
 seniors_list <- split(seniors, f = seniors$Senior)
 
-t <- filter(occurrences, taxon == 'Abronia villosa') |>
-  vect() |>
-  project(crs(prov_stz))
-
+t <- filter(occurrences, taxon == 'Abronia villosa') |> 
+  vect() |> 
+  project(crs(prov_stz)) 
 
 ```
 
 ```{r generate projects for crews, eval= F}
-
-unique(seed_zones$stz)
 
 lapply(teams_list[13], project_maker,
        admu = admin_boundaries, 
@@ -164,7 +161,6 @@ lapply(teams_list[13], project_maker,
        invasive = invasives, 
        total_change = change_intensity, 
        occurrences = occurrences, 
-      # historic_SOS, 
        roads = roads, seed_transfer = STZ)
 
 lapply(seniors_list[3],  project_maker,

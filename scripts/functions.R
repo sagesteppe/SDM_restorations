@@ -848,7 +848,7 @@ neigh_type <- function(x){
 #' @param total_change Total Change Intensity Index from the MRLC
 #' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
 #' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
-project_maker <- function(x, target_species, intype,
+project_maker_original <- function(x, target_species, intype,
                           admu, 
                           blm_surf, fs_surf, # ownership stuff
                           fire,  invasive,  occurrences, historic_SOS, 
@@ -1038,16 +1038,321 @@ project_maker <- function(x, target_species, intype,
   options(warn = defaultW)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################################################################
+# write out portions of 
+
+#' Write out all spatial data for crews to a directory
+#' @param x a project species list
+#' @param project_areas split sf data set, with each crews field office(s), and name
+#' @param admu administrative boundaries
+#' @param intype one of 'crew' or 'senior', defaults to crew
+#' @param target_species a dataframe containing possible target species
+#' @param crew_id column in project_areas holding the crews identifier info 'e.g. UFO'
+#' @param blm_surf sf data set of surface management as multipolygon at most
+#' @param fs_surf sf data set of surface USFS land management as multipolygon at most
+#' @param fire sf data set of historic fires as multipopylgon at most
+#' @param invasive sf dataset of invasive species relative cover estimates
+#' @param historic_SOS sf dataset with historic SoS endeavors and relevant info
+#' @param roads sf dataset of roads with relevant attritbutes
+#' @param seed_transfer sf dataset of seed transfer zones 
+#' @param total_change Total Change Intensity Index from the MRLC
+#' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
+#' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
+project_maker <- function(x, target_species, intype,
+                          admu, 
+                          blm_surf, fs_surf, # ownership stuff
+                          fire,  invasive,  occurrences, historic_SOS, 
+                          total_change, 
+                          roads, seed_transfer#, 
+                          #     drought6, drought12
+){
+  
+  defaultW <- getOption("warn")
+  options(warn = -1)
+  if(missing(intype)){intype <- 'crew'}
+  
+  #### Initiate Project Directories ####
+  # create directory to hold all contents
+  
+  if(intype == 'crew'){
+    crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Contract'][[1]][1])
+  } else {crew_dir <- paste0('/media/steppe/hdd/2024SOS_CrewGeospatial/', x['Senior'][[1]][1])}
+  
+  ifelse(!dir.exists(file.path('../Crews/')), dir.create(file.path('../Crews/')), FALSE)
+  ifelse(!dir.exists(file.path(crew_dir)), dir.create(file.path(crew_dir)), FALSE)
+  ifelse(!dir.exists(file.path(crew_dir, 'Geodata')), 
+         dir.create(file.path(crew_dir, 'Geodata')), FALSE)
+  ifelse(!dir.exists(file.path(crew_dir, 'Data')), 
+         dir.create(file.path(crew_dir, 'Data')), FALSE)
+  
+  # write out BLM and Forest Service
+  dir.create( file.path(crew_dir, 'Geodata/Admin'), showWarnings = F) 
+  dir.create( file.path(crew_dir, 'Geodata/Admin/Boundaries'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Admin/Allotments'), showWarnings = F)
+  dir.create( file.path(crew_dir, 'Geodata/Admin/Surface'), showWarnings = F ) # both BLM and Forest Service go in here
+  
+  # fire and invasive species data
+  dir.create( file.path(crew_dir, 'Geodata/Disturb'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Disturb/Fire'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Disturb/Invasive'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity'), showWarnings = F ) 
+  
+  # target species information
+  dir.create( file.path(crew_dir, 'Geodata/Species'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Species/SDM'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Species/SDM-raw'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Species/Occurrences'), showWarnings = F ) 
+  dir.create( file.path(crew_dir, 'Geodata/Species/Historic_SoS'), showWarnings = F)
+  
+  # Roads
+  dir.create( file.path(crew_dir, 'Geodata/Roads')) 
+  # Seed transfer zones
+  dir.create( file.path(crew_dir, 'Geodata/STZ')) 
+  #  # drought 
+  #  dir.create( file.path(crew_dir, 'Geodata/Drought'))
+  
+  #### Process geographic data to a mask of the field office ####
+  focal_bbox <- dplyr::filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice) ) %>%  
+    sf::st_union() %>% 
+    sf::st_transform(5070)
+  
+  focal_vect  <- focal_bbox %>%  
+    terra::vect()
+  focal_bbox <- focal_bbox 
+  
+  # write out ownership details
+  filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice)) |>
+    sf::st_cast("MULTILINESTRING") |> 
+    sf::st_write( dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), quiet = T, append = F)
+  blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox) 
+  sf::st_write(blm_surf_sub, dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'BLM_Surface.shp'), quiet = T, append = F)
+  sf::st_intersection(allotments, focal_bbox) |> 
+    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Allotments', 'Allotments.shp'), quiet = T, append = F)
+  sf::st_intersection(fs_surf, focal_bbox) |>
+    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'USFS_Surface.shp'), quiet = T, append = F)
+  
+  # write out invasive species and fire
+  fire <- sf::st_intersection(fire, blm_surf_sub)
+  fire |> 
+    dplyr::mutate(FIRE_YEAR = as.numeric(FIRE_YEAR)) |>  
+    sf::st_write(dsn =  file.path(crew_dir, 'Geodata/Disturb/Fire', 'Fire.shp'), quiet = T, append = F)
+  
+#  terra::crop(invasives, focal_vect, mask = T, threads = T, overwrite = T, filename =
+#                file.path(crew_dir, 'Geodata/Disturb/Invasive', 'Invasive.tif'))
+  
+  # write out the change_intensity
+#  terra::crop(total_change, focal_vect, mask = T, threads = T, overwrite = T, filename = #
+#                file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity', 'TCII.tif'))
+  
+  # write out assorted data 
+#  roads[lengths(sf::st_intersects(roads, focal_bbox)) > 0,] |>
+#    sf::st_write( dsn = file.path(crew_dir, 'Geodata/Roads', 'roads.shp'), quiet = T, append = F)
+#  sf::st_intersection(seed_transfer, focal_bbox) |>  
+#    sf::st_write( dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T, append = F)
+
+  
+  
+  
+  
+  
+  
+  # write out species occurrence data
+  if(intype == 'crew'){ContractInfo <- x$Contract[1]} else{ContractInfo <- unique(x$Contract)}
+  
+  t_spp <- target_species |> 
+    dplyr::filter(Requisition %in% ContractInfo) |> 
+    dplyr::pull(binomial)
+  
+  if(intype == 'senior'){t_spp <- unique(unlist(t_spp))}
+  
+  occurrences_sub <- dplyr::filter(occurrences, taxon %in% gsub('_', ' ', t_spp))
+  print(x$Contract)
+  subsetdata <- subset2stz(occurrences_sub, target_stz = seed_zones, prov = prov_stz, 
+                           requisition = x$Contract, focal_bbox = focal_vect, 
+                           blm_surf_sub = blm_surf_sub)
+  occurrences_list <- split(subsetdata, f = subsetdata$taxon)
+  return(occurrences_list)
+  
+  occ_writer <- function(x){
+    
+    binomial <- paste0(gsub(' ', '_', sf::st_drop_geometry(x$taxon[1])), '.shp')
+    st_write(x,  dsn = file.path(crew_dir, 'Geodata/Species/Occurrences', binomial),
+             quiet = T, append = F)
+  } 
+  
+  lapply(occurrences_list, occ_writer)
+  
+  ### identify target species and load their patches data set
+  patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
+  sdm_files <- file.path(patches_p, list.files(patches_p, pattern = 'shp$'))
+  sdm_files <- sdm_files[ grep(paste0(gsub(' ', '_', t_spp), collapse = '.shp|'), sdm_files)]
+  
+  sdm_writer <- function(x){
+    f <- sf::st_read(x, quiet = TRUE)
+    f_crop <- sf::st_crop(f, focal_bbox)
+    f_crop <- f_crop[ lengths(st_intersects(f_crop, blm_surf_sub)) > 0, ] %>% 
+      dplyr::filter(!st_is_empty(.)) %>% 
+      sf::st_as_sf() 
+    f_crop <- st_intersection(f_crop, blm_surf_sub) %>% 
+      select(-Unit_Nm,-Loc_Nm)
+    f_crop <- f_crop[sf::st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
+    
+    binomial <- paste0(gsub(' ', '_', basename(x)))
+    if(nrow(f_crop) > 1){
+      sf::st_write(f_crop, 
+                   file.path(crew_dir, 'Geodata/Species/SDM', binomial), append = F, quiet = TRUE)
+    }
+  }
+  
+  lapply(sdm_files, sdm_writer)
+  
+  ## also write out the raw SDM output
+  raw_P <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
+  sdm_files <- file.path(raw_P, list.files(raw_P, pattern = 'tif$'))
+  sdm_files <- sdm_files[grepl('1k-', sdm_files)]
+  sdm_files1 <- gsub('1k.*$', '', sdm_files)
+  sdm_files <- sdm_files[ grep(paste0(gsub(' ', '_', t_spp), collapse = '|'), basename(sdm_files1))]
+  
+  sdm_writer2 <- function(x){
+    f <- terra::rast(x)
+    f_crop <- terra::crop(f, focal_bbox)
+    f_crop <- terra::mask(f_crop, blm_surf_sub)
+    
+    f_crop <- terra::mask(f_crop, ifel(f_crop < 0.70, NA, f_crop)) # if suitability < 60% remove
+    # now aggregate rasters to half resolutions
+    f_crop <- terra::aggregate(f_crop, fact = 2, fun = 'mean', na.rm = TRUE)
+    
+    binomial <- gsub('1k-.*$', '.tif', basename(x))
+    terra::writeRaster(f_crop, 
+                       file.path(crew_dir, 'Geodata/Species/SDM-raw', binomial), overwrite = TRUE)
+  }
+  
+  lapply(sdm_files, sdm_writer2)
+  
+  # now copy the qgis project template. 
+  
+  fs::dir_copy('/media/steppe/hdd/2024SOS_CrewGeospatial/qml_styles',
+               paste0(crew_dir, '/Geodata/qml_styles'), overwrite = TRUE)
+  fs::file_copy('/media/steppe/hdd/2024SOS_CrewGeospatial/HitchPlanner.qgz',
+                paste0(crew_dir, '/Geodata/HitchPlanner.qgz'), overwrite = TRUE)
+  # write.csv(t_spp, file = file.path(crew_dir, 'Data', 'Target-species.csv'), row.names = F)
+  # sub <- sdms[[str_remove(names(sdms), '_[0-9].*$') %in% t]]
+  
+  # st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Occurrences', 'Occurrences.shp'), quiet = T)
+  # st_intersection(historic_SOS, focal_bbox) %>% 
+  #    st_write(., dsn = file.path(crew_dir, 'Geodata/Species/Historic_SoS', 'Historic_SoS.shp'), quiet = T, append = F)
+  
+  # write out original species information
+  #  sdm_fo <- crop(sub, focal_vect, mask = T) # need to make a vect of this... 
+  #  fnames <- paste0(crew_dir, '/Geodata/Species/SDM/', str_remove(names(sdm_fo),
+  #                                                                 '_[0-9].*$'), ".tif")
+  #  writeRaster(sdm_fo, fnames)
+  
+  options(warn = defaultW)
+}
+
+
 ################################################################################
 #' reduce the occurrence, known basins, or raw SDM outputs to desired seed transfer zones
 #' on a per project basis
 #' @param x the input species list
-#' @param y the input vector data geometry
 #' @param target_stz a dataframe with the Taxons name, Contract, desired STZs, and STZ product related to them. 
 #' @param prov A STACK OF PROVISIONAL RASTERS, THIS SHOULD BE CROPPED TO THE AREA OF ANALYSIS IN THE FUNCTION AROUD THIS ONE. 
-#' @param 
-#' 
-function(x, target_stz, prov){
+#' @param requistion essentially x of the parent function, x$Contract
+#' @param focal_bbox focal bounding box for study area, supply as a vect() so can be projected if necessary. 
+#' @param blm_surf_sub subsetted to blm owernship. 
+subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_sub){
   
   # determine whether we are using empirical or provisional seed transfer zones
   
@@ -1055,12 +1360,12 @@ function(x, target_stz, prov){
   # identify all species which can be processed from the Provisional STZ's
   # we have created a local copy of the stz's as the layers of a raster stack 
   # to speed up this process. 
-  
-  prov_taxa <- SOMETHING[ target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave'),]
+  target_stz <- target_stz[target_stz$Requisition %in% c(requisition),]
+  prov_taxa <- target_stz[ target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave'),]
   prov <- prov[[which(names(prov) == unique(prov_taxa$stz))]]  # subset the rasterstack to the relevant layer
   
   # now subset the provisional seed zones to the BLM Office before iterating through species
-  prov_crop <- terra::crop(prov, focal_bbox) 
+  prov_crop <- terra::crop(prov, terra::ext(terra::project(focal_bbox, terra::crs(prov))))
   prov_crop <- terra::mask(prov_crop, blm_surf_sub) 
   
   # we'll also remove any STZ's which are non target at this step. although they are small
@@ -1108,19 +1413,16 @@ function(x, target_stz, prov){
     message('This class not expected by this small function\n 
           we take sf and SpatRaster objects. Small overhaul needed?')
   }
-  
-  
-  
-    
-  }
-  
-  #### Part 2 load species specific STZ's ####
-  # identify all species which require these. 
-  spp_emp_files <- list.files()
-  
-  # now load each STZ reference, and write them out individually. 
-  
+
 }
+
+
+
+
+
+
+
+
 
 ############################################################################
 # write out whether a model says a species is flowering or not.
