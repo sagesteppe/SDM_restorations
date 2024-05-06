@@ -1242,11 +1242,6 @@ project_maker <- function(x, target_species, intype,
 #    sf::st_write( dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T, append = F)
 
   
-  
-  
-  
-  
-  
   # write out species occurrence data
   if(intype == 'crew'){ContractInfo <- x$Contract[1]} else{ContractInfo <- unique(x$Contract)}
   
@@ -1257,11 +1252,14 @@ project_maker <- function(x, target_species, intype,
   if(intype == 'senior'){t_spp <- unique(unlist(t_spp))}
   
   occurrences_sub <- dplyr::filter(occurrences, taxon %in% gsub('_', ' ', t_spp))
-  print(x$Contract)
-  subsetdata <- subset2stz(occurrences_sub, target_stz = seed_zones, prov = prov_stz, 
-                           requisition = x$Contract, focal_bbox = focal_vect, 
-                           blm_surf_sub = blm_surf_sub)
-  occurrences_list <- split(subsetdata, f = subsetdata$taxon)
+  occurrences_list <- split(occurrences_sub, f = occurrences_sub$taxon)
+  
+  occurrences_list <- lapply(
+    X = occurrences_list, FUN = subset2stz, target_stz = seed_zones,
+    prov = prov_stz, requisition = x$Contract, focal_bbox = focal_vect, 
+    blm_surf_sub = blm_surf_sub)
+ 
+  occurrences_list <- Filter(function(x) nrow(x) > 1, occurrences_list)
   return(occurrences_list)
   
   occ_writer <- function(x){
@@ -1349,7 +1347,7 @@ project_maker <- function(x, target_species, intype,
 #' @param x the input species list
 #' @param target_stz a dataframe with the Taxons name, Contract, desired STZs, and STZ product related to them. 
 #' @param prov A STACK OF PROVISIONAL RASTERS, THIS SHOULD BE CROPPED TO THE AREA OF ANALYSIS IN THE FUNCTION AROUD THIS ONE. 
-#' @param requistion essentially x of the parent function, x$Contract
+
 #' @param focal_bbox focal bounding box for study area, supply as a vect() so can be projected if necessary. 
 #' @param blm_surf_sub subsetted to blm owernship. 
 subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_sub){
@@ -1361,36 +1359,44 @@ subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_su
   # we have created a local copy of the stz's as the layers of a raster stack 
   # to speed up this process. 
   target_stz <- target_stz[target_stz$Requisition %in% c(requisition),]
-  prov_taxa <- target_stz[ target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave'),]
-  prov <- prov[[which(names(prov) == unique(prov_taxa$stz))]]  # subset the rasterstack to the relevant layer
+  prov_taxa <- target_stz[target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave'),]
+  prov <- prov[[which(names(prov) == unique(prov_taxa$stz))]]  # subset the raster stack to the relevant layer
   
-  # now subset the provisional seed zones to the BLM Office before iterating through species
+  # now subset the provisional seed zones to the BLM Office 
   prov_crop <- terra::crop(prov, terra::ext(terra::project(focal_bbox, terra::crs(prov))))
-  prov_crop <- terra::mask(prov_crop, blm_surf_sub) 
-  
-  # we'll also remove any STZ's which are non target at this step. although they are small
-  # this will save us a pinch of time on the several hundred iterations
   prov_crop <- terra::mask(prov_crop, 
-                terra::ifel(prov_crop %in% 
-                            unique(prov_taxa[prov_taxa$stz_zone != 'any', 'stz_zone']), 
-                          prov_crop, NA)) 
+                           terra::project(terra::vect(blm_surf_sub), terra::crs(prov)))
+  # subset to species
+  prov_taxon <- target_stz[gsub('_', ' ', target_stz$binomial) == x$taxon[1], ]
+  
+  # need to determine if raster type is categorical or numeric. to match the 
+  # properties of that layer of the spatrast
+  if(
+    any(
+      grepl('[A-z]', unique(prov_taxon$st_zone)))){
+       msk_vals <- unique(prov_taxon$st_zone)} else {
+        msk_vals <- as.numeric(unique(prov_taxon$st_zone))
+       }
+  
+  msk <- terra::ifel(prov_crop %in% msk_vals, prov_crop, NA)
+  prov_crop <- terra::mask(prov_crop, msk) 
 
   # need to be able to dispatch to both raster and vector data, and both point and
   # polygon data. 
-  if(class(x) == 'SpatRaster'){
-    
+  if(class(x)[1] == 'SpatRaster'){
+
     # we can simply mask non target seed zones in our stz rasters, and then mask
     # our species raster to that raster.
-    msk <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
+    
     targeted_st_zones <- terra::mask(prov_crop, msk, inverse = TRUE)
     raw_sdm_masked_to_target_stzs <- terra::mask(x, targeted_st_zones)
     return(raw_sdm_masked_to_target_stzs)
     
-  } else if(class(x) == 'sf'){ # determine type of vector data and dispatch. 
+  } else if(class(x)[1] == 'sf'){ # determine type of vector data and dispatch. 
     
+
     if(unique(sf::st_geometry_type(x[1,])) == 'POINT'){
-      
-      msk <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
+    
       targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
       taxon_in_target_stz <- x[which( # identify point records overlapping target stz. 
         !is.na(
@@ -1401,7 +1407,6 @@ subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_su
       
     } else { # now essentially intersect the areas of polygons. 
       
-      msk <- terra::ifel(prov_crop %in% c( target_stz[binomial == unique(x$taxon), 'st_zone']), 1, NA)
       targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
       targeted_v <- sf::st_as_sf(
         terra::as.polygons(targeted, dissolve = FALSE, values = FALSE))
@@ -1413,7 +1418,6 @@ subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_su
     message('This class not expected by this small function\n 
           we take sf and SpatRaster objects. Small overhaul needed?')
   }
-
 }
 
 

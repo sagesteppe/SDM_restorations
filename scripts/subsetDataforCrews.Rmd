@@ -163,6 +163,7 @@ lapply(teams_list[13], project_maker,
        occurrences = occurrences, 
        roads = roads, seed_transfer = STZ)
 
+
 lapply(seniors_list[3],  project_maker,
        admu = admin_boundaries, intype = 'senior',
        target_species = spp_needed, 
@@ -174,6 +175,7 @@ lapply(seniors_list[3],  project_maker,
        occurrences = occurrences, 
       # historic_SOS, 
        roads = roads, seed_transfer = STZ)
+
 ```
 
 Now we can generate estimates of flowering duration in certain field offices
