@@ -78,6 +78,32 @@ spp_needed <- read.csv('../data/raw/contract_lkp.csv') %>%
   left_join(spp_needed, ., by = c('contract' = 'Contract_colloquial')) %>% 
   select(-contract) %>% 
   distinct()
+
+# add on the paths to their SDM's and post-processed SDMs
+
+patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
+sdm_files <- file.path(patches_p, list.files(patches_p, pattern = 'shp$'))
+sdm_files_basin <- data.frame(
+  path_basins = sdm_files, 
+  taxon = gsub('.shp', '', basename(sdm_files))
+  )
+
+raw_p <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
+sdm_files <- file.path(raw_p, list.files(raw_p, pattern = 'tif$'))
+sdm_files <- sdm_files[grepl('1k-', sdm_files)]
+
+sdm_files <- data.frame(
+  path_raw_sdm = sdm_files, 
+  taxon = gsub('1k.*$', '', basename(sdm_files))
+  )
+
+spp_needed <- left_join(spp_needed, sdm_files, by = c('binomial' = 'taxon')) %>% 
+  left_join(., sdm_files_basin, by = c('binomial' = 'taxon')) %>% 
+  mutate(
+    occurrence_path = 
+      '/media/steppe/hdd/SDM_restorations/data/raw/occurrence/combined_records/jittered_occurrences.shp')
+
+rm(patches_p, sdm_files, sdm_files_basin, raw_p)
 ```
 
 ```{r seed zones}
@@ -150,9 +176,59 @@ t <- filter(occurrences, taxon == 'Abronia villosa') |>
 
 ```
 
+
+
+```{r}
+
+emps <- filter(seed_zones, stz == 'DesertSW' & Requisition == 'Uncompahgre - P102085') %>% 
+  pull(binomial) %>% 
+  unique()
+
+spp_needed_test <- filter(spp_needed, Requisition == 'Uncompahgre - P102085' & binomial %in% emps)
+spp_needed_test <- split(spp_needed_test, f = spp_needed_test$binomial)
+
+example_rast <- rast(spp_needed_test[[1]][,'path_raw_sdm'])
+ptest <- project(prov_stz[[2]], 'epsg:5070')
+ptest <- resample(ptest, example_rast)
+
+#### Process geographic data to a mask of the field office ####
+focal_bbox <- dplyr::filter(admin_boundaries, ADMU_NA %in% stringr::str_to_upper(teams_list[[13]]$FieldOffice) ) %>%  
+  sf::st_union() %>% 
+  sf::st_transform(5070)
+  
+focal_bbox <- focal_bbox 
+blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox) 
+
+ptest <- mask(ptest, blm_surf_sub)
+plot(ptest)
+
+a <- lapply(X = spp_needed_test[1], FUN = empiricalSTZ_writer, seed_zones = seed_zones, pSTZs = ptest)
+
+b <- vect(spp_needed_test[[1]][,'path_basins'])
+
+ob <- terra::mask(b, ptest)
+
+plot(a[["Aristida_purpurea"]])
+```
+
+```{r}
+f <- system.file("ex/elev.tif", package="terra")
+r <- rast(f)
+msk <- ifel(r < 400, NA, 1)
+
+m <- mask(r, msk)
+
+f <- system.file("ex/lux.shp", package="terra")
+v <- vect(f)[1,]
+
+mv1 <- mask(r, v)
+plot(mv1)
+```
+
+
 ```{r generate projects for crews, eval= F}
 
-ob <- lapply(teams_list[13], project_maker,
+lapply(teams_list[13], project_maker, 
        admu = admin_boundaries, 
        target_species = spp_needed, 
        blm_surf = blm_surf, 
@@ -162,8 +238,6 @@ ob <- lapply(teams_list[13], project_maker,
        total_change = change_intensity, 
        occurrences = occurrences, 
        roads = roads, seed_transfer = STZ) 
-
-plot( ab[["Uncompahgre - P102085"]][["Astragalus lonchocarpus"]] )
 
 lapply(seniors_list[3],  project_maker,
        admu = admin_boundaries, intype = 'senior',

@@ -1230,8 +1230,7 @@ project_maker <- function(x, target_species, intype,
   if(intype == 'senior'){t_spp <- unique(unlist(t_spp))}
   
   
-  
-  
+
   occurrences_sub <- dplyr::filter(occurrences, taxon %in% gsub('_', ' ', t_spp))
   occurrences_list <- split(occurrences_sub, f = occurrences_sub$taxon)
   
@@ -1421,7 +1420,6 @@ subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_su
       
       } else { # now essentially intersect the areas of polygons. 
       
-        targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
         targeted_v <- sf::st_as_sf(
           terra::as.polygons(targeted, dissolve = FALSE, values = FALSE))
       
@@ -1451,17 +1449,48 @@ subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_su
 
 
 
+# lapply through the species which are needed. 
 
+empiricalSTZ_writer <- function(spp_needed, seed_zones, pSTZs){
+  
+  sz <- seed_zones[seed_zones$binomial == spp_needed$binomial & 
+                     seed_zones$Requisition == spp_needed$Requisition,]
+  if(all(
+      grepl('[A-z]', unique(sz$st_zone)))){
+    msk_vals <- unique(sz$st_zone)} else {
+      msk_vals <- as.numeric(unique(sz$st_zone))
+    }
+  
+  # mask to field office # 
+  msk <- terra::ifel(pSTZs %in% msk_vals, pSTZs, NA) 
+  msk <- terra::crop(pSTZs, msk, mask = TRUE) 
+  
+  ############# first write out the occurrence points ################
+  occ <- sf::st_read(spp_needed$occurrence_path, quiet = T) |>
+    dplyr::mutate(taxon = str_replace(taxon, ' ', '_')) |>
+    dplyr::filter(taxon == spp_needed$binomial)
+  
+  taxon_in_target_stz <- occ[which( # identify point records overlapping target stz. 
+    !is.na(
+      terra::extract(msk, terra::project(terra::vect(occ), crs(pSTZs)), 
+                     method = 'simple', ID = F))), ]
+  
+  ############ second write out the raw SDM ################
+#  raw_sdm <- terra::rast(spp_needed$path_raw_sdm)
+#  raw_sdm <- terra::crop(raw_sdm, msk, mask = TRUE)
+  
+#  raw_sdm <- terra::mask(raw_sdm, ifel(raw_sdm < 0.70, NA, raw_sdm)) # if suitability < 70% remove
+  # now aggregate rasters to half resolutions
+#  raw_sdm <- terra::aggregate(raw_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
+#  raw_sdm <- terra::trim(raw_sdm)
 
-
-
-
-
-
-
-
-
-
+  ############ third write out the basins SDM ################
+  basins <- terra::vect(spp_needed$path_basins)
+  drainages_in_target_stz <- terra::mask(basins, msk)
+  return(drainages_in_target_stz)
+  
+ # return(c(taxon_in_target_stz, raw_sdm, drainages_in_target_stz))
+}
 
 
 
