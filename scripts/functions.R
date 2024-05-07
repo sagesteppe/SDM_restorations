@@ -1214,32 +1214,9 @@ project_maker <- function(x, target_species, intype,
   # write out ownership details
   filter(admu, ADMU_NA %in% stringr::str_to_upper(x$FieldOffice)) |>
     sf::st_cast("MULTILINESTRING") |> 
-    sf::st_write( dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), quiet = T, append = F)
+    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), 
+                  quiet = T, append = F)
   blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox) 
-  sf::st_write(blm_surf_sub, dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'BLM_Surface.shp'), quiet = T, append = F)
-  sf::st_intersection(allotments, focal_bbox) |> 
-    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Allotments', 'Allotments.shp'), quiet = T, append = F)
-  sf::st_intersection(fs_surf, focal_bbox) |>
-    sf::st_write(dsn = file.path(crew_dir, 'Geodata/Admin/Surface', 'USFS_Surface.shp'), quiet = T, append = F)
-  
-  # write out invasive species and fire
-  fire <- sf::st_intersection(fire, blm_surf_sub)
-  fire |> 
-    dplyr::mutate(FIRE_YEAR = as.numeric(FIRE_YEAR)) |>  
-    sf::st_write(dsn =  file.path(crew_dir, 'Geodata/Disturb/Fire', 'Fire.shp'), quiet = T, append = F)
-  
-#  terra::crop(invasives, focal_vect, mask = T, threads = T, overwrite = T, filename =
-#                file.path(crew_dir, 'Geodata/Disturb/Invasive', 'Invasive.tif'))
-  
-  # write out the change_intensity
-#  terra::crop(total_change, focal_vect, mask = T, threads = T, overwrite = T, filename = #
-#                file.path(crew_dir, 'Geodata/Disturb/TotalChangeIntensity', 'TCII.tif'))
-  
-  # write out assorted data 
-#  roads[lengths(sf::st_intersects(roads, focal_bbox)) > 0,] |>
-#    sf::st_write( dsn = file.path(crew_dir, 'Geodata/Roads', 'roads.shp'), quiet = T, append = F)
-#  sf::st_intersection(seed_transfer, focal_bbox) |>  
-#    sf::st_write( dsn = file.path(crew_dir, 'Geodata/STZ', 'STZ.shp'), quiet = T, append = F)
 
   
   # write out species occurrence data
@@ -1249,7 +1226,11 @@ project_maker <- function(x, target_species, intype,
     dplyr::filter(Requisition %in% ContractInfo) |> 
     dplyr::pull(binomial)
   
+  
   if(intype == 'senior'){t_spp <- unique(unlist(t_spp))}
+  
+  
+  
   
   occurrences_sub <- dplyr::filter(occurrences, taxon %in% gsub('_', ' ', t_spp))
   occurrences_list <- split(occurrences_sub, f = occurrences_sub$taxon)
@@ -1258,10 +1239,10 @@ project_maker <- function(x, target_species, intype,
     X = occurrences_list, FUN = subset2stz, target_stz = seed_zones,
     prov = prov_stz, requisition = x$Contract, focal_bbox = focal_vect, 
     blm_surf_sub = blm_surf_sub)
- 
-  occurrences_list <- Filter(function(x) nrow(x) > 1, occurrences_list)
-  return(occurrences_list)
   
+  occurrences_list <- Filter(function(x) nrow(x)[1] > 0, occurrences_list)
+  occurrences_list <- Filter(Negate(is.null), occurrences_list)
+
   occ_writer <- function(x){
     
     binomial <- paste0(gsub(' ', '_', sf::st_drop_geometry(x$taxon[1])), '.shp')
@@ -1271,13 +1252,13 @@ project_maker <- function(x, target_species, intype,
   
   lapply(occurrences_list, occ_writer)
   
-  ### identify target species and load their patches data set
+  ### identify target species and load their patches data set ###
   patches_p <- '/media/steppe/hdd/SDM_restorations/results/PatchesClippedBLM'
   sdm_files <- file.path(patches_p, list.files(patches_p, pattern = 'shp$'))
   sdm_files <- sdm_files[ grep(paste0(gsub(' ', '_', t_spp), collapse = '.shp|'), sdm_files)]
   
-  sdm_writer <- function(x){
-    f <- sf::st_read(x, quiet = TRUE)
+  sdm_writer <- function(input, x){
+    f <- sf::st_read(input, quiet = TRUE)
     f_crop <- sf::st_crop(f, focal_bbox)
     f_crop <- f_crop[ lengths(st_intersects(f_crop, blm_surf_sub)) > 0, ] %>% 
       dplyr::filter(!st_is_empty(.)) %>% 
@@ -1286,6 +1267,11 @@ project_maker <- function(x, target_species, intype,
       select(-Unit_Nm,-Loc_Nm)
     f_crop <- f_crop[sf::st_is(f_crop, c('POLYGON', 'MULTIPOLYGON')),]
     
+    lapply(
+      X = occurrences_list, FUN = subset2stz, target_stz = seed_zones,
+      prov = prov_stz, requisition = x$Contract, focal_bbox = focal_vect, 
+      blm_surf_sub = blm_surf_sub)
+    
     binomial <- paste0(gsub(' ', '_', basename(x)))
     if(nrow(f_crop) > 1){
       sf::st_write(f_crop, 
@@ -1293,7 +1279,7 @@ project_maker <- function(x, target_species, intype,
     }
   }
   
-  lapply(sdm_files, sdm_writer)
+  lapply(sdm_files, sdm_writer, x = x)
   
   ## also write out the raw SDM output
   raw_P <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
@@ -1342,14 +1328,13 @@ project_maker <- function(x, target_species, intype,
 
 
 ################################################################################
-#' reduce the occurrence, known basins, or raw SDM outputs to desired seed transfer zones
+#' reduce the occurrences, known basins, and raw SDM outputs to desired seed transfer zones
 #' on a per project basis
 #' @param x the input species list
-#' @param target_stz a dataframe with the Taxons name, Contract, desired STZs, and STZ product related to them. 
+#' @param target_stz a data frame with the Taxons name, Contract, desired STZs, and STZ product related to them. 
 #' @param prov A STACK OF PROVISIONAL RASTERS, THIS SHOULD BE CROPPED TO THE AREA OF ANALYSIS IN THE FUNCTION AROUD THIS ONE. 
-
 #' @param focal_bbox focal bounding box for study area, supply as a vect() so can be projected if necessary. 
-#' @param blm_surf_sub subsetted to blm owernship. 
+#' @param blm_surf_sub subsetted to blm ownership. 
 subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_sub){
   
   # determine whether we are using empirical or provisional seed transfer zones
@@ -1358,67 +1343,166 @@ subset2stz <- function(x, target_stz, prov, requisition, focal_bbox, blm_surf_su
   # identify all species which can be processed from the Provisional STZ's
   # we have created a local copy of the stz's as the layers of a raster stack 
   # to speed up this process. 
-  target_stz <- target_stz[target_stz$Requisition %in% c(requisition),]
-  prov_taxa <- target_stz[target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave'),]
+  prov_taxa <- target_stz[target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave') &
+                            target_stz$Requisition %in% c(requisition),]
   prov <- prov[[which(names(prov) == unique(prov_taxa$stz))]]  # subset the raster stack to the relevant layer
+  
+  # These species will be processed using their empirical seed zones. 
+  need_empirical <- target_stz[! target_stz$stz %in% c('Bower2013', 'DesertSW','GreatBasin_Bower', 'Mojave') &
+                            target_stz$Requisition %in% c(requisition),]
   
   # now subset the provisional seed zones to the BLM Office 
   prov_crop <- terra::crop(prov, terra::ext(terra::project(focal_bbox, terra::crs(prov))))
   prov_crop <- terra::mask(prov_crop, 
                            terra::project(terra::vect(blm_surf_sub), terra::crs(prov)))
-  # subset to species
-  prov_taxon <- target_stz[gsub('_', ' ', target_stz$binomial) == x$taxon[1], ]
   
-  # need to determine if raster type is categorical or numeric. to match the 
-  # properties of that layer of the spatrast
-  if(
-    any(
-      grepl('[A-z]', unique(prov_taxon$st_zone)))){
-       msk_vals <- unique(prov_taxon$st_zone)} else {
-        msk_vals <- as.numeric(unique(prov_taxon$st_zone))
-       }
+  # We will now import both the raw species distribution model output, and the
+  # re-sampled 
   
-  msk <- terra::ifel(prov_crop %in% msk_vals, prov_crop, NA)
-  prov_crop <- terra::mask(prov_crop, msk) 
+  # subset to species 
+  prov_taxon <- prov_taxa[gsub('_', ' ', prov_taxa$binomial) == x$taxon[1], ]
+  if(nrow(prov_taxon) > 0){
+  
+   # need to determine if raster type is categorical or numeric. to match the 
+    # properties of that layer of the spatraster
+    if(
+      all(
+        grepl('[A-z]', unique(prov_taxon$st_zone)))){
+         msk_vals <- unique(prov_taxon$st_zone)} else {
+          msk_vals <- as.numeric(unique(prov_taxon$st_zone))
+         }
+  
+    msk <- terra::ifel(prov_crop %in% msk_vals, prov_crop, NA) 
+    prov_crop <- terra::mask(prov_crop, msk) 
+    
+    
+    
+    
+    
+    
+    
+    # load the sdms here. 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    # need to be able to dispatch to both raster and vector data, and both point and
+    # polygon data. 
+    if(class(x)[1] == 'SpatRaster'){
 
-  # need to be able to dispatch to both raster and vector data, and both point and
-  # polygon data. 
-  if(class(x)[1] == 'SpatRaster'){
-
-    # we can simply mask non target seed zones in our stz rasters, and then mask
-    # our species raster to that raster.
+      # we can simply mask non target seed zones in our stz rasters, and then mask
+      # our species raster to that raster.
     
-    targeted_st_zones <- terra::mask(prov_crop, msk, inverse = TRUE)
-    raw_sdm_masked_to_target_stzs <- terra::mask(x, targeted_st_zones)
-    return(raw_sdm_masked_to_target_stzs)
+      targeted_st_zones <- terra::mask(prov_crop, msk, inverse = TRUE)
+      raw_sdm_masked_to_target_stzs <- terra::mask(x, targeted_st_zones)
+      return(raw_sdm_masked_to_target_stzs)
     
-  } else if(class(x)[1] == 'sf'){ # determine type of vector data and dispatch. 
+    } else if(class(x)[1] == 'sf'){ # determine type of vector data and dispatch. 
     
-
-    if(unique(sf::st_geometry_type(x[1,])) == 'POINT'){
+      if(unique(sf::st_geometry_type(x[1,])) == 'POINT'){
     
-      targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
-      taxon_in_target_stz <- x[which( # identify point records overlapping target stz. 
-        !is.na(
-          terra::extract(prov_crop, terra::project(terra::vect(x), crs(prov_crop)), 
-                         method = 'simple', ID = F))), ]
-      # species by species subset to the target zones
-      return(taxon_in_target_stz)
+        targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
+        taxon_in_target_stz <- x[which( # identify point records overlapping target stz. 
+          !is.na(
+            terra::extract(prov_crop, terra::project(terra::vect(x), crs(prov_crop)), 
+                           method = 'simple', ID = F))), ]
+        # species by species subset to the target zones
+        return(taxon_in_target_stz)
       
-    } else { # now essentially intersect the areas of polygons. 
+      } else { # now essentially intersect the areas of polygons. 
       
-      targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
-      targeted_v <- sf::st_as_sf(
-        terra::as.polygons(targeted, dissolve = FALSE, values = FALSE))
+        targeted <- terra::mask(prov_crop, msk, inverse = TRUE)
+        targeted_v <- sf::st_as_sf(
+          terra::as.polygons(targeted, dissolve = FALSE, values = FALSE))
       
-      drainages_in_target_stz <- st_intersection(x, targeted_v)
+        drainages_in_target_stz <- st_intersection(x, targeted_v)
+      
+      }
+     } else {
+        message('This class not expected by this small function\n 
+              we take sf and SpatRaster objects. Small overhaul needed?')
+      
+       } 
+    } else {
+      # run empirical seed zone species down here
+      
+      
       
     }
-  } else {
-    message('This class not expected by this small function\n 
-          we take sf and SpatRaster objects. Small overhaul needed?')
-  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

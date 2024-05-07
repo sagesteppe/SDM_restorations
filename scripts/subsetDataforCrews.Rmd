@@ -152,7 +152,7 @@ t <- filter(occurrences, taxon == 'Abronia villosa') |>
 
 ```{r generate projects for crews, eval= F}
 
-lapply(teams_list[13], project_maker,
+ob <- lapply(teams_list[13], project_maker,
        admu = admin_boundaries, 
        target_species = spp_needed, 
        blm_surf = blm_surf, 
@@ -161,8 +161,9 @@ lapply(teams_list[13], project_maker,
        invasive = invasives, 
        total_change = change_intensity, 
        occurrences = occurrences, 
-       roads = roads, seed_transfer = STZ)
+       roads = roads, seed_transfer = STZ) 
 
+plot( ab[["Uncompahgre - P102085"]][["Astragalus lonchocarpus"]] )
 
 lapply(seniors_list[3],  project_maker,
        admu = admin_boundaries, intype = 'senior',
@@ -173,7 +174,6 @@ lapply(seniors_list[3],  project_maker,
        invasive = invasives, 
        total_change = change_intensity, 
        occurrences = occurrences, 
-      # historic_SOS, 
        roads = roads, seed_transfer = STZ)
 
 ```
