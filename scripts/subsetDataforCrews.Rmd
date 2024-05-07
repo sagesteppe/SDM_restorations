@@ -200,15 +200,12 @@ focal_bbox <- focal_bbox
 blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox) 
 
 ptest <- mask(ptest, blm_surf_sub)
+trim(ptest)
 plot(ptest)
 
-a <- lapply(X = spp_needed_test[1], FUN = empiricalSTZ_writer, seed_zones = seed_zones, pSTZs = ptest)
+a <- lapply(X = spp_needed_test[1], FUN = empiricalSTZ_writer, 
+            seed_zones = seed_zones, pSTZs = ptest) # 24 pts, 245 polys
 
-b <- vect(spp_needed_test[[1]][,'path_basins'])
-
-ob <- terra::mask(b, ptest)
-
-plot(a[["Aristida_purpurea"]])
 ```
 
 ```{r}

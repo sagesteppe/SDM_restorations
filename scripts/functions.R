@@ -1476,20 +1476,19 @@ empiricalSTZ_writer <- function(spp_needed, seed_zones, pSTZs){
                      method = 'simple', ID = F))), ]
   
   ############ second write out the raw SDM ################
-#  raw_sdm <- terra::rast(spp_needed$path_raw_sdm)
-#  raw_sdm <- terra::crop(raw_sdm, msk, mask = TRUE)
+  raw_sdm <- terra::rast(spp_needed$path_raw_sdm)
+  raw_sdm <- terra::crop(raw_sdm, msk, mask = TRUE)
   
-#  raw_sdm <- terra::mask(raw_sdm, ifel(raw_sdm < 0.70, NA, raw_sdm)) # if suitability < 70% remove
+  raw_sdm <- terra::mask(raw_sdm, ifel(raw_sdm < 0.70, NA, raw_sdm)) # if suitability < 70% remove
   # now aggregate rasters to half resolutions
-#  raw_sdm <- terra::aggregate(raw_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
-#  raw_sdm <- terra::trim(raw_sdm)
+  raw_sdm <- terra::aggregate(raw_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
+  raw_sdm <- terra::trim(raw_sdm)
 
   ############ third write out the basins SDM ################
   basins <- terra::vect(spp_needed$path_basins)
-  drainages_in_target_stz <- terra::mask(basins, msk)
-  return(drainages_in_target_stz)
-  
- # return(c(taxon_in_target_stz, raw_sdm, drainages_in_target_stz))
+  drainages_in_target_stz <- sf::st_as_sf(terra::crop(basins, raw_sdm))
+
+  return(c(taxon_in_target_stz, raw_sdm, drainages_in_target_stz))
 }
 
 
