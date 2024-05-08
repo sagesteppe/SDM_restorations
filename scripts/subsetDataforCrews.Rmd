@@ -182,31 +182,60 @@ t <- filter(occurrences, taxon == 'Abronia villosa') |>
 
 emps <- filter(seed_zones, stz == 'DesertSW' & Requisition == 'Uncompahgre - P102085') %>% 
   pull(binomial) %>% 
-  unique()
+  unique() 
 
 spp_needed_test <- filter(spp_needed, Requisition == 'Uncompahgre - P102085' & binomial %in% emps)
 spp_needed_test <- split(spp_needed_test, f = spp_needed_test$binomial)
 
-example_rast <- rast(spp_needed_test[[1]][,'path_raw_sdm'])
-ptest <- project(prov_stz[[2]], 'epsg:5070')
-ptest <- resample(ptest, example_rast)
+example_rast <- rast(spp_needed_test[[1]][,'path_raw_sdm']) 
+ptest <- project(prov_stz[[2]], 'epsg:5070') 
+ptest <- resample(ptest, example_rast) 
 
 #### Process geographic data to a mask of the field office ####
-focal_bbox <- dplyr::filter(admin_boundaries, ADMU_NA %in% stringr::str_to_upper(teams_list[[13]]$FieldOffice) ) %>%  
+focal_bbox <- dplyr::filter(admin_boundaries, 
+                            ADMU_NA %in% 
+                              stringr::str_to_upper(teams_list[[13]]$FieldOffice)) %>%  
   sf::st_union() %>% 
-  sf::st_transform(5070)
+  sf::st_transform(5070) 
   
 focal_bbox <- focal_bbox 
 blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox) 
+ptest <- mask(ptest, blm_surf_sub) 
 
-ptest <- mask(ptest, blm_surf_sub)
-ptest <- trim(ptest)
-plot(ptest)
+spp_needed_test <- filter(spp_needed, Requisition == 'Uncompahgre - P102085') 
 
+emp_prov_info <- identify_spp_emp_prov_sz(
+  spp_needed_test, seed_zones = seed_zones, pSTZs = prov_stz, 
+  focal_domain = focal_bbox, blm_surf_sub = blm_surf_sub) 
 
-crew_dir <-  '/media/steppe/hdd/2024SOS_CrewGeospatial/Uncompahgre - P102085'
-lapply(X = spp_needed_test[1], FUN = empiricalSTZ_writer, 
-            seed_zones = seed_zones, pSTZs = ptest) # 24 pts, 245 polys
+crew_dir <-  '/media/steppe/hdd/2024SOS_CrewGeospatial/Uncompahgre - P102085' 
+
+# here we can put in:
+taxa_w_provisional_stz <- split(emp_prov_info[["taxa_w_provisional_stz"]], 
+                                f = 1:nrow(emp_prov_info[["taxa_w_provisional_stz"]]))
+
+taxa_w_empirical_stz <- split(emp_prov_info[["taxa_w_empirical_stz"]], 
+                                f = 1:nrow(emp_prov_info[["taxa_w_empirical_stz"]]))
+
+lapply(X = spp_needed_test[3:10], FUN = provisionalSTZ_writer, 
+            seed_zones = seed_zones, pSTZs = masked_pSTZ_lyr) 
+p <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
+example_rast <- rast(file.path(p,'Achnatherum_hymenoides1k-2024-01-10_09:42:26.tif') )
+prov_stz <- project(prov_stz, 'epsg:5070') 
+prov_stz <- resample(prov_stz, example_rast) 
+
+lapply(teams_list[13], project_maker, 
+       admu = admin_boundaries, 
+       target_species = spp_needed, 
+       blm_surf = blm_surf, 
+       fs_surf = usfs_surf, 
+       fire = fire_perimeters, 
+       invasive = invasives, 
+       total_change = change_intensity, 
+       occurrences = occurrences, 
+       roads = roads, 
+       pSTZs = prov_stz,
+       seed_transfer = STZ) 
 
 ```
 
