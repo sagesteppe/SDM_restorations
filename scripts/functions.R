@@ -1474,28 +1474,38 @@ empiricalSTZ_writer <- function(spp_needed, seed_zones, pSTZs){
     !is.na(
       terra::extract(msk, terra::project(terra::vect(occ), crs(pSTZs)), 
                      method = 'simple', ID = F))), ]
+    
+  binomial <- gsub(' ', '_', sf::st_drop_geometry(spp_needed$binomial[1]))
+  sf::st_write(taxon_in_target_stz, dsn = file.path(
+    crew_dir, 'Geodata/Species/Occurrences', paste0(binomial,'.shp')),
+             quiet = T, append = F)
   
   ############ second write out the raw SDM ################
   raw_sdm <- terra::rast(spp_needed$path_raw_sdm)
   raw_sdm <- terra::crop(raw_sdm, msk, mask = TRUE)
   
-  raw_sdm <- terra::mask(raw_sdm, ifel(raw_sdm < 0.70, NA, raw_sdm)) # if suitability < 70% remove
+  # if suitability < 70% remove
+  raw_sdm <- terra::mask(raw_sdm, ifel(raw_sdm < 0.70, NA, raw_sdm)) 
   # now aggregate rasters to half resolutions
   raw_sdm <- terra::aggregate(raw_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
   raw_sdm <- terra::trim(raw_sdm)
-
+  
+  terra::writeRaster(raw_sdm, filename = file.path(
+    crew_dir, 'Geodata/Species/SDM-raw', paste0(binomial,'.tif')),
+    overwrite = T)
+  
   ############ third write out the basins SDM ################
   basins <- terra::vect(spp_needed$path_basins)
-  drainages_in_target_stz <- sf::st_as_sf(terra::crop(basins, raw_sdm))
+  drainages_in_target_stz <- terra::crop(basins, raw_sdm)
+  msk <- terra::as.polygons(msk > -Inf)
+  drainages_in_target_stz <- sf::st_as_sf(
+    terra::mask(drainages_in_target_stz, msk))
 
-  return(c(taxon_in_target_stz, raw_sdm, drainages_in_target_stz))
+  sf::st_write(drainages_in_target_stz, dsn = file.path(
+    crew_dir, 'Geodata/Species/SDM', paste0(binomial,'.shp')),
+    quiet = T, append = F)
+
 }
-
-
-
-
-
-
 
 
 
