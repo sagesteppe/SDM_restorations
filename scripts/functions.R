@@ -1183,8 +1183,7 @@ project_maker <- function(x, target_species, intype,
       dsn = file.path(crew_dir, 'Geodata/Admin/Boundaries', 'Field_Office_Boundaries.shp' ), 
                   quiet = T, append = F) 
   blm_surf_sub <- sf::st_intersection(blm_surf, focal_bbox)  
-
-
+  
   # determine which Seed Transfer Zones to use 
   emp_prov_info <- identify_spp_emp_prov_sz(spp_needed = target_species,
     seed_zones = seed_zones, pSTZs = pSTZs, 
@@ -1319,6 +1318,7 @@ identify_spp_emp_prov_sz <- function(spp_needed, seed_zones, pSTZs, focal_domain
 #'zones. 
 provisionalSTZ_writer <- function(spp_needed, seed_zones, pSTZs, crew_dir){
   
+  binomial <- gsub(' ', '_', sf::st_drop_geometry(spp_needed$binomial[1]))
   sz <- seed_zones[seed_zones$binomial == spp_needed$binomial & 
                      seed_zones$Requisition == spp_needed$Requisition,]
   if(all(
@@ -1327,10 +1327,12 @@ provisionalSTZ_writer <- function(spp_needed, seed_zones, pSTZs, crew_dir){
       msk_vals <- as.numeric(unique(sz$st_zone))
     }
   
-  # mask the seed transfer zones to the ones of interest # 
-  msk <- terra::ifel(pSTZs %in% msk_vals, pSTZs, NA) 
-  msk <- terra::crop(pSTZs, msk, mask = TRUE) 
-  
+  if(all(msk_vals != 'any')){
+    # mask the seed transfer zones to the ones of interest # 
+    msk <- terra::ifel(pSTZs %in% msk_vals, pSTZs, NA) 
+    msk <- terra::crop(pSTZs, msk, mask = TRUE) 
+  } else {msk <- pSTZs}
+
   ############# first write out the occurrence points ################
   if(!is.na(spp_needed$occurrence_path)){
     
@@ -1343,7 +1345,6 @@ provisionalSTZ_writer <- function(spp_needed, seed_zones, pSTZs, crew_dir){
         terra::extract(msk, terra::project(terra::vect(occ), crs(pSTZs)), 
                        method = 'simple', ID = F))), ]
     
-    binomial <- gsub(' ', '_', sf::st_drop_geometry(spp_needed$binomial[1]))
     sf::st_write(taxon_in_target_stz, dsn = file.path(
       crew_dir, 'Geodata/Species/Occurrences', paste0(binomial,'.shp')),
                quiet = T, append = F)
@@ -1351,18 +1352,37 @@ provisionalSTZ_writer <- function(spp_needed, seed_zones, pSTZs, crew_dir){
   ############ second write out the raw SDM ################
   if(!is.na(spp_needed$path_raw_sdm)){
     raw_sdm <- terra::rast(spp_needed$path_raw_sdm)
-    raw_sdm <- terra::crop(raw_sdm, msk, mask = TRUE)
+
+    cropped <- function(x){tryCatch(
+      expr = {terra::crop(x, msk, mask = TRUE)},
+      warning = function(w){
+        int <- terra::resample(x, prov_stz)
+        terra::crop(int, msk, mask = TRUE)}
+      )}
+    
+    cropped_sdm <- cropped(raw_sdm)
+    
+    if(exists('cropped_sdm')){
   
-    # if suitability < 70% remove
-    raw_sdm <- terra::mask(raw_sdm, ifel(raw_sdm < 0.70, NA, raw_sdm)) 
-    # now aggregate rasters to half resolutions
-    raw_sdm <- terra::aggregate(raw_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
-    raw_sdm <- terra::trim(raw_sdm)
+      # if suitability < 70% remove
+      masked_sdm <- terra::mask(cropped_sdm, ifel(cropped_sdm < 0.70, NA, cropped_sdm)) 
+      # now aggregate rasters to half resolutions
+      masked_sdm <- terra::aggregate(masked_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
   
-    terra::writeRaster(raw_sdm, filename = file.path(
-      crew_dir, 'Geodata/Species/SDM-raw', paste0(binomial,'.tif')),
-      overwrite = T)
+      trimmed <- function(x){tryCatch(
+        expr = {terra::trim(x)},
+        error = function(e){message(binomial, ' raster not found\n')}
+        )}
+      
+    trimmed_sdm <- trimmed(masked_sdm)
+      if(exists('trimmed_sdm')){
+     terra::writeRaster(trimmed_sdm, filename = file.path(
+        crew_dir, 'Geodata/Species/SDM-raw', paste0(binomial,'.tif')),
+        overwrite = T)
+      }
+    }
   }
+
   
   ############ third write out the basins SDM ################
   if(!is.na(spp_needed$path_basins)){
