@@ -177,7 +177,6 @@ t <- filter(occurrences, taxon == 'Abronia villosa') |>
 ```
 
 
-
 ```{r}
 
 p <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
@@ -185,8 +184,16 @@ example_rast <- rast(file.path(p,'Achnatherum_hymenoides1k-2024-01-10_09:42:26.t
 prov_stz <- project(prov_stz, 'epsg:5070') 
 prov_stz <- resample(prov_stz, example_rast) 
 
+p <- '/media/steppe/hdd/EmpiricalSeedZones/data/geodata/rasters'
+f <- file.path(p, list.files(p, pattern = 'tif$'))
+eSTZs <- rast(f)
+names(eSTZs) <- gsub('-.*tif$', '', basename(f))
+eSTZs <- project(eSTZs, 'epsg:5070') 
+eSTZs <- resample(eSTZs, example_rast)
+rm(f, p)
+
 lapply( 
-  teams_list[2], project_maker, 
+  teams_list[13], project_maker, 
   admu = admin_boundaries, 
   target_species = spp_needed, 
   blm_surf = blm_surf, 
@@ -197,10 +204,11 @@ lapply(
   occurrences = occurrences, 
   roads = roads,  
   pSTZs = prov_stz, 
-  seed_transfer = STZ
+  eSTZs = eSTZs, 
+  seed_transfer = STZ 
   )
 
-plot(ob[["Bishop - P102079"]][["10"]])
+plot(eSTZs)
 
 ```
 

@@ -1147,6 +1147,7 @@ project_maker_original <- function(x, target_species, intype,
 #' @param roads sf dataset of roads with relevant attritbutes
 #' @param seed_transfer sf dataset of seed transfer zones 
 #' @param pSTZs rasterstack of provisional seed transfer zones
+#' @param eSTZs rasterstack of empirical seed transfer zones
 #' @param total_change Total Change Intensity Index from the MRLC
 #' @param drought6 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
 #' @param drought12 12 netcdf of drought dataset from SPEI website, we recommend using 6 and 12 month
@@ -1154,7 +1155,7 @@ project_maker <- function(x, target_species, intype,
                           admu, 
                           blm_surf, fs_surf, # ownership stuff
                           fire,  invasive,  occurrences, historic_SOS, 
-                          total_change, pSTZs,
+                          total_change, pSTZs, eSTZs, 
                           roads, seed_transfer#, 
                           #     drought6, drought12
 ){
@@ -1198,11 +1199,15 @@ project_maker <- function(x, target_species, intype,
                                 f = 1:nrow(emp_prov_info[["taxa_w_empirical_stz"]]))
   
   # write out the data for Occurrence Points, Hydrological Basins, and Raw SDMs
-  # for species with provisional seed transfer zones
+  # for species with PROVISIONAL seed transfer zones
   lapply(X = taxa_w_provisional_stz, FUN = provisionalSTZ_writer, 
          seed_zones = seed_zones, pSTZs = emp_prov_info[['masked_pSTZ_lyr']], 
          crew_dir = crew_dir)
 
+  # write out the data for Occurrence Points, Hydrological Basins, and Raw SDMs
+  # for species with EMPIRICAL seed transfer zones
+  lapply(X = taxa_w_empirical_stz, FUN = empiricalSTZ_writer,
+         seed_zones = seed_zones, eSTZs = eSTZs, crew_dir)
 }
 
 
@@ -1249,7 +1254,6 @@ init_proj_dir <- function(x, crew_dir){
   dir.create( file.path(crew_dir, 'Geodata/Drought'))
   
 }
-
 
 
 
@@ -1312,7 +1316,7 @@ identify_spp_emp_prov_sz <- function(spp_needed, seed_zones, pSTZs, focal_domain
 
 
 #' mask SDM spatial data products to a field office and provisional seed zones. 
-#' @param spp_needed a list of species required, same as input to the parent fn
+#' @param spp_needed taxa_w_provisional_stz from the function identify_spp_emp_prov_sz
 #' @param seed_zones a data frame with the seed_zones required
 #' @param pSTZs the identified seed zone layer from a raster stack of provisional seed
 #'zones. 
@@ -1401,10 +1405,97 @@ provisionalSTZ_writer <- function(spp_needed, seed_zones, pSTZs, crew_dir){
 }
 
 
+#' Look up Empirical/Species Specific STZ's and mask data to their extents 
+#' @param spp_needed taxa_w_empirical_stz from the function identify_spp_emp_prov_sz 
+#' @param seed_zones a data frame with the seed_zones required
+#' @param eSTZs A raster stack of all relevant empirical and species specific seed transfer zones
+#' 
+empiricalSTZ_writer <- function(spp_needed, seed_zones, eSTZs, crew_dir){
+  
+  binomial <- gsub(' ', '_', sf::st_drop_geometry(spp_needed$binomial[1]))
+  sz <- seed_zones[seed_zones$binomial == spp_needed$binomial & 
+                     seed_zones$Requisition == spp_needed$Requisition,]
+  if(all(
+    grepl('[A-z]', unique(sz$st_zone)))){
+    msk_vals <- unique(sz$st_zone)} else {
+      msk_vals <- as.numeric(unique(sz$st_zone))
+    }
+  
+  # determine which ESTZ we are using for each species....
+  eSTZsub <- eSTZs[[which(names(eSTZs) == unique(spp_needed$binomial))]]
+  if(all(msk_vals != 'any')){
+    # mask the seed transfer zones to the ones of interest # 
+    msk <- terra::ifel(eSTZsub %in% msk_vals, eSTZsub, NA) 
+    msk <- terra::crop(eSTZsub, msk, mask = TRUE) 
+  } else {msk <- eSTZsub}
+  
+  ############# first write out the occurrence points ################
+  if(!is.na(spp_needed$occurrence_path)){
+    
+    occ <- sf::st_read(spp_needed$occurrence_path, quiet = T) |>
+      dplyr::mutate(taxon = str_replace(taxon, ' ', '_')) |>
+      dplyr::filter(taxon == spp_needed$binomial)
+    
+    taxon_in_target_stz <- occ[which( # identify point records overlapping target stz. 
+      !is.na(
+        terra::extract(msk, terra::project(terra::vect(occ), crs(eSTZsub)), 
+                       method = 'simple', ID = F))), ]
+    
+    sf::st_write(taxon_in_target_stz, dsn = file.path(
+      crew_dir, 'Geodata/Species/Occurrences', paste0(binomial,'.shp')),
+      quiet = T, append = F)
+  }
+  ############ second write out the raw SDM ################
+  if(!is.na(spp_needed$path_raw_sdm)){
+    raw_sdm <- terra::rast(spp_needed$path_raw_sdm)
+    
+    cropped <- function(x){tryCatch(
+      expr = {terra::crop(x, msk, mask = TRUE)},
+      warning = function(w){
+        int <- terra::resample(x, prov_stz)
+        terra::crop(int, msk, mask = TRUE)}
+    )}
+    
+    cropped_sdm <- cropped(raw_sdm)
+    
+    if(exists('cropped_sdm')){
+      
+      # if suitability < 70% remove
+      masked_sdm <- terra::mask(cropped_sdm, ifel(cropped_sdm < 0.70, NA, cropped_sdm)) 
+      # now aggregate rasters to half resolutions
+      masked_sdm <- terra::aggregate(masked_sdm, fact = 2, fun = 'mean', na.rm = TRUE)
+      
+      trimmed <- function(x){tryCatch(
+        expr = {terra::trim(x)},
+        error = function(e){message(binomial, ' raster not found\n')}
+      )}
+      
+      trimmed_sdm <- trimmed(masked_sdm)
+      if(exists('trimmed_sdm')){
+        terra::writeRaster(trimmed_sdm, filename = file.path(
+          crew_dir, 'Geodata/Species/SDM-raw', paste0(binomial,'.tif')),
+          overwrite = T)
+      }
+    }
+  }
+  
+  
+  ############ third write out the basins SDM ################
+  if(!is.na(spp_needed$path_basins)){
+    
+    basins <- terra::vect(spp_needed$path_basins)
+    drainages_in_target_stz <- terra::crop(basins, raw_sdm)
+    msk <- terra::as.polygons(msk > -Inf)
+    drainages_in_target_stz <- sf::st_as_sf(
+      terra::mask(drainages_in_target_stz, msk))
+    
+    sf::st_write(drainages_in_target_stz, dsn = file.path(
+      crew_dir, 'Geodata/Species/SDM', paste0(binomial,'.shp')),
+      quiet = T, append = F)
+  }
+  
 
-
-
-
+}
 
 
 
