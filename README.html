@@ -352,12 +352,189 @@ display: none;
 </div>
 
 
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>A primary challenge to restoring Earths terrestrial ecosystems is the
+lack of available plant germplasm (<span class="citation">@national2023assessment</span>, <span class="citation">@merritt2011restoration</span>). Given the scale of our
+restoration needs, in most scenarios, the only sustainable source of
+seed is from grow-outs of wild harvested seed in agricultural settings
+(<span class="citation">@pedrini2020collection</span>, <span class="citation">@broadhurst2015seeding</span>, <span class="citation">@national2023assessment</span>). Enormous efforts are
+now underway to increase the number of species, the number of
+populations within these species, and the genetic diversity of these
+populations, available for restoration <span class="citation">@national2023assessment</span>. However, difficulties
+exist in both the wild harvest and increase of seed which are limiting
+our ability to develop adequate amounts of germplasm.</p>
+<p>While most species desired in restorations have historically had
+relatively large geographic ranges, numbers of populations, and number
+of individuals per populations, the development of native germplasm
+remains behind targets (<span class="citation">@national2023assessment</span>). We posit that in part
+this is due to the difficulty of finding populations with the
+appropriate number of individuals, which are experiencing climatic
+conditions conducive to producing enough viable seed to being
+agricultural increase, a complications borne of widespread habitat
+degradation and unnatural wildfires <em>(cite on degradation and
+wildfires)</em>. Tools which are capable of predicting a species
+geographic range, the presence and size of populations across the range
+and in seed collection target units (such as empirical or provisional
+seed transfer zones or ecoregions), such as Species Distribution Models
+offer promise to increase the rate at which native germplasm can be
+developed.</p>
+<p>However, while SDM’s generate hypothesis of whether areas have
+environmental conditions similar to the observed environmental niche of
+the species they do not consider the probabilities of colonization, nor
+the populations census sizes. A possible tool to associate a probability
+of occurrence of a species in a suitable habitat patch, is connectivity
+analysis. Utilizing the predicted unsuitability of habitat, with extreme
+barriers to dispersal, to create cost-resistance surfaces between
+patches with known populations and predicted populations allows for
+simulating the probability of occurrence. While previous correlations
+between habitat suitability and population size have often been low, we
+posit that patch level parameters offer a more useful prediction of
+population size (<span class="citation">@weber2017there</span>, <span class="citation">@waldock2022quantitative</span>) Patch metrics will
+more appropriately reflect parameters of a potential population,
+e.g. geographic extent, which we posit is a more informative proxy of
+population size than environmental niche correlation.<br />
+Utilizing this approach will allow field crews to associate
+probabilities with previously unground truthed patches.</p>
+<p>Here we showcase the utility of SDM’s to predict suitable habitat for
+common species in natural settings and use those data to test two
+specific hypotheses. Firstly that SDM’s can identify more populations
+than exist in the occurrence based records they were derived from. And
+secondly patch metrics derived from SDM’s correlate with observed
+population census size. In order to determine whether SDM’s are useful
+in detecting new populations, over <sub>10</sub> field crews were given
+50 putative populations to survey for the presence and absence of the
+modelled species. To determine if patch metrics can be used to predict
+population census sizes, these crews noted whether the populations was
+large enough to support</p>
+</div>
+<div id="materials-and-methods" class="section level1">
+<h1>2 MATERIALS AND METHODS</h1>
+<div id="study-system" class="section level2">
+<h2>2.1 Study system</h2>
+<p>The 355 modelled species were selected by land managers in arid &amp;
+semi-arid areas Western North America and are species they already or
+immediately intend to use in restoration. The spatial domain of
+modelling broadly encompasses the Western United States being bounded by
+the Pacific Ocean, the 50th parallel at north, -100 degrees at East and
+Mexico to the south. This domain has tremendous variation in amounts of
+elevation, temperature, and precipitation.</p>
+</div>
+<div id="species-occurrence-records" class="section level2">
+<h2>Species Occurrence Records</h2>
+<p>Species presence records were collected from Natural History Museums,
+citizen science initiatives, and standardized ecological monitoring
+programmes using R (<span class="citation">@chamberlain2024rgbif</span>,
+<span class="citation">@maitner2023bien</span>, <span class="citation">@michonneau2023idigbio</span>). These records were
+filtered to only those collected after 1950, with coordinate uncertainty
+less than 250 meters, and only the most recent record per 90m cell was
+retained. All of these records were then manually reviewed by species,
+where records with more 2 or more variables in the 2.5% quantiles of
+several environmental variables (bio1, 4, 10, 12, &amp; 19; TABLE X) and
+distance were flagged. During subjective manual review all digitized
+herbarium specimens which were suspect were reviewed, while other
+records were dropped based on the analysts review of other occurrence
+records.</p>
+<p>Species absences were generated using three processes, and we sought
+to have a 1:1 ratio of presences to absences. True absences were
+acquired from a massive ecological monitoring program Assess, Inventory,
+and Monitor (AIM), these absences accounted for a percent equivalent to
+land managed by BLM within the species range (e.g. if 20% of land
+ownership across a species range was BLM, than the number of presences *
+0.2 defined the number of these absences). Likely absences, representing
+15% of records, were generated outside the known range of the species,
+but bounded to be within 50 miles of the extent extent of occurrences.
+Pseudo-absences (PA) were randomly selected from areas in, or within XX
+km, of the species range but greater than 10km from an occurrence, these
+records accounted for ((1 - (% BLM Land + 15 % LA records)) * 1.25).
+Because most of these species are highly abundant in order to reduce the
+probability that a PA was drawn within a species the environmental niche
+linear discriminant analysis (LDA) was used. The LDA utilized the
+presences, true absences and likely absences as the classes and several
+environmental variables (<span class="citation">@venables2002mass</span>), identified by vifstep with
+theta = 10 as displaying at most moderate collinearity, as independent
+variables (<span class="citation">@naimi2014usdm</span>). As many
+records, classified by the LDA as originating from the Presence data
+set, from the pseudo-absences could be removed as to achieve a class
+balance between presences and absences.</p>
+</div>
+<div id="environmental-variables" class="section level2">
+<h2>Environmental Variables</h2>
+<p>XX variables were used in generating the species distribution models
+(table X, <span class="citation">@karger2017climatologies</span>, <span class="citation">@hengl2017soilgrids250m</span>, <span class="citation">@ivushkin2019global</span>, <span class="citation">@tuanmu2014global</span>, <span class="citation">@yamazaki2017merit</span>, <span class="citation">@amatulli2020geomorpho90m</span>, <span class="citation">@sanderson2002human</span>). These variables were
+selected based on authors previous work, and represent variables
+commonly associated with the empirical distributions of taxa in arid and
+semi-arid regions. All variables were downloaded from source and
+re-sampled to 90m resolution using terra (<span class="citation">@hijman2023terra</span>).</p>
+</div>
+<div id="species-distribution-modelling" class="section level2">
+<h2>Species Distribution Modelling</h2>
+<p>Random Forests models were generated for each species following
+several steps to reduce the number of features. While superfluous
+features generally do not notably decrease the performance of random
+forests, they increase the amount of time required to predict models
+onto gridded surfaces. The Boruta algorithm was used on the full stack
+of 44?? independent variables to remove un-informative variables <span class="citation">@kursa2010boruta</span>), and the variable importance
+factor (VIF) scores were then used to subset the most informative
+features in several auto-correlated pairs, reducing the independent
+variables to at most 33.<br />
+Recursive Feature Elimination (rfe) was then used to identify the fewest
+number of independent variables which could either increase model
+performance (measured using accuracy), or only decrease it by 1.5%
+relative to the full set of variables, these variables were subset and
+used as features for random forest modelling with all default values
+except for optimized mtrys (<span class="citation">@kuhn2008caret</span>, <span class="citation">@liaw2002randomForest</span>). Models were then
+predicted onto gridded surfaces which exceeded the species range by 50
+miles (<span class="citation">@terra</span>).</p>
+</div>
+<div id="patch-identification" class="section level2">
+<h2>Patch identification</h2>
+<p>To identify putative metapopulations raster cells predicted as having
+less than 0.8 probability of suitable habitat were masked as NA’s, and
+then areas which were crossed by streams with Strahler orders of three
+of more (DATASET), and the divides of HU10 watersheds (DATASET) were
+‘burnt’ away from the raster. The resulting rasters were aggregated by a
+factor of 2 to 5, depending of their sizes (&lt; 300 MiB 2, &lt; 500 3,
+&lt; 700 4, &gt; 700 5) to accommodate, a rooks case search using terra
+in a practical time period. Resultant patches &lt; 5 acres were then
+discarded, and the rasters was resampled to it’s input resolution.</p>
+<p>Putative populations were identified using the patches generated
+above. These patches followed the same processing, except that HU12
+watersheds were used to delineate populations.</p>
+<p>Because the &gt; 0.8 threshold used above did not capture all
+colonized patches, all patches with predicted suitability scores of
+&gt;0.55 which contained species observations were then identified using
+Terra’s patches to create a data set of known populations.</p>
+<p>Multiple landscape metrics were calculated the Class metrics
+Euclidean Nearest Neighbor of both mean and coefficient of variation,
+and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index,
+PARA, Fractal Index (<span class="citation">@hesselbarth2019lsm</span>).</p>
+</div>
+<div id="predicting-species-occurrence-in-patches" class="section level2">
+<h2>Predicting Species Occurrence in Patches</h2>
+<p>All patches identified above were used to identify patches within 5
+contiguous neighbors, or 5 kilometers, of a patch known to be occupied.
+Occupied patches were determined using both the training and test
+occurrences data set used to generate the SDMs. To identify each patch
+within 5 orders of contiguous neighbors <code>nblag</code>, and to
+determine all patches within 5k of a populated patch
+<code>dnearneigh</code>, were used (<span class="citation">@bivand2018spdep</span>). For each of these
+non-occupied patches the number of occupied patches at different lags
+were counted.</p>
+<p>Each non-occupied patch was assigned an arbitrary rank based upon
+whether they were contiguous with an occupied patch, and if contiguous
+than their lag number to the nearest occupied patch, and the number of
+occupied patches connected. The arbitrarily assigned numbers increase
+from ‘1’, for an occupied patch, to ‘7’ for a patch which has fewer than
+3 second-order contiguous neighbors to an occupied patch(es).</p>
+<p>line 804 in functions</p>
+</div>
 <div id="variables-and-sources-for-environmental-niche-models" class="section level2">
 <h2>Variables and Sources for Environmental Niche Models</h2>
 <p>Two major models are created, one which focuses on identifying areas
 of fundamental environmental niches in the wild, and a second which
 focuses on identifying farms which the species has considerable niche
-overlap with. The full ‘wild’ models feature up to 38 variables, while
+overlap with. The full ‘wild’ models feature up to 33 variables, while
 the ‘farm’ models features ca. 26 variables. Both endeavors run step
 wise.</p>
 <table>
@@ -379,349 +556,230 @@ wise.</p>
 <tr class="odd">
 <td align="center">1.</td>
 <td align="center">Mean Annual Air Temperature (BIO1)</td>
-<td align="center">PRISM / CLIMATENA/ DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">2.</td>
 <td align="center">Temperature seasonality (BIO4)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">3.</td>
 <td align="center">Max Temperature of Warmest Month (BIO5)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">4.</td>
 <td align="center">Min Temperature of Coldest Month (BIO6)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">5.</td>
 <td align="center">Mean Temperature of Warmest Quarter (BIO10)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">6.</td>
 <td align="center">Mean Temperature of Coldest Quarter (BIO11)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">7.</td>
 <td align="center">Mean annual precipitation (BIO12)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">8.</td>
 <td align="center">Precipitation of Warmest Quarter (BIO18)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">9.</td>
 <td align="center">Precipitation of Coldest Quarter (BIO19)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">10.</td>
-<td align="center">Mean annual cloudiness - MODIS</td>
-<td align="center">Wilson et al. 2016</td>
+<td align="center">Mean Monthly vapour pressure deficit (vpd)</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
-<td align="center">12.</td>
-<td align="center">Beginning of the frost-free period (gdgfgd0)</td>
-<td align="center">Wang et al.</td>
+<td align="center">11.</td>
+<td align="center">Heat accumulation of Degree-days above 5C (gdd5)</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">12.</td>
-<td align="center">Climatic moisture deficit</td>
-<td align="center">Wang et al.</td>
+<td align="center">Number of Degree-days above 5C (ngd5)</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">13.</td>
-<td align="center">Degree-days above 5C (gdd5)</td>
-<td align="center">Wang et al.</td>
+<td align="center">Heat accumulation of Degree-days above 10C
+(gdd10)</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">14.</td>
-<td align="center">Mean annual precipitation as snow</td>
-<td align="center">Wang et al.</td>
+<td align="center">Number of Degree-days above 10C (ngd10)</td>
+<td align="center">Chelsa</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">15.</td>
+<td align="center">Mean monthly near surface humidity (hurs)</td>
+<td align="center">Chelsa</td>
+<td align="center">both</td>
+</tr>
+<tr class="even">
+<td align="center">16.</td>
+<td align="center">Number of Days with Snow Cover(scd)</td>
+<td align="center">Chelsa</td>
+<td align="center">both</td>
+</tr>
+<tr class="odd">
+<td align="center">17.</td>
+<td align="center">Annual Snow Water Equivalent (swe)</td>
+<td align="center">Chelsa</td>
+<td align="center">both</td>
+</tr>
+<tr class="even">
+<td align="center">18.</td>
 <td align="center">Percent Herbaceous Vegetation</td>
 <td align="center">EarthEnv</td>
 <td align="center">wild</td>
 </tr>
-<tr class="even">
-<td align="center">16.</td>
+<tr class="odd">
+<td align="center">19.</td>
 <td align="center">Percent Shrub Cover</td>
 <td align="center">EarthEnv</td>
 <td align="center">wild</td>
 </tr>
-<tr class="odd">
-<td align="center">17.</td>
+<tr class="even">
+<td align="center">20.</td>
 <td align="center">Percent Tree Cover</td>
 <td align="center">EarthEnv</td>
 <td align="center">wild</td>
 </tr>
-<tr class="even">
-<td align="center">18.</td>
-<td align="center">Soil probability of bedrock (R Horizon)</td>
+<tr class="odd">
+<td align="center">21.</td>
+<td align="center">Depth to Bedrock (R Horizon)</td>
 <td align="center">SoilGrids</td>
 <td align="center">wild</td>
 </tr>
-<tr class="odd">
-<td align="center">19.</td>
+<tr class="even">
+<td align="center">22.</td>
 <td align="center">Soil organic carbon (Tonnes / ha)</td>
 <td align="center">SoilGrids</td>
 <td align="center">wild</td>
 </tr>
-<tr class="even">
-<td align="center">20.</td>
-<td align="center">Surface (0-5 cm) soil pH in H<sub>2</sub>O</td>
-<td align="center">SoilGrids</td>
-<td align="center">both</td>
-</tr>
-<tr class="odd">
-<td align="center">21.</td>
-<td align="center">30-60 cm soil pH in H<sub>2</sub>O</td>
-<td align="center">SoilGrids</td>
-<td align="center">both</td>
-</tr>
-<tr class="even">
-<td align="center">22.</td>
-<td align="center">Surface (0-5 cm) soil % sand</td>
-<td align="center">SoilGrids</td>
-<td align="center">both</td>
-</tr>
 <tr class="odd">
 <td align="center">23.</td>
-<td align="center">5-15 cm soil % sand</td>
+<td align="center">Surface (0-5 cm) soil pH in H<sub>2</sub>O</td>
 <td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">24.</td>
-<td align="center">15-30 cm soil % sand</td>
+<td align="center">30-60 cm soil pH in H<sub>2</sub>O</td>
 <td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">25.</td>
-<td align="center">Surface (0-5 cm) soil % clay</td>
+<td align="center">Surface (0-5 cm) soil % sand</td>
 <td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">26.</td>
-<td align="center">5-15 cm soil % clay</td>
+<td align="center">5-15 cm soil % sand</td>
 <td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">27.</td>
-<td align="center">15-30 cm soil % clay</td>
+<td align="center">15-30 cm soil % sand</td>
 <td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">28.</td>
-<td align="center">Surface (0-5 cm) coarse fragments</td>
+<td align="center">Surface (0-5 cm) soil % clay</td>
 <td align="center">SoilGrids</td>
-<td align="center">wild</td>
+<td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">29.</td>
-<td align="center">Soil USDA class</td>
+<td align="center">5-15 cm soil % clay</td>
 <td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">30.</td>
-<td align="center">Elevation</td>
-<td align="center">Geomorpho90</td>
+<td align="center">15-30 cm soil % clay</td>
+<td align="center">SoilGrids</td>
 <td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">31.</td>
-<td align="center">Slope</td>
-<td align="center">Geomorpho90</td>
+<td align="center">Surface (0-5 cm) coarse fragments</td>
+<td align="center">SoilGrids</td>
 <td align="center">wild</td>
 </tr>
 <tr class="even">
 <td align="center">32.</td>
-<td align="center">Aspect</td>
-<td align="center">Geomorpho90</td>
-<td align="center">wild</td>
+<td align="center">Soil Salinity</td>
+<td align="center">SoilGrids</td>
+<td align="center">both</td>
 </tr>
 <tr class="odd">
 <td align="center">33.</td>
-<td align="center">Topographic Wetness Index</td>
-<td align="center">Geomorpho90</td>
-<td align="center">wild</td>
+<td align="center">Elevation</td>
+<td align="center">MERIT - DEM</td>
+<td align="center">both</td>
 </tr>
 <tr class="even">
 <td align="center">34.</td>
-<td align="center">Terrain ruggedness Index</td>
+<td align="center">Slope</td>
 <td align="center">Geomorpho90</td>
 <td align="center">wild</td>
 </tr>
 <tr class="odd">
 <td align="center">35.</td>
-<td align="center">Geomorphon</td>
-<td align="center">Geomoprho90</td>
+<td align="center">Aspect</td>
+<td align="center">Geomorpho90</td>
 <td align="center">wild</td>
 </tr>
 <tr class="even">
 <td align="center">36.</td>
-<td align="center">Estimated actual (w/-cloud) solar radiation</td>
-<td align="center">r.sun / Wilson et al. 2016</td>
-<td align="center">both</td>
+<td align="center">Topographic Position Index</td>
+<td align="center">Geomorpho90</td>
+<td align="center">wild</td>
 </tr>
 <tr class="odd">
 <td align="center">37.</td>
-<td align="center">Log-transformed distance to surface water</td>
-<td align="center">Global Surface Water Explorer</td>
-<td align="center">both</td>
-</tr>
-<tr class="even">
-<td align="center">38.</td>
 <td align="center">Human Influence Index</td>
-<td align="center">TIGRIS/ BTS NARN/ HDX/ NLCD/ NASA</td>
+<td align="center">NASA Earth Data</td>
 <td align="center">wild</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div id="workflow-for-presenceabsence-generation-and-cleaning" class="section level2">
-<h2>Workflow for Presence/Absence generation and cleaning</h2>
-<p>Some considerations for dealing with temporal mismatch between
-environmental variables and species occurrence records.</p>
-<p>In order to reduce the number of records which have questionable
-geographic integrity, no records before 1950 were acquired.</p>
-<div id="thinning-historic-records" class="section level3">
-<h3>Thinning Historic Records</h3>
-<ol style="list-style-type: lower-alpha">
-<li>remove records with noted coordinate uncertainty of &gt; 270m<br />
-</li>
-<li>remove records on county centroids<br />
-</li>
-<li>if multiple records exist per raster cell, reduce to that with the
-lowest coordinate uncertainty, or the most recent</li>
-</ol>
-</div>
-<div id="processing-post-burn-records" class="section level3">
-<h3>Processing Post Burn Records</h3>
-<ol style="list-style-type: lower-alpha">
-<li>flag all historic records which are located within a burn scar,
-which occurred after the date of observation.<br />
-</li>
-<li>for that species, use plot based occurrence data, and years since
-burn interacting with cover of invasive annual grasses to model
-probability of an extant population at the site. <span class="math inline">\(\text{occurrence ~ year since fire * modelled
-invasive annual grass cover}\)</span><br />
-</li>
-<li>randomly sample flagged records with probabilities defined in
-<em>b</em></li>
-</ol>
-</div>
-<div id="processing-records-in-sites-invaded-by-invasive-annual-grasses" class="section level3">
-<h3>Processing Records in Sites Invaded by Invasive Annual Grasses</h3>
-<ol style="list-style-type: lower-alpha">
-<li>flag all historic records which are located within an area with
-greater &gt;10% invasive annual grass cover<br />
-</li>
-<li>for that species, use plot based occurrence data, and cover of
-invasive annual grasses to model probability of an extant population at
-the site. <span class="math inline">\(\text{occurrence ~ modelled
-invasive annual grass cover}\)</span><br />
-</li>
-<li>randomly sample flagged records with probabilities defined in
-<em>b</em></li>
-</ol>
-</div>
-</div>
-<div id="better-matching-the-fundamental-niche-to-population-occurrence-via-cost-surfaces" class="section level2">
-<h2>Better matching the Fundamental Niche to Population Occurrence via
-Cost Surfaces</h2>
-<p>Cost surfaces reflect historic connectivity of locations prior to
-European settlement.</p>
-<table>
-<colgroup>
-<col width="6%" />
-<col width="48%" />
-<col width="32%" />
-<col width="12%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">Layer</th>
-<th align="center">Description</th>
-<th align="center">Source</th>
-<th align="center">Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">1.</td>
-<td align="center">Terrain Ruggedness Index</td>
-<td align="center">Geomorpho90</td>
-<td align="center">negative</td>
-</tr>
-<tr class="even">
-<td align="center">2.</td>
-<td align="center">Log-transformed distance to surface water</td>
-<td align="center">Global Surface Water Explorer</td>
-<td align="center">negative</td>
-</tr>
-<tr class="odd">
-<td align="center">3.</td>
-<td align="center">Log-transformed distance to perennial streams</td>
-<td align="center">National Hydrography Dataset</td>
-<td align="center">negative</td>
-</tr>
-<tr class="even">
-<td align="center">4.</td>
-<td align="center">Percent Barren</td>
-<td align="center">EarthEnv</td>
-<td align="center">negative</td>
-</tr>
-<tr class="odd">
-<td align="center">5.</td>
-<td align="center">Max Temperature of Warmest Month (BIO5)</td>
-<td align="center">PRISM / CLIMATENA / DISMO</td>
-<td align="center">negative</td>
-</tr>
-<tr class="even">
-<td align="center">6.</td>
-<td align="center">Wind Direction*</td>
-<td align="center">rWind/GFS</td>
-<td align="center">anisotropic</td>
-</tr>
-<tr class="odd">
-<td align="center">7.</td>
-<td align="center">Wind Speed*</td>
-<td align="center">rWind/GFS</td>
-<td align="center">positive</td>
-</tr>
-</tbody>
-</table>
-<p>Variables indicated by a ’*’ exist only for taxa which have evident
-adaptions to wind dispersal, notably those of the Asteraceae.</p>
+<p>data sources (<span class="citation">@karger2017climatologies</span>,
+<span class="citation">@hengl2017soilgrids250m</span>, <span class="citation">@ivushkin2019global</span>, <span class="citation">@tuanmu2014global</span>, <span class="citation">@yamazaki2017merit</span>, <span class="citation">@amatulli2020geomorpho90m</span>, <span class="citation">@sanderson2002human</span>)</p>
 </div>
 <div id="correlation-between-patch-habitat-suitable-and-abundance" class="section level2">
 <h2>Correlation between patch habitat suitable and abundance</h2>
@@ -749,9 +807,12 @@ treated as a fixed effect.</p>
 <p>% Cover ~ PS * species<br />
 % Cover ~ sqrt(PS) * species<br />
 % Cover ~ log(PS) * species</p>
-% Cover ~ PS + species<br />
+<p>% Cover ~ PS + species<br />
 % Cover ~ sqrt(PS) + species<br />
-% Cover ~ log(PS) + species
+% Cover ~ log(PS) + species</p>
+<p>% Cover ~ PS<br />
+% Cover ~ sqrt(PS)<br />
+% Cover ~ log(PS)</p>
 </center>
 <p>The model with the highest correlation coefficient to the occurrence
 data would be the final model indicating the strength of correlation
@@ -759,6 +820,20 @@ between the SDM’s and in field measured occurrence.</p>
 <p>In instances where multiple field observations exist per patch,
 patches will be decomposed so that the cells closest to the plots become
 the unit at which PS is calculated.</p>
+<p>To determine whether habitat suitability could predict species
+abundance mean weighted patch suitability <span class="math inline">\(PS
+= \sum_{\text{i = 1}}^{n} {x_{i}}\)</span> was regressed against
+abundance using GLM. All AIM plots were queried for all occasions which
+a target species was observed via either the Species Richness, or
+Line-Point Intercept method (150 points along three equiangular
+transects over a 25m radius outside a 5m radius buffer zone). Occurrence
+of a species only along SR was considered 1% cover, while the canopy
+cover from LPI was used.</p>
+<p>To determine whether connectivity could predict the presence of a
+population in a patch, connectivity was calculated between every patch,
+and jacknife-resampled for logistic regression where connectivity scaled
+from 0 to 100 served as a the independent variable.</p>
+</div>
 </div>
 
 

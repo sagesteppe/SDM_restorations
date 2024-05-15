@@ -762,7 +762,7 @@ neigh_type <- function(x){
     dplyr::mutate(Presence = 'Predicted') |> 
     dplyr::filter(lyr_1 %in% pm$id) # filter for core area indexes
   
-  pred1 <- pred[ lengths(sf::st_covers(pred, occ)) == 0, ] # make this dataset distinct. 
+  pred1 <- pred[ lengths(sf::st_covers(pred, occ)) == 0, ] # make this data set distinct. 
   pred2 <- sf::st_buffer(pred1, dist = 80) # for up north. 
   pred2 <- sf::st_difference(pred2)
   

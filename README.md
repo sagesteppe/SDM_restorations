@@ -56,24 +56,34 @@ Models were then predicted onto gridded surfaces which exceeded the species rang
 
 ## Patch identification 
 To identify putative metapopulations raster cells predicted as having less than 0.8 probability of suitable habitat were masked as NA's, and then areas which were crossed by streams with Strahler orders of three of more (DATASET), and the divides of HU10 watersheds (DATASET) were 'burnt' away from the raster. 
-The resulting rasters were aggregated by a factor of 2 to 5, depending of their sizes (< 300 MiB 2, < 500 3, < 700 4, > 700 5) to accomodate, a rooks case search using terra in a practical time period. 
+The resulting rasters were aggregated by a factor of 2 to 5, depending of their sizes (< 300 MiB 2, < 500 3, < 700 4, > 700 5) to accommodate, a rooks case search using terra in a practical time period. 
 Resultant patches < 5 acres were then discarded, and the rasters was resampled to it's input resolution.  
 
 Putative populations were identified using the patches generated above. These patches followed the same processing, except that HU12 watersheds were used to delineate populations. 
 
 Because the > 0.8 threshold used above did not capture all colonized patches, all patches with predicted suitability scores of >0.55 which contained species observations were then identified using Terra's patches to create a data set of known populations. 
 
-Multiple landscape metrics were calculated the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index (landscapemetrics).
-
 ## Predicting Species Occurrence in Patches
 
-All patches identified above were used to identify patches nearest neighbors. The 5 nearest neighbors of each patch were detected using @SPDEP. 
+All patches identified above were used to identify patches within 5 contiguous neighbors, or 5 kilometers, of a patch known to be occupied.
+Occupied patches were determined using both the training and test occurrences data set used to generate the SDMs. 
+To identify each patch within 5 orders of contiguous neighbors `nblag`, and to determine all patches within 5k of a populated patch `dnearneigh`, were used (@bivand2018spdep). 
+For each of these non-occupied patches the number of occupied patches at different lags were counted.  
+
+Each non-occupied patch was assigned an arbitrary rank based upon whether they were contiguous with an occupied patch, and if contiguous than their lag number to the nearest occupied patch, and the number of occupied patches connected. 
+The arbitrarily assigned numbers increase from '1', for an occupied patch, to '7' for a patch which has fewer than 3 second-order contiguous neighbors to an occupied patch(es). 
+
+line 804 in functions  
+
+## Patch Metrics 
+
+Multiple landscape metrics were calculated the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index (@hesselbarth2019lsm).
+
 
 ## Variables and Sources for Environmental Niche Models
 
 Two major models are created, one which focuses on identifying areas of fundamental environmental niches in the wild, and a second which focuses on identifying farms which the species has considerable niche overlap with. 
 The full 'wild' models feature up to 33 variables, while the 'farm' models features ca. 26 variables. Both endeavors run step wise. 
-
 
 | Layer |                       Description                       |              Source                   |     Model    |      
 | :---: | :-----------------------------------------------------: | :-----------------------------------: | :----------: | 
@@ -117,6 +127,26 @@ The full 'wild' models feature up to 33 variables, while the 'farm' models featu
 
 
 data sources (@karger2017climatologies, @hengl2017soilgrids250m, @ivushkin2019global,  @tuanmu2014global, @yamazaki2017merit, @amatulli2020geomorpho90m, @sanderson2002human)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Correlation between patch habitat suitable and abundance

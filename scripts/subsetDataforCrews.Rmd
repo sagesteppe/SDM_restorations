@@ -188,8 +188,7 @@ p <- '/media/steppe/hdd/EmpiricalSeedZones/data/geodata/rasters'
 f <- file.path(p, list.files(p, pattern = 'tif$'))
 eSTZs <- rast(f)
 names(eSTZs) <- gsub('-.*tif$', '', basename(f))
-eSTZs <- project(eSTZs, 'epsg:5070') 
-eSTZs <- resample(eSTZs, example_rast)
+eSTZs <- resample(eSTZs, example_rast, method = 'near')
 rm(f, p)
 
 lapply( 
@@ -207,8 +206,6 @@ lapply(
   eSTZs = eSTZs, 
   seed_transfer = STZ 
   )
-
-plot(eSTZs)
 
 ```
 
