@@ -177,18 +177,24 @@ t <- filter(occurrences, taxon == 'Abronia villosa') |>
 ```
 
 
-```{r}
+```{r, eval = F}
 
 p <- '/media/steppe/hdd/SDM_restorations/results/suitability_maps'
 example_rast <- rast(file.path(p,'Achnatherum_hymenoides1k-2024-01-10_09:42:26.tif') )
 prov_stz <- project(prov_stz, 'epsg:5070') 
 prov_stz <- resample(prov_stz, example_rast) 
 
+crs(example_rast) == crs(eSTZs)
+
 p <- '/media/steppe/hdd/EmpiricalSeedZones/data/geodata/rasters'
 f <- file.path(p, list.files(p, pattern = 'tif$'))
-eSTZs <- rast(f)
-names(eSTZs) <- gsub('-.*tif$', '', basename(f))
-eSTZs <- resample(eSTZs, example_rast, method = 'near')
+eSTZs <- rast(f[1])
+plot(eSTZs)
+plot(example_rast)
+names(eSTZs) <- gsub('-.*tif$', '', basename(f[1]))
+
+eSTZs1 <- resample(eSTZs, example_rast, method = 'near', threads = 16)
+plot(eSTZs1)
 rm(f, p)
 
 lapply( 
@@ -212,7 +218,7 @@ lapply(
 
 ```{r generate projects for crews, eval= F}
 
-lapply(teams_list[13], project_maker, 
+lapply(teams_list[c(7,13)], project_maker, 
        admu = admin_boundaries, 
        target_species = spp_needed, 
        blm_surf = blm_surf, 
@@ -223,7 +229,7 @@ lapply(teams_list[13], project_maker,
        occurrences = occurrences, 
        roads = roads, seed_transfer = STZ) 
 
-lapply(seniors_list[3],  project_maker,
+lapply(seniors_list[3],  project_maker_original,
        admu = admin_boundaries, intype = 'senior',
        target_species = spp_needed, 
        blm_surf = blm_surf, 
@@ -244,7 +250,7 @@ spp_needed <- rename(spp_needed, taxon = binomial)
 
 p2ts <- '/media/steppe/hdd/SeedPhenology/data/processed/timestamps'
 lapply(
-  X = teams_list[13], # 5 throws an error
+  X = teams_list[c(7,13)], # 5 throws an error
   FUN = phen_tabulator,
   path = p2ts, 
   admu = admin_boundaries, 

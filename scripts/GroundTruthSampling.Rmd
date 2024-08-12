@@ -7,7 +7,6 @@ output: html_document
 
 To determine whether SDM's and hydrological basins can help find native plant populations field tests were conducted on the Northern Colorado Plateau. 
 
-
 ```{r}
 library(sf)
 library(terra)
