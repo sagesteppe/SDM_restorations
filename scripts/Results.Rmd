@@ -76,35 +76,110 @@ extractR <- function(x){
   
   x <- sf::st_join(x, patch_ranks)
   suitability <- terra::extract(suitability, x)$predicted_suitability
-  
-  wide <- dplyr::mutate(
-    x, 
-    suitability = suitability, 
-    .before = geometry) |>
-    select(-f_suitability, -f_rankedp)
     
   # now we can join the class and patch metrics to each population 
   # which they were calculated for. 
-  IDs <- tidyr::drop_na(wide, PchIDComb) |>
+  IDs <- tidyr::drop_na(x, PchIDComb) |>
     dplyr::pull(PchIDComb)
+  
   patch <- read.csv(sf::st_drop_geometry(x$f_patchMetrics[1]) ) |>
     dplyr::filter(id %in% IDs) |>
-   # dplyr::rename(patch_metric = metric, patch_value = value) |>
     tidyr::pivot_wider(values_from = value, names_from = metric)
   class <- read.csv(sf::st_drop_geometry(x$f_classMetrics[1])) |>
     tidyr::pivot_wider(names_from = metric, values_from = value)
   
-  ob <- cbind(patch, class)
+  if(nrow(patch) == 0){
+    patch <- data.frame(id = NA, cai = NA, enn = NA, frac = NA, para = NA )
+  }
+  
+  lsm <- cbind(patch, class) |>
+    dplyr::mutate(id = as.character(id))
 
-  return(ob)
+  wide <- dplyr::mutate(
+    x, 
+    suitability = suitability, 
+    .before = geometry) |>
+    dplyr::select(-f_suitability, -f_rankedp, -f_patchMetrics, -f_classMetrics) |>
+    dplyr::left_join(lsm, by = c('PchIDComb' = 'id' ))
+  
+  return(wide)
   
 } 
 
-scouting <- lapply(scout_split[1], extractR)
+scouting <- lapply(scout_split, extractR)
 scouting <- dplyr::bind_rows(scouting)
 
-scouting[[1]] |> 
-    tidyr::pivot_wider(names_from = metric, values_from = value)
+```
+
+
+```{r determine a null model for each species, eval = F}
+#' return a large sample from a raster to plot the amount of suitable habitat 
+#' 
+#' sample many rasters to make a plot showing the cumulative amount of suitable habitat
+#' @param x a data frame split by species including columns with paths to files. 
+prcntSuitable <- function(x){
+  
+  r <- terra::rast(sf::st_drop_geometry(x$f_suitability[1]))
+  Suitability = spatSample(r, size = 50000, na.rm = TRUE)
+  q <- quantile(Suitability$predicted_suitability, probs = seq(0.01, 1, 0.01))
+  
+  sample <- 
+    data.frame(
+      Species = sf::st_drop_geometry(x$taxa[1]), 
+      Percent = 1:100, 
+      Records = as.numeric(q)
+    )
+  
+  return(sample)
+  
+}
+
+suitability_amounts <- lapply(scout_split, prcntSuitable)
+saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.rds')
+```
+
+
+```{r}
+
+suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds')
+suitability_amounts <- bind_rows(suitability_amounts)
+
+suitability_means <- suitability_amounts |>
+  group_by(Percent) |>
+  summarise(Mean = mean(Records))
+
+par(pty="s")
+plot(suitability_means$Mean, suitability_means$Percent, type = "l", col = "red", 
+     ylab = "% of all Raster Cells", xlab = "Cumulative Sum of Records at each Predicted Suitability")
+
+
+ggplot(suitability_amounts, aes(Percent, Records, color = Species, group = Species)) +
+  geom_line() +
+  scale_color_grey(guide = 'none') + 
+  geom_line(data = suitability_means, 
+            aes(Percent, Mean), inherit.aes = F, color = '#093824', lwd = 1) + 
+  labs(
+    y = "% of all Raster Cells",
+    x = 'Cumulative sum of records at each quantile of Predicted Suitability') + 
+  theme_classic() +
+  theme(aspect.ratio = 1/1)
+  
+
+
+'#292E1E'
+'#1F271B'
+'#003E1F'
+'#003E1F'
+'#093824'
+'#04471C'
+'#1F2F16'
+'#137547'
+'#2A9134'
+
+'#254441'
+'#395B50'
+'#73BA9B'
+'#519872'
 
 rm(files)
 ```
@@ -130,6 +205,8 @@ abline(v = quants[[2]], lwd = 2)
 abline(v = quants[[3]], lwd = 2)
 
 ```
+
+
 ```{r}
 quants
 ```
@@ -180,6 +257,12 @@ anova(pois.mod, pois.mod_int)
 
 4) What is the relationship between patch metrics and population size? 
 ```{r}
+
+scout_long <- pivot_longer(scouting, cai:enn_mn)
+
+ggplot(scout_long, aes(y = POPULATION_SIZE, x = value)) +
+  geom_point() +
+  facet_grid(. ~ name) 
 
 ```
 
