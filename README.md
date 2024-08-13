@@ -73,14 +73,14 @@ For each of these non-occupied patches the number of occupied patches at differe
 Each non-occupied patch was assigned an arbitrary rank based upon whether they were contiguous with an occupied patch, and if contiguous than their lag number to the nearest occupied patch, and the number of occupied patches connected (TABLE XX). 
 The arbitrarily assigned numbers increase from '1', for an occupied patch, to '7' for a patch which has fewer than 3 second-order contiguous neighbors to an occupied patch(es). 
 
-|  Connection   |  No. Connections   |   Rank   |
-| :-----------: | :----------------: | :------: |
-|     1^st^     |        >= 2        |    2     |
-|     1^st^     |         1          |    3     |
-|     2^nd^     |        >= 3        |    4     |
-|     2^nd^     |        <= 2        |    5     |
-|     3^rd^     |        >= 4        |    6     |
-|     3^rd^     |        <= 3        |    7     |
+|  Connection   |  No. Connections   |   Rank   | 
+| :-----------: | :----------------: | :------: | 
+|     1^st^     |        >= 2        |    2     | 
+|     1^st^     |         1          |    3     | 
+|     2^nd^     |        >= 3        |    4     | 
+|     2^nd^     |        <= 2        |    5     | 
+|     3^rd^     |        >= 4        |    6     | 
+|     3^rd^     |        <= 3        |    7     | 
 
 Patches which have no contiguous neighbors, but which have neighbors within 5km were also assigned rank values based in this system (TABLE XX). 
 
@@ -91,8 +91,7 @@ Patches which have no contiguous neighbors, but which have neighbors within 5km 
 
 ## Patch Metrics 
 
-Multiple landscape metrics were calculated the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index (@hesselbarth2019lsm).
-
+Multiple landscape metrics were calculated; the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index (@hesselbarth2019lsm).
 
 ## Appendix 2
 
