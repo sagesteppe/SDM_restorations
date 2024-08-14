@@ -58,7 +58,12 @@ rm(f, f_rp, f_pm)
 ```{r Extract Values to Results}
 
 scouting <- left_join(scouting, files, by = c('taxa' = 'species')) |>
-  mutate(Presence = if_else(POPULATION_SIZE > 0, 1, 0), .after = POPULATION_SIZE)
+  mutate(Presence = if_else(POPULATION_SIZE > 0, 1, 0), .after = POPULATION_SIZE) |>
+  
+  # penstemon palmeri are all seeded outside their native range and 'helped' along
+  # during establishment we will remove them from the analysis
+  
+  filter(taxa != 'Penstemon_palmeri')
 
 scout_split <- split(scouting, scouting$taxa)
 # we are going to discard species with fewer than 3 observations. 
@@ -106,8 +111,8 @@ extractR <- function(x){
   
 } 
 
-scouting <- lapply(scout_split, extractR)
-scouting <- dplyr::bind_rows(scouting)
+scouting <- lapply(scout_split, extractR) 
+scouting <- dplyr::bind_rows(scouting) 
 
 ```
 
@@ -143,47 +148,67 @@ saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.r
 
 suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds')
 suitability_amounts <- bind_rows(suitability_amounts)
+remotes::install_github("bcgov/elucidate")
 
-suitability_means <- suitability_amounts |>
-  group_by(Percent) |>
-  summarise(Mean = mean(Records))
+y1 <- rnorm(1:10, 100, 10)
+elucidate::mean_ci(y1)
 
-par(pty="s")
-plot(suitability_means$Mean, suitability_means$Percent, type = "l", col = "red", 
-     ylab = "% of all Raster Cells", xlab = "Cumulative Sum of Records at each Predicted Suitability")
+recs <- filter(suitability_amounts, Percent == 50) |>
+  pull(Records)
 
+as.numeric( elucidate::mean_ci(recs, replicates = 1000, ci_level = 0.99) )
 
-ggplot(suitability_amounts, aes(Percent, Records, color = Species, group = Species)) +
-  geom_line() +
+prctn <- split(suitability_amounts, f = suitability_amounts$Percent)
+suitability_means <- lapply(prctn, \(x)
+  data.frame(as.list(
+    elucidate::mean_ci(x$Records, replicates = 1000, ci_level = 0.99))
+  )
+) |>
+  bind_rows() |>
+  mutate(Percent = 1:100)
+
+fp <- scouting[scouting$futurePotential=='Yes',] 
+fp <- arrange(fp, suitability) |>
+  st_drop_geometry() |>
+  select(suitability) |>
+  mutate(obs = 1:n() / n())
+
+linecols <- c(
+  'Species' = 'grey50',
+  "Mean" = "#093824", 
+  "95% CI" = "#73BA9B",
+  "Populations" = "#FF2C55"
+  )
+
+ggplot(suitability_amounts, aes(x = Percent, y = Records, color = Species, group = Species)) +
+  geom_line(lty = 1) +
   scale_color_grey(guide = 'none') + 
+  geom_ribbon(data = suitability_means, aes(ymin = lower, ymax = upper, x = Percent),
+              fill = '#73BA9B', inherit.aes = F, alpha = 0.5) + 
   geom_line(data = suitability_means, 
-            aes(Percent, Mean), inherit.aes = F, color = '#093824', lwd = 1) + 
-  labs(
-    y = "% of all Raster Cells",
-    x = 'Cumulative sum of records at each quantile of Predicted Suitability') + 
-  theme_classic() +
-  theme(aspect.ratio = 1/1)
+            aes(x = Percent, y =  mean, color = 'a'), color = '#093824', inherit.aes = F, lwd = 1) + 
+  geom_line(data = fp, aes(x = suitability*100, y = obs), color = '#FF2C55', inherit.aes = F,  lwd = 1) 
   
+  labs(
+    title = 'Populations are found in\nareas with higher suitability',
+    x = "Raster Cells (cumulative)",
+    y = 'Predicted Suitability (cumulative)') + 
+  theme_classic() +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2), sec.axis = sec_axis(~.*100,
+    name = 'Populations Found (cumulative)',
+    breaks = seq(0, 100, by = 20), 
+    labels = \(x) paste0(x, "%"))
+  )  +
+  
+  scale_x_continuous(breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%")) + 
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    aspect.ratio = 1/1)
 
+rm(linecols)
 
-'#292E1E'
-'#1F271B'
-'#003E1F'
-'#003E1F'
-'#093824'
-'#04471C'
-'#1F2F16'
-'#137547'
-'#2A9134'
-
-'#254441'
-'#395B50'
-'#73BA9B'
-'#519872'
-
-rm(files)
+hypothetical_curves
 ```
-
 
 ## Determine which points were used in training the models
 
@@ -196,23 +221,24 @@ These points will need to be removed because they are already known to be presen
 
 ```{r}
 
-fp <- scout1[scouting$futurePotential=='Yes',] 
-
+fp <- scouting[scouting$futurePotential=='Yes',] 
 quants <- quantile(fp$suitability, na.rm = TRUE, probs = c(0.25, 0.5, 0.75))
+
 hist(fp$suitability)
 abline(v = quants[[1]], lwd = 2)
 abline(v = quants[[2]], lwd = 2)
-abline(v = quants[[3]], lwd = 2)
 
 ```
 
 
 ```{r}
-quants
+
 ```
 
 2) What is the relationship between Patch Rank and presence of species? 
 
+
+- can we test moving the distance patches into their own categories ??? 
 ```{r}
 hist(fp$Rank)
 ```
