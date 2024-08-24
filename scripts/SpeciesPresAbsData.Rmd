@@ -1,0 +1,149 @@
+---
+title: "Species Presence and Census Data" 
+output: pdf_document
+geometry: margin=0.1in
+---
+\vspace{0.25cm}
+\begin{Form}
+    \TextField{Crew ID:}
+    \TextField{Latitude:}
+    \TextField{Longitude:}
+\end{Form}
+\vspace{0.25cm}
+
+\begin{Form}
+  \CheckBox[name=Aristida purpurea]{Aristida purpurea} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Asclepias cryptoceras]{Asclepias cryptoceras} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Astragalus lonchocarpus]{Astragalus lonchocarpus} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Bouteloua gracilis]{Bouteloua gracilis} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Cleome lutea]{Cleome lutea} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Cleome serrulata]{Cleome serrulata} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Cymopterus bulbosus]{Cymopterus bulbosus} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Cymopterus purpureus]{Cymopterus purpureus} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Elymus elymoides]{Elymus elymoides} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Eriogonum fusiforme]{Eriogonum fusiforme} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Eriogonum shockleyi]{Eriogonum shockleyi} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Helianthus annuus]{Helianthus annuus} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Hesperostipa comata]{Hesperostipa comata} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Heterotheca villosa]{Heterotheca villosa} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Krascheninnikovia lanata]{Krascheninnikovia lanata} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Lomatium dissectum]{Lomatium dissectum} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Lomatium grayi]{Lomatium grayi} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Lomatium dissectum]{Lomatium dissectum} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Lomatium triternatum]{Lomatium triternatum} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Packera multilobata]{Packera multilobata} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Pascopyrum smithii]{Pascopyrum smithii} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Phacelia crenulata]{Phacelia crenulata} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Pleuraphis jamesii]{Pleuraphis jamesii} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Sphaeralcea coccinea]{Sphaeralcea coccinea} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Sporobolus airoides]{Sporobolus airoides} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Stanleya pinnata]{Stanleya pinnata} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+\begin{Form}
+  \CheckBox[name=Vulpia octoflora]{Vulpia octoflora} \hfill 
+  \TextField{Census:}
+\end{Form}
+
+*Instructions* Checks only need to be filled out for species which are present at the site, you also only need to make census estimates when the species is present. Always fill out the Crew and geographic information. When thinking about absense consider an area surrounding you by 50m, when census, estimate the size of the entire population (spreading beyond this range), just as you have been for SOS. 

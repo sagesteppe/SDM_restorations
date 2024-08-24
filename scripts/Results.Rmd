@@ -117,6 +117,19 @@ scouting <- dplyr::bind_rows(scouting)
 ```
 
 
+```{r write out some species for further data acquisition, eval = F}
+sort( gsub('_', ' ', names(scout_split))) # these will be the species we make notes on.
+
+data.frame(
+  Species = sort( gsub('_', ' ', names(scout_split))), 
+  'Pres-Abs' = '',
+  Census = ''
+)|>
+  write_csv('../data/SOS/Absence_sampling.csv')
+
+```
+
+
 ```{r determine a null model for each species, eval = F}
 #' return a large sample from a raster to plot the amount of suitable habitat 
 #' 
