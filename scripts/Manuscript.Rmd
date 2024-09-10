@@ -1,0 +1,138 @@
+--- 
+title: 'Using Species Distribution Models to inform native seed collection efforts' 
+author:  |
+    |  $^1$Chicago Botanic Garden, 1000 Lake Cook Road, Glencoe, Illinois 60022, USA  
+    | Reed Clark Benkendorf$^1$^[Author for Correspondence: rbenkendorf@chicagobotanic.org]
+abstract: |
+  \noindent
+  words          
+keywords: |
+  species distribution models, native seed development  
+output:
+  pdf_document: default
+  toc: no
+  word_document: default
+csl: "../citations/restoration-ecology.csl"
+bibliography: ../citations/bibliography/citations.bib
+link-citations: yes
+fig_caption: yes
+always_allow_html: yes
+header-includes:
+- \usepackage{endfloat}
+- \usepackage{setspace}\doublespacing
+- \usepackage{lineno}
+- \linenumbers
+- \usepackage[width=\textwidth]{caption}
+- \usepackage{wrapfig}
+- \usepackage[export]{adjustbox}
+- \usepackage{rotating} 
+--- 
+
+##  IMPLICATIONS FOR PRACTICE
+
+up to six of these. let's shoot 3 with 2 sentence max per. 
+
+```{r echo = F}
+knitr::opts_chunk$set(echo=F, warning = F, message = F)
+```
+
+# Introduction 
+
+A primary challenge in restoring Earths terrestrial ecosystems is the lack of available plant germplasm (@national2023assessment, @merritt2011restoration). 
+Given the scale of our restoration needs, in most scenarios, the only sustainable source of seed is from grow-outs of wild harvested seed in agricultural settings (@pedrini2020collection, @broadhurst2015seeding,  @national2023assessment).
+Enormous efforts are now underway to increase the number of species, the number of populations within these species, and the genetic diversity of the seed available for restoration @national2023assessment. 
+However, numerous difficulties exist in both the wild harvest seed and it's increase which are limiting our ability to develop adequate amounts of germplasm.   
+
+While most species desired in restorations have historically had relatively large geographic ranges, numbers of populations, and number of individuals per populations, the development of native germplasm remains behind targets (@national2023assessment). 
+We posit that in part this is due to the difficulty of finding populations with the appropriate number of individuals, which are experiencing climatic conditions conducive to producing enough viable seed to being agricultural increase, a complications borne of widespread habitat degradation and unnatural wildfires *(@abatzoglou2021projected)*. 
+Tools which are capable of predicting a species geographic range, the presence and size of populations across the range and in seed collection target units (such as empirical or provisional seed transfer zones or ecoregions), such as Species Distribution Models offer promise to increase the rate at which native germplasm can be developed.
+
+However, while SDM's generate hypothesis of whether areas have environmental conditions similar to the observed environmental niche of the species they do not consider the probabilities of colonization, nor the populations census sizes. 
+A possible tool to associate a probability of occurrence of a species in a suitable habitat patch, is connectivity analysis. 
+Utilizing the predicted unsuitability of habitat, with extreme barriers to dispersal, to create cost-resistance surfaces between patches with known populations and predicted populations allows for simulating the probability of occurrence. 
+While previous correlations between habitat suitability and population size have often been low, we posit that patch level parameters offer a more useful prediction of population size (@weber2017there, @waldock2022quantitative). 
+Patch metrics will more appropriately reflect parameters of a potential population, e.g. geographic extent, which we posit is a more informative proxy of population size than environmental niche correlation.  
+Utilizing this approach will allow field crews to associate probabilities with previously unground-truthed patches. 
+
+Here we showcase the utility of SDM's to predict suitable habitat for common species in natural settings and use those data to test two specific hypotheses. 
+Firstly that SDM's can identify more populations than exist in the occurrence based records they were derived from. 
+And secondly patch metrics derived from SDM's correlate with observed population census size. 
+In order to determine whether SDM's are useful in detecting new populations, over ~10~ field crews were given 50 putative populations to survey for the presence and absence of the modeled species. 
+To determine if patch metrics can be used to predict population census sizes, these crews noted whether the populations was large enough to support 
+
+# 2 MATERIALS AND METHODS  
+## 2.1 Study system  
+
+The 353 modelled species were selected by land managers in arid & semi-arid areas Western North America and are species they already or immediately intend to use in restoration. 
+The spatial domain of modelling broadly encompasses the Western United States being bounded by the Pacific Ocean, the 50th parallel at north, -100 degrees at East and Mexico to the south. 
+This domain has tremendous variation in amounts of elevation, temperature, and precipitation. 
+
+## Species Occurrence Records  
+Species presence records were collected from Natural History Museums, citizen science initiatives, and standardized ecological monitoring programmes using R (@chamberlain2024rgbif, @maitner2023bien, @michonneau2023idigbio). 
+These records were filtered to only those collected after 1950, with coordinate uncertainty less than 250 meters, and only the most recent record per 90m cell was retained. 
+All of these records were then manually reviewed by species, where records with more 2 or more variables in the 2.5% quantiles of several environmental variables (bio1, 4, 10, 12, & 19; see TABLE X) and distance were flagged.
+During subjective manual review all digitized herbarium specimens which were suspect were reviewed, while other records were dropped based on the analysts review of other occurrence records.   
+
+Species absences were generated using three processes, and we sought to have a 1:1 ratio of presences to absences. 
+True absences were acquired from a massive ecological monitoring program Assess, Inventory, and Monitor (AIM), these absences accounted for a percent equivalent to land managed by BLM within the species range (e.g. if 20% of land ownership across a species range was BLM, than the number of presences * 0.2 defined the number of these absences). 
+Likely absences, representing 15% of records, were generated outside the known range of the species, but bounded to be within 50 miles of the extent extent of occurrences. 
+Pseudo-absences (PA) were randomly selected from areas in, or within XX km, of the species range but greater than 10km from an occurrence, these records accounted for ((1 - (% BLM Land + 15 % LA records)) * 1.25).
+Because most of these species are highly abundant in order to reduce the probability that a PA was drawn within a species the environmental niche linear discriminant analysis (LDA) was used. The LDA utilized the presences, true absences and likely absences as the classes and several environmental variables (@venables2002mass), identified by vifstep with theta = 10 as displaying at most moderate collinearity, as independent variables (@naimi2014usdm). 
+As many records, classified by the LDA as originating from the Presence data set, from the pseudo-absences could be removed as to achieve a class balance between presences and absences. 
+
+## Environmental Variables  
+Up to 44 variables were used in generating the species distribution models (table X, @karger2017climatologies, @hengl2017soilgrids250m, @ivushkin2019global,  @tuanmu2014global, @yamazaki2017merit, @amatulli2020geomorpho90m, @sanderson2002human). 
+These variables were selected based on authors previous work, and represent variables commonly associated with the empirical distributions of taxa in arid and semi-arid regions. 
+All variables were downloaded from source and re-sampled to 90m resolution using terra (@hijman2024terra). 
+
+## Species Distribution Modelling  
+Random Forests models were generated for each species following several steps to reduce the number of features.
+While superfluous features generally do not notably decrease the performance of random forests, they increase the amount of time required to predict models onto gridded surfaces. 
+The Boruta algorithm was used on the full stack of 44 independent variables to remove un-informative variables @kursa2010boruta), and the variable importance factor (VIF) scores were then used to subset the most informative features in several auto-correlated pairs, reducing the independent variables to at most 33.  
+Recursive Feature Elimination (rfe) was then used to identify the fewest number of independent variables which could either increase model performance (measured using accuracy), or only decrease it by 1.5% relative to the full set of variables, these variables were subset and used as features for random forest modelling with all default values except for optimized mtrys (@kuhn2008caret, @liaw2002randomForest). 
+Models were then predicted onto gridded surfaces which exceeded the species range by 50 miles (@hijman2024terra). 
+
+## Patch identification 
+To identify putative metapopulations raster cells predicted as having less than 0.8 probability of suitable habitat were masked as NA's, and then areas which were crossed by streams with Strahler orders of three of more (@usgs2004nhd), and the divides of HU10 watersheds (@usgs2023wbd) were 'burnt' away from the raster. 
+The resulting rasters were aggregated by a factor of 2 to 5, depending of their sizes (< 300 MiB 2, < 500 MiB 3, < 700 MiB 4, > 700 MiB 5) to accommodate, a rooks case search using terra in a practical time period. 
+Resultant patches < 5 acres were then discarded, and the rasters was resampled to it's input resolution.  
+
+Putative populations were identified using the patches generated above. These patches followed the same processing, except that HU12 watersheds were used to delineate populations. 
+
+Because the > 0.8 threshold used above did not capture all colonized patches, all patches with predicted suitability scores of >0.55 which contained species observations were then identified using Terra's patches to create a data set of known populations. 
+
+## Predicting Species Occurrence in Patches
+
+All patches identified above were used to identify patches within 5 contiguous neighbors, or 5 kilometers, of a patch known to be occupied.
+Occupied patches were determined using both the training and test occurrences data set used to generate the SDMs. 
+To identify each patch within 5 orders of contiguous neighbors `nblag`, and to determine all patches within 5k of a populated patch `dnearneigh`, were used (@bivand2018spdep). 
+For each of these non-occupied patches the number of occupied patches at different lags were counted.  
+
+Each non-occupied patch was assigned an arbitrary rank based upon whether they were contiguous with an occupied patch, and if contiguous than their lag number to the nearest occupied patch, and the number of occupied patches connected (TABLE XX). 
+The arbitrarily assigned numbers increase from '1', for an occupied patch, to '7' for a patch which has fewer than 3 second-order contiguous neighbors to an occupied patch(es). 
+
+|  Connection   |  No. Connections   |   Rank   | 
+| :-----------: | :----------------: | :------: | 
+|     1^st^     |        >= 2        |    2     | 
+|     1^st^     |         1          |    3     | 
+|     2^nd^     |        >= 3        |    4     | 
+|     2^nd^     |        <= 2        |    5     | 
+|     3^rd^     |        >= 4        |    6     | 
+|     3^rd^     |        <= 3        |    7     | 
+
+Patches which have no contiguous neighbors, but which have neighbors within 5km were also assigned rank values based in this system (TABLE XX). 
+
+|  No. Occupied Patches   |   Rank   | 
+| :---------------------: | :------: | 
+|           >= 3          |    5     |  
+|           <= 2          |    6     | 
+
+# Results 
+
+# Discussion  
+
+# Acknowledgments 
+ 
+# Literature Cited 
+
+# Supporting Information 
