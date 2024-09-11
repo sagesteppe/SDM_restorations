@@ -808,8 +808,8 @@ neigh_type <- function(x){
                            OrderConnection == 'SecondOrder' & NoConnections <= 2 ~ 5, 
                            OrderConnection == 'ThirdOrder' & NoConnections >= 4 ~ 6, 
                            OrderConnection == 'ThirdOrder' & NoConnections <= 3 ~ 7, 
-                           OccupiedNeighborsIn5k >= 3 ~ 5, 
-                           OccupiedNeighborsIn5k <= 2 ~ 6, 
+                           OccupiedNeighborsIn5k >= 3 ~ 8, 
+                           OccupiedNeighborsIn5k <= 2 ~ 9, 
                            .default = as.numeric(7)
                          )) |>
     dplyr::slice_min(Rank, n = 1, by = 'ROW') |>
@@ -822,8 +822,8 @@ neigh_type <- function(x){
     dplyr::right_join( ranks, by = 'ROW') |>
     dplyr::select(-ROW, -Presence, PchIDComb = PatchIDCombined)
   
-  write.csv(dat, paste0('../results/connections/', taxon, '.csv'), row.names = F)
-  sf::st_write(x1, paste0('../results/rankedPatches/', taxon, '.shp'), quiet = T, append = F)
+  write.csv(dat, paste0('../results/connections-manuscript/', taxon, '.csv'), row.names = F)
+  sf::st_write(x1, paste0('../results/rankedPatches-manuscript/', taxon, '.shp'), quiet = T, append = F)
   
 }
 

@@ -56,7 +56,6 @@ files <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), base
 
 rm(target_taxa)
 
-
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu10R-line.tif') )
 hydr_ftr <-  rast( file.path(gd, 'river_resistance', 'water_ftR.tif') )
@@ -90,7 +89,6 @@ target_taxa <- read.csv('../data/raw/2024sos_species-FIXED.csv', na.strings = ""
   pull(taxon)
 
 files <- f[grep(paste(paste0(gsub(' ', '_', target_taxa)), collapse = '|'), basename(f))]
-
 
 gd <- '/media/steppe/hdd/Geospatial_data'
 hydr_bound <- rast( file.path(gd, 'WBD_rast', 'hu12R-line.tif') )
@@ -277,13 +275,6 @@ lpi <- spp_richness <- st_read(dsn = p1,
                distinct(), by = c('SpeciesList' = 'symbol' ))
 
 # add the species names from USDA PLANTS CODES
-
-# ...
-
-AIM_abundance_retrievR <- function(x, aim_tables){
-  
-  
-}
 
 ```
 

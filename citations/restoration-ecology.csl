@@ -13,7 +13,7 @@
     <category citation-format="author-date"/>
     <category field="biology"/>
     <eissn>1526-100X</eissn>
-    <updated>2021-06-02T07:49:02+00:00</updated>
+    <updated>2021-06-03T04:09:55+00:00</updated>
     <rights license="http://creativecommons.org/licenses/by-sa/3.0/">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License</rights>
   </info>
   <macro name="editor">
@@ -33,7 +33,7 @@
   </macro>
   <macro name="author">
     <names variable="author">
-      <name initialize-with="" sort-separator=" " name-as-sort-order="all" delimiter-precedes-last="always" et-al-min="4"/>
+      <name initialize-with="" sort-separator=" " name-as-sort-order="all" delimiter-precedes-last="always"/>
       <label prefix=", " form="short"/>
       <substitute>
         <names variable="editor"/>
@@ -94,7 +94,7 @@
       </else>
     </choose>
   </macro>
-  <citation collapse="year" disambiguate-add-givenname="true" disambiguate-add-names="true" disambiguate-add-year-suffix="true">
+  <citation collapse="year" disambiguate-add-givenname="true" disambiguate-add-names="true" disambiguate-add-year-suffix="true" et-al-min="3" et-al-use-first="1">
     <layout delimiter="; " prefix="(" suffix=")">
       <group delimiter=", ">
         <group delimiter=" ">
@@ -180,4 +180,3 @@
     </layout>
   </bibliography>
 </style>
-
