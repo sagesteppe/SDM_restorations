@@ -23,16 +23,17 @@ rm(p2dat, f)
 ggparcoord(dat,
            columns = c( 4:5, 2, 6:7), groupColumn = 8,
            showPoints = TRUE, scale = "globalminmax",
-           title = "Common evaluation metrics for each model",
+           title = "Evaluation metrics for models",
            alphaLines = 0.3 
 ) + 
-  labs(y = 'Value', x = 'Measurement') + 
+  labs(y = 'Value', x = 'Metric') + 
   scale_color_gradient(high = '#426b69', low = '#8BB174') +
   theme(
     aspect.ratio = 4/3,
-    text = element_text(colour = "white"),
-    axis.text.x=element_text(colour="white"),
-    axis.text.y=element_text(colour="white"),
+  #  text = element_text(colour = "white"),
+   # axis.text.x=element_text(colour="white"),
+  #  axis.text.y=element_text(colour="white"),
+    axis.text.x = element_text(angle = 25, vjust = 0.65),
     plot.title = element_text(hjust = 0.5),
     legend.position="none",
     panel.border = element_blank(),

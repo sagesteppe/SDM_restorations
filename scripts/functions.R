@@ -1788,3 +1788,19 @@ date_maker <- function(){
   
   return(list(dates, reporting_dates))
 }
+
+
+
+returnGini <- function(x){
+  
+  f <- paste0(x, list.files(x, pattern = '1k-'))
+  mods <- lapply(f, readRDS)
+  mods <- parallel::mclapply(mods, randomForest::importance)
+  
+  names(mods) <- gsub('1k-.*$', '', basename(f))
+  mods <- purrr::map(mods, data.frame) |>
+    purrr::map(tibble::rownames_to_column, var = 'Variable') |>
+    dplyr::bind_rows(.id = 'Taxon')
+  
+  return(mods)
+}

@@ -181,14 +181,12 @@ recs_removed <- lapply(to_remove, function(x){out <- length(na.omit(gsub('^0$', 
   mutate(propRemoved = if_else(recordsRemoved > 0, recordsRemoved/totalRecords, 0))
 
 rm(exact, ranges, pos, pts2remove, to_remove, thinned)
-rm(list = ls()[ sapply( ls(), exists, mode="function")])
 ```
-
 
 ```{r How many records flagged by LDA?}
 
 f <- file.path('../results/lda', list.files('../results/lda'))
-df <- do.call(rbind, lapply(f, function(x)
+lda <- do.call(rbind, lapply(f, function(x)
   cbind(read.csv(x), name= gsub('[.]csv$', '', basename(x))))) |>
   mutate(
     removedFlagged = if_else(Removed >= Max_Recs_Removal, 1, 0),
@@ -197,20 +195,7 @@ df <- do.call(rbind, lapply(f, function(x)
 
 ```
 
-```{r}
-returnGini <- function(x){
-  
-  f <- paste0(x, list.files(x, pattern = '1k-'))
-  mods <- lapply(f, readRDS)
-  mods <- parallel::mclapply(mods, randomForest::importance)
-  
-  names(mods) <- gsub('1k-.*$', '', basename(f))
-  mods <- purrr::map(mods, data.frame) |>
-    purrr::map(tibble::rownames_to_column, var = 'Variable') |>
-    dplyr::bind_rows(.id = 'Taxon')
-  
-  return(mods)
-}
+```{r Variable Importance}
 
 giniDecrease <- returnGini(x = '../results/rf_models/')
 
@@ -226,62 +211,46 @@ gd_summ <- giniDecrease |>
     n = n(), 
     mean = mean(propDecreaseGini)
   ) |>
-  arrange(-n) |>
-  mutate(
-    Theme = case_when(
-      Variable %in% c(
-        'bio1', 'bio10', 'bio11', 'bio12', 'bio18', 'bio19', 'bio4', 'bio5',
-        'bio6', 'gdd5', 'gdgfgd5', 'hurs', 'ngd5', 'scd', 'swe', 'vpd') ~ 'Climate',
-      Variable %in% c('cfvo_30_60', 'depth2bedrock', 'phh2o_30_60', 'salinity', 
-                      'sand_5_15', 'silt_5_15', 'soc_0_5') ~ 'Soil',
-      Variable %in% c('aspect', 'cti', 'dem', 'slope', 'tpi', 'tri') ~ 'Topography',
-      Variable %in% c('herb', 'lastwild', 'shrub', 'tree') ~ 'Land Cover/Landuse'
-      )
-    )
+  arrange(-n) 
 
-ggplot(data = gd_summ, aes(x = n, y = mean, color = Theme, label = Variable)) + 
-  geom_smooth(method = 'glm', formula = 'y ~ x', aes(x = n, y = mean), inherit.aes = F, color = 'black') +
-  scale_color_manual(
-    breaks = c("Climate", "Soil", "Land Cover/Landuse", "Topography"),
-    values=c("#773344", "#20A4F3", "#63A375", "#EA7317")
-  ) + 
-  geom_jitter() + 
-  ggrepel::geom_label_repel(max.overlaps = 17, alpha = 0.9) + 
-  labs(
-    title = 'Relationship between the number of models featuring\n a variable and the variables mean contribution to all models', 
-    x = 'Number of models including variable', 
-    y = ' Proportional mean decrease in Gini', 
-    caption = expression(~italic('Variables become more important as they increase the mean decrease in Gini'))
-    ) + 
-  theme_classic() + 
-  theme(
-    axis.line.y = element_blank(), 
-    axis.line.x = element_blank(),
-    plot.title = element_text(hjust = 0.5), 
-    legend.position = 'bottom'
-    ) 
+```
 
-rm(ob, giniDecrease)
+```{r Model Performance held out data}
+
+p2dat <- '../results/summary'
+f <- file.path(p2dat, list.files(p2dat)[ grep('1k.csv', list.files(p2dat))])
+
+mod_perform <- do.call("rbind", sapply(f, read.csv, simplify = FALSE)) |>
+  rownames_to_column('Taxon') |>
+  mutate(Taxon = gsub('1k.*', '', basename(Taxon))) |>
+  filter(Metric %in% c('Independent_Variables', 'AUC', 'Sensitivity', 'Specificity',
+                       'Kappa', 'Balanced Accuracy')) |>
+  pivot_wider(names_from = Metric, values_from = Value) |>
+  mutate(AUC_copy = AUC)
+
+rm(p2dat, f)
 ```
 
 Of the `r round(sum(recs_removed$totalRecords) * 0.015, 0)` records which were flagged, and manually investigated by an analyst a total of `r sum(recs_removed$recordsRemoved)` were removed. 
 Of these `r nrow(recs_removed)` manually reviewed taxa, `r nrow(recs_removed[recs_removed$recordsRemoved==0,])` had no records removed, the mean proportion of records which were removed (based on the entire number of records present) was `r round(mean(recs_removed$propRemoved), 3)`, median = `r round(median(recs_removed$propRemoved), 3)`, with a maximum of `r round(max(recs_removed$propRemoved), 3)`. 
 These values are skewed upwards due to a few species which serve as common 'dumping' grounds for difficult to identify taxa in species rich clades. 
 
-While the training accuracy scores for the linear-discriminant analysis were high all across the board (mean = `r round(mean(df$ACC_train), 4)`, min = `r round(min(df$ACC_train), 3)`), the realized range on testing values were lower, and reflected values more typical of complex applications (mean = `r round(mean(df$ACC_test), 3)`, median = `r round(median(df$ACC_test), 3)`, min = `r round(min(df$ACC_test), 3)`). 
-Of the randomly generated psuedo-absences which underwent linear discriminant analysis for `r nrow(df)` taxa, in only `r nrow(df[df$removedFlagged==0,])` instances did the number of records flagged for removal not exceed the number of records flagged. 
-On average `r round(mean(df$propFlagged), 3)` records were flagged per species (median = `r round(median (df$propFlagged), 3)`). 
+While the training accuracy scores for the linear-discriminant analysis were high all across the board (mean = `r round(mean(lda$ACC_train), 4)`, min = `r round(min(lda$ACC_train), 3)`), the realized range on testing values were lower, and reflected values more typical of complex applications (mean = `r round(mean(lda$ACC_test), 3)`, median = `r round(median(lda$ACC_test), 3)`, min = `r round(min(lda$ACC_test), 3)`). 
+Of the randomly generated psuedo-absences which underwent linear discriminant analysis for `r nrow(lda)` taxa, in only `r nrow(lda[lda$removedFlagged==0,])` instances did the number of records flagged for removal not exceed the number of records flagged. 
+On average `r round(mean(lda$propFlagged), 3)` records were flagged per species (median = `r round(median (lda$propFlagged), 3)`). 
 
-Which variables were the most important rank positions across all models? 
+The final models utilized `r nrow(gd_summ)` variables, the variables which showed up in the most models, also tended to be the most important in driving decisions (FIGURE X). 
+In general climate variables, especially the Bioclim variables, tended to be the most important in decreasing mean Gini, with variables of other types also contributing to models in lesser capacities (FIGURE X). 
+On the partitioned data, most models performed very well across a variety of diagnostic metrics (FIGURE XX). 
+Area under the receiver operator curve (AUC) values were generally the highest with a mean = `r round(mean(mod_perform$AUC), 3)`, median = `r round(median(mod_perform$AUC), 3)`, kappa scores were generally lowest with a mean = `r round(mean(mod_perform$Kappa), 3)`, median = `r round(median(mod_perform$Kappa), 3)`, and balanced accuracy scores were intermediate with mean = `r round(mean(mod_perform[['Balanced Accuracy']]), 3)`, median = `r round(median(mod_perform[['Balanced Accuracy']]), 3)`. 
 
-
-How were model evaluation statistics?
-
-Where were the populations crews ended up finding? (weird elbow plot)
+*Where were the populations crews ended up finding?* weird elbow plot)
 How did presences and absences interact? (logistic regression) 
 
 ```{r}
 rm(recs_removed)
+rm(list = ls()[ sapply( ls(), exists, mode="function")])
+
 ```
 
 # Discussion  
