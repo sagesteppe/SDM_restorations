@@ -124,3 +124,80 @@ table(thinned$datasource)
 
 
 
+################################################################################
+#########    WHICH VARIABLES HAD MOST OF THE INFLUENCE ON THE MODELS?   ########
+returnGini <- function(x){
+  
+  f <- paste0(x, list.files(x, pattern = '1k-'))
+  mods <- lapply(f, readRDS)
+  mods <- parallel::mclapply(mods, randomForest::importance)
+  
+  names(mods) <- gsub('1k-.*$', '', basename(f))
+  mods <- purrr::map(mods, data.frame) |>
+    purrr::map(tibble::rownames_to_column, var = 'Variable') |>
+    dplyr::bind_rows(.id = 'Taxon')
+  
+  return(mods)
+}
+
+giniDecrease <- returnGini(x = '../results/rf_models/')
+
+gd_summ <- giniDecrease |>
+  group_by(Taxon) |>
+  mutate(
+    sumGini = sum(MeanDecreaseGini),
+    propDecreaseGini = MeanDecreaseGini/sumGini
+  ) |>
+  ungroup() |>
+  group_by(Variable) |>
+  summarize(
+    n = n(), 
+    mean = mean(propDecreaseGini)
+  ) |>
+  arrange(-n) |>
+  mutate(
+    Theme = case_when(
+      Variable %in% c(
+        'bio1', 'bio10', 'bio11', 'bio12', 'bio18', 'bio19', 'bio4', 'bio5',
+        'bio6', 'gdd5', 'gdgfgd5', 'hurs', 'ngd5', 'scd', 'swe', 'vpd') ~ 'Climate',
+      Variable %in% c('cfvo_30_60', 'depth2bedrock', 'phh2o_30_60', 'salinity', 
+                      'sand_5_15', 'silt_5_15', 'soc_0_5') ~ 'Soil',
+      Variable %in% c('aspect', 'cti', 'dem', 'slope', 'tpi', 'tri') ~ 'Topography',
+      Variable %in% c('herb', 'lastwild', 'shrub', 'tree') ~ 'Land Cover/Landuse'
+    )
+  )
+
+
+model <- lm(gd_summ$mean ~ gd_summ$n)
+
+ggplot(data = gd_summ, aes(x = n, y = mean, color = Theme, label = Variable)) + 
+  geom_smooth(method = 'glm', formula = 'y ~ x', aes(x = n, y = mean),
+              inherit.aes = F, color = 'black') +
+  annotate(
+    geom = 'text', x = 300, y = 0.025, parse = TRUE, 
+    label = paste("~R^2==~",  round(broom::glance(model)[,2], 3)))  + 
+  scale_color_manual(
+    breaks = c("Climate", "Soil", "Land Cover/Landuse", "Topography"),
+    values=c("#773344", "#20A4F3", "#63A375", "#EA7317")
+  ) + 
+  geom_jitter() + 
+  ggrepel::geom_label_repel(max.overlaps = 20, alpha = 0.9) + 
+  labs(
+    title = 'Relationship between the number of models featuring\n a variable and the variables mean contribution to all models', 
+    x = 'Number of models including variable', 
+    y = ' Proportional mean decrease in Gini', 
+    caption = expression(~italic('Variables become more important as they increase the mean decrease in Gini'))
+  ) + 
+  theme_classic() + 
+  theme(
+    axis.line.y = element_blank(), 
+    axis.line.x = element_blank(),
+    plot.title = element_text(hjust = 0.5), 
+    legend.position = 'bottom'
+  ) 
+
+
+rm(ob, giniDecrease, gd_summ, model, returnGini)
+
+ggsave('../plots/VariableImportance.png', bg = 'transparent', 
+       width = 8, height = 4, units = 'in')
