@@ -221,6 +221,9 @@ labs <- data.frame(
 suitability_means <- suitability_means |>
   mutate(Null_mod = mean*Percent)
 
+## create a dummy species var to put the grey50 color on the legend. 
+dum_species <- data.frame(Percent = 1, Records = 0.1, Species = 'dum')
+
 linecols <- c( # define our palette
   'Species' = 'grey50',
   "Mean (95% CI)" = "#093824", 
@@ -242,6 +245,7 @@ ggplot(suitability_amounts,
   geom_line(data = suitability_means, aes(y = Percent/100, x = Null_mod, color = 'Theoretical Probability'),
             inherit.aes = F, lwd = 1) +
   geom_line(data = fp, aes(y = suitability, x = obs*100, color = 'Observed Populations'), inherit.aes = F, lwd = 1) +
+  geom_line(data = dum_species, aes(color = 'Species'), lwd = 1) + 
   
   labs(
     title = 'Populations are found in areas\nwith higher predicted suitability',
@@ -252,7 +256,9 @@ ggplot(suitability_amounts,
     breaks = seq(0, 1, by = 0.2)
   )  +
   scale_fill_manual(values = linecols, guide = 'none') + 
-  scale_colour_manual(values = linecols, name = NULL) + 
+  scale_colour_manual(
+    values = linecols, name = NULL, 
+    breaks = c('Species', 'Mean (95% CI)', 'Theoretical Probability', 'Observed Populations')) + 
   
   scale_x_continuous(
     breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%"), 
@@ -287,10 +293,10 @@ ggplot(suitability_amounts,
                arrow = arrow(length = unit(0.25, "cm")), color = 'black') +
   
   geom_label(data = labs, aes(x = x, y = y, label = label), 
-             inherit.aes = F, size = 2.5,
+             inherit.aes = F, size = 2.5 , 
+             
+ ######        USE THIS TO MAKE THE PLOT TRANSPARENT FOR THE TALK        #####
              fill='transparent', color = 'white') +
-  
-  ######        USE THIS TO MAKE THE PLOT TRANSPARENT FOR THE TALK        #####
 
   theme(
     panel.background = element_rect(fill='transparent'), #transparent panel bg
