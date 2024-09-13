@@ -157,6 +157,50 @@ saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.r
 ```
 
 
+
+
+
+
+
+
+
+
+
+```{r}
+
+habitat_specialist <- data.frame(
+  suitability = c(
+    seq(from= 0, to  = 0.1, length.out = 70), 
+    seq(from= 0.1, to  = 0.4, length.out = 15), 
+    seq(from= 0.4, to  = 0.8, length.out = 10),
+    seq(from= 0.8, to  = 1, length.out = 5)
+  ),
+  percent = 1:100
+)
+
+habitat_generalist <- data.frame(
+  suitability = c(
+    seq(from= 0, to  = 0.5, length.out = 40), 
+    seq(from= 0.6, to  = 0.7, length.out = 30), 
+    seq(from= 0.7, to  = 0.9, length.out = 20),
+    seq(from= 0.9, to  = 1, length.out = 10)
+  ),
+  percent = 1:100
+)
+
+
+ggplot() + 
+  geom_smooth(data = habitat_specialist, aes(x = percent, y = suitability)) + 
+  geom_smooth(data = habitat_generalist, aes(x = percent, y = suitability)) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    aspect.ratio = 1/1)
+
+
+```
+
+
+
 ```{r}
 
 suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds')
@@ -193,27 +237,37 @@ linecols <- c(
   "Populations" = "#FF2C55"
   )
 
-ggplot(suitability_amounts, aes(y = Percent, x = Records, color = Species, group = Species)) +
+
+suitability_means <- suitability_means |>
+  mutate(Null_mod = mean*Percent)
+
+ggplot(suitability_amounts,
+       aes(x = Percent, y = Records, color = Species, group = Species)) +
   geom_line(lty = 1) +
   scale_color_grey(guide = 'none') + 
-  geom_ribbon(data = suitability_means, aes(xmin = lower, xmax = upper, y = Percent),
+  geom_ribbon(data = suitability_means, aes(ymin = lower, ymax = upper, x = Percent),
               fill = '#73BA9B', inherit.aes = F, alpha = 0.5) + 
   geom_line(data = suitability_means, 
-            aes(y = Percent, x =  mean, color = 'a'), color = '#093824', inherit.aes = F, lwd = 1) + 
-  geom_line(data = fp, aes(y = suitability*100, x = obs), color = '#FF2C55', inherit.aes = F,  lwd = 1) +
+            aes(x = Percent, y =  mean, color = 'a'), 
+            color = '#093824', inherit.aes = F, lwd = 1) + 
+  geom_line(data = suitability_means, aes(x = Percent, y = Null_mod/100),
+            color = 'black', inherit.aes = F,  lwd = 1) +
+  geom_line(data = fp, aes(x = suitability*100, y = obs),
+            color = '#FF2C55', inherit.aes = F,  lwd = 1) +
   
   labs(
-    title = 'Populations are found in areas\nwith higher predicted suitability',
-    y = "Raster Cells (cumulative)",
-    x = 'Predicted Suitability (cumulative)') + 
+    title = 'Populations are found in\nareas with higher suitability',
+    x = "Raster Cells (cumulative)",
+    y = 'Predicted Suitability (cumulative)') + 
   theme_classic() +
-  scale_x_continuous(breaks = seq(0, 1, by = 0.2), sec.axis = sec_axis(~.*100,
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2), sec.axis = sec_axis(~.*100,
     name = 'Populations Found (cumulative)',
     breaks = seq(0, 100, by = 20), 
     labels = \(x) paste0(x, "%"))
   )  +
   
-  scale_y_continuous(breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%")) + 
+  scale_x_continuous(breaks = seq(0, 100, by = 20), 
+                     labels = \(x) paste0(x, "%")) + 
   theme(
     plot.title = element_text(hjust = 0.5),
     aspect.ratio = 1/1)
