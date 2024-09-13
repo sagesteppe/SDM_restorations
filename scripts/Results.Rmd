@@ -223,40 +223,43 @@ suitability_means <- suitability_means |>
 
 linecols <- c( # define our palette
   'Species' = 'grey50',
-  "Mean" = "#093824", 
+  "Mean (95% CI)" = "#093824", 
   "95% CI" = "#73BA9B",
-  "Populations" = "#FF2C55"
+  "Observed Populations" = "#7570b3",
+  'Theoretical Probability' = '#d95f02'
   )
-
 
 ggplot(suitability_amounts,
        aes(x = Percent, y = Records, color = Species, group = Species)) +
   geom_line(lty = 1) +
   scale_color_grey(guide = 'none') + 
-  geom_ribbon(data = suitability_means, aes(ymin = lower, ymax = upper, x = Percent),
-              fill = '#73BA9B', inherit.aes = F, alpha = 0.5) + 
+  ggnewscale::new_scale_color() +
+  geom_ribbon(data = suitability_means, aes(ymin = lower, ymax = upper, x = Percent, fill = '95% CI'),
+              inherit.aes = F, alpha = 0.5) + 
   geom_line(data = suitability_means, 
-            aes(x = Percent, y =  mean, color = 'a'), 
-            color = '#093824', inherit.aes = F, lwd = 1) + 
-  geom_line(data = suitability_means, aes(y = Percent/100, x = Null_mod),
-            color = '#d95f02', inherit.aes = F,  lwd = 1, lty = 53, linemitre = 2) +
-  geom_line(data = fp, aes(y = suitability, x = obs*100),
-            color = '#7570b3', inherit.aes = F,  lwd = 1, lty = 53) +
+            aes(x = Percent, y =  mean, color = 'Mean (95% CI)'), 
+            inherit.aes = F, lwd = 1) + 
+  geom_line(data = suitability_means, aes(y = Percent/100, x = Null_mod, color = 'Theoretical Probability'),
+            inherit.aes = F, lwd = 1) +
+  geom_line(data = fp, aes(y = suitability, x = obs*100, color = 'Observed Populations'), inherit.aes = F, lwd = 1) +
   
   labs(
-    title = 'Populations are found in\nareas with higher suitability',
+    title = 'Populations are found in areas\nwith higher predicted suitability',
     x = "Raster Cells (cumulative)",
     y = 'Predicted Suitability') + 
   theme_classic() +
   scale_y_continuous(
     breaks = seq(0, 1, by = 0.2)
   )  +
+  scale_fill_manual(values = linecols, guide = 'none') + 
+  scale_colour_manual(values = linecols, name = NULL) + 
   
   scale_x_continuous(
     breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%"), 
           sec.axis = sec_axis(~., name = 'Populations Found (cumulative)', 
                         breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%"))) + 
   theme(
+    legend.position=c(.9,.10),
     plot.title = element_text(hjust = 0.5),
     aspect.ratio = 1/1) + 
   
@@ -283,10 +286,26 @@ ggplot(suitability_amounts,
                    x = sm80$Percent+15, y = sm80$mean - 0.15),
                arrow = arrow(length = unit(0.25, "cm")), color = 'black') +
   
-  geom_label(data = labs, aes(x = x, y = y, label = label), inherit.aes = F, size = 2.5)
+  geom_label(data = labs, aes(x = x, y = y, label = label), 
+             inherit.aes = F, size = 2.5,
+             fill='transparent', color = 'white') +
+  
+  ######        USE THIS TO MAKE THE PLOT TRANSPARENT FOR THE TALK        #####
+
+  theme(
+    panel.background = element_rect(fill='transparent'), #transparent panel bg
+    plot.background = element_rect(fill='transparent', color=NA), #transparent plot bg
+    panel.grid.major = element_blank(), #remove major gridlines
+    panel.grid.minor = element_blank(), #remove minor gridlines
+    legend.background = element_rect(fill='transparent'), #transparent legend bg
+    legend.box.background = element_rect(fill='transparent'), #transparent legend panel
+    text = element_text(colour = "white")
+  )
+
+ggsave('../plots/leafplot-trans.png', width = 9, height = 9, units = 'in')
 
 
-# rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
+rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
 ```
 
 
