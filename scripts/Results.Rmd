@@ -159,87 +159,75 @@ saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.r
 
 
 
-
-
-
-
-
-
-
-```{r}
-
-habitat_specialist <- data.frame(
-  suitability = c(
-    seq(from= 0, to  = 0.1, length.out = 70), 
-    seq(from= 0.1, to  = 0.4, length.out = 15), 
-    seq(from= 0.4, to  = 0.8, length.out = 10),
-    seq(from= 0.8, to  = 1, length.out = 5)
-  ),
-  percent = 1:100
-)
-
-habitat_generalist <- data.frame(
-  suitability = c(
-    seq(from= 0, to  = 0.5, length.out = 40), 
-    seq(from= 0.6, to  = 0.7, length.out = 30), 
-    seq(from= 0.7, to  = 0.9, length.out = 20),
-    seq(from= 0.9, to  = 1, length.out = 10)
-  ),
-  percent = 1:100
-)
-
-
-ggplot() + 
-  geom_smooth(data = habitat_specialist, aes(x = percent, y = suitability)) + 
-  geom_smooth(data = habitat_generalist, aes(x = percent, y = suitability)) +
-  theme(
-    plot.title = element_text(hjust = 0.5),
-    aspect.ratio = 1/1)
-
-
-```
-
-
-
 ```{r}
 
 suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds')
 suitability_amounts <- bind_rows(suitability_amounts)
-remotes::install_github("bcgov/elucidate")
-
-y1 <- rnorm(1:10, 100, 10)
-elucidate::mean_ci(y1)
-
-recs <- filter(suitability_amounts, Percent == 50) |>
-  pull(Records)
-
-as.numeric( elucidate::mean_ci(recs, replicates = 1000, ci_level = 0.99) )
 
 prctn <- split(suitability_amounts, f = suitability_amounts$Percent)
 suitability_means <- lapply(prctn, \(x)
   data.frame(as.list(
     elucidate::mean_ci(x$Records, replicates = 1000, ci_level = 0.99))
-  )
+  ) 
 ) |>
   bind_rows() |>
   mutate(Percent = 1:100)
 
+#################################################################################
 fp <- scouting[scouting$futurePotential=='Yes',] 
 fp <- arrange(fp, suitability) |>
   st_drop_geometry() |>
   select(suitability) |>
   mutate(obs = 1:n() / n())
 
-linecols <- c(
+
+### Here we prep some display text which will help users interpret the plot ####
+################################################################################
+sm50 <- suitability_means[ which.min(abs(suitability_means$Percent-50)), ] 
+# on average 50% of cells have lower probabilities of being suitable than 0.23
+
+sm80 <- suitability_means[ which.min(abs(suitability_means$Percent-80)), ] 
+# on average 80% of cells have lower probabilities of being suitable than 0.614
+
+fp_2 <- fp[ which.min(abs(fp$obs-0.2)), ] # 80% of all populations are found in areas with suitability > 65.2%
+fp_5 <- fp[ which.min(abs(fp$obs-0.5)), ] # 50% of all populations are found in areas with suitability > 83.6% 
+fp_8 <- fp[ which.min(abs(fp$obs-0.8)), ] # the final 20 % of populations are found in areas with suitability > 94.6%
+
+
+labs <- data.frame(
+  x = c(
+    round(fp_2$obs, 2)*100 -10, 
+    round(fp_5$obs, 2)*100 - 10, 
+    sm50$Percent+15, 
+    sm80$Percent+15),
+  y = c(
+    round(fp_2$suitability, 2) + 0.1,
+    round(fp_5$suitability, 2) + 0.1, 
+    sm50$mean - 0.15, 
+    sm80$mean - 0.15),
+  label = c(
+    paste0(100- (round(fp_2$obs, 2)*100), '% of pops.\nwere found in areas\nwith suitability > ', round(fp_2$suitability, 2)),  
+    paste0(round(fp_5$obs, 2)*100, '% of pops.\nwere found in areas\nwith suitability > ', round(fp_5$suitability, 2)),
+    paste0(sm50$Percent, '% of cells have\nprobabilities of being\nsuitable lower than ', round(sm50$mean, 2)), 
+    paste0(sm80$Percent, '% of cells have\nprobabilities of being\nsuitable lower than ', round(sm80$mean, 2))
+  )
+)
+
+################################################################################
+
+# Create the mean suitability values across all taxa, this will illustrate the
+# distribution of modeled suitable habitat across 'common species' in the West based
+# on our input data and modelling approach. 
+suitability_means <- suitability_means |>
+  mutate(Null_mod = mean*Percent)
+
+linecols <- c( # define our palette
   'Species' = 'grey50',
   "Mean" = "#093824", 
   "95% CI" = "#73BA9B",
   "Populations" = "#FF2C55"
   )
 
-
-suitability_means <- suitability_means |>
-  mutate(Null_mod = mean*Percent)
 
 ggplot(suitability_amounts,
        aes(x = Percent, y = Records, color = Species, group = Species)) +
@@ -250,45 +238,65 @@ ggplot(suitability_amounts,
   geom_line(data = suitability_means, 
             aes(x = Percent, y =  mean, color = 'a'), 
             color = '#093824', inherit.aes = F, lwd = 1) + 
-  geom_line(data = suitability_means, aes(x = Percent, y = Null_mod/100),
-            color = 'black', inherit.aes = F,  lwd = 1) +
-  geom_line(data = fp, aes(x = suitability*100, y = obs),
-            color = '#FF2C55', inherit.aes = F,  lwd = 1) +
+  geom_line(data = suitability_means, aes(y = Percent/100, x = Null_mod),
+            color = '#d95f02', inherit.aes = F,  lwd = 1, lty = 53, linemitre = 2) +
+  geom_line(data = fp, aes(y = suitability, x = obs*100),
+            color = '#7570b3', inherit.aes = F,  lwd = 1, lty = 53) +
   
   labs(
     title = 'Populations are found in\nareas with higher suitability',
     x = "Raster Cells (cumulative)",
-    y = 'Predicted Suitability (cumulative)') + 
+    y = 'Predicted Suitability') + 
   theme_classic() +
-  scale_y_continuous(breaks = seq(0, 1, by = 0.2), sec.axis = sec_axis(~.*100,
-    name = 'Populations Found (cumulative)',
-    breaks = seq(0, 100, by = 20), 
-    labels = \(x) paste0(x, "%"))
+  scale_y_continuous(
+    breaks = seq(0, 1, by = 0.2)
   )  +
   
-  scale_x_continuous(breaks = seq(0, 100, by = 20), 
-                     labels = \(x) paste0(x, "%")) + 
+  scale_x_continuous(
+    breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%"), 
+          sec.axis = sec_axis(~., name = 'Populations Found (cumulative)', 
+                        breaks = seq(0, 100, by = 20), labels = \(x) paste0(x, "%"))) + 
   theme(
     plot.title = element_text(hjust = 0.5),
-    aspect.ratio = 1/1)
+    aspect.ratio = 1/1) + 
+  
+  geom_segment(
+    aes(
+      xend = fp_2$obs*100, 
+      yend = fp_2$suitability, 
+      x = round(fp_2$obs, 2)*100 - 10, 
+      y = fp_2$suitability + 0.1),
+                  arrow = arrow(length = unit(0.25, "cm")), color = 'black') + 
+  geom_segment(
+    aes(
+      xend = fp_5$obs*100, 
+      yend = fp_5$suitability, 
+      x = round(fp_5$obs, 2)*100 - 10, 
+      y = fp_5$suitability + 0.1),
+    arrow = arrow(length = unit(0.25, "cm")), color = 'black') +
+  
+  geom_segment(aes(xend = sm50$Percent, yend = sm50$mean, 
+                   x = sm50$Percent+15, y = sm50$mean - 0.15),
+                  arrow = arrow(length = unit(0.25, "cm")), color = 'black') +
+  
+  geom_segment(aes(xend = sm80$Percent, yend = sm80$mean, 
+                   x = sm80$Percent+15, y = sm80$mean - 0.15),
+               arrow = arrow(length = unit(0.25, "cm")), color = 'black') +
+  
+  geom_label(data = labs, aes(x = x, y = y, label = label), inherit.aes = F, size = 2.5)
 
-rm(linecols)
+
+# rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
 ```
 
 
+Raster cells (X axis, lower), represent units of the entire landscape, and the landscape predicts the amount of suitable habitat (Y axis) available for a species. 
+Across all species, the amount of suitable habitat appears low, on average (green line) for any one species, 80% of the landscape has a less than 0.61 chance of being suitable. 
+So on average only 20% of the landscape has high odds of being suitable habitat for an average species. 
+We can multiple the probability of each raster cell having suitable habitat to generate an expectation of how many populations crews would find based on our models alone (orange line).
+Using empirical data (purple line) we show that crews mostly found populations in areas with high predicted suitability, 80% of populations were in areas with suitability > 0.65, 50% in areas with modeled suitability > 0.84$. 
+Where the purple line is above the orange line, it shows that crews found fewer populations than would be expected by our model; I wager most of this deviation is due to them simply not recording populations - a sampling artifact. 
 
-```{r}
-suitability_means[ which.min(abs(suitability_means$Percent-50)), 'mean'] # on average 50% of cells have lower probabilities of being suitable than 0.23
-
-suitability_means[ which.min(abs(suitability_means$Percent-80)), 'mean'] # on average 80% of cells have lower probabilities of being suitable than 0.614
-
-
-fp[ which.min(abs(fp$obs-0.2)), ] # 80% of all populations are found in areas with suitability > 65.2% 
-
-fp[ which.min(abs(fp$obs-0.5)), ] # 50% of all populations are found in areas with suitability > 83.6% 
-
-fp[ which.min(abs(fp$obs-0.8)), ] # the final 20 % of populations are found in areas with suitability > 94.6%
-```
 
 ## Determine which points were used in training the models
 
