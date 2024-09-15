@@ -795,8 +795,8 @@ neigh_type <- function(x){
     data.frame(as.matrix(nbdist)), 'OccupiedNeighborsIn5k')
   nbdist$OccupiedNeighborsIn5k <- as.numeric(nbdist$OccupiedNeighborsIn5k)
   
-  dat <- cbind(nbdist, nblags) %>% 
-    tibble::rownames_to_column('ROW') %>% 
+  dat <- cbind(nbdist, nblags) |> 
+    tibble::rownames_to_column('ROW') |>  
     tidyr::pivot_longer(FirstOrder:FifthOrder, names_to = 'OrderConnection', values_to = 'NoConnections') %>% 
     dplyr::filter(ROW %in% 1:known_r | OccupiedNeighborsIn5k > 0 | NoConnections > 0)
   
@@ -810,7 +810,7 @@ neigh_type <- function(x){
                            OrderConnection == 'ThirdOrder' & NoConnections <= 3 ~ 7, 
                            OccupiedNeighborsIn5k >= 3 ~ 8, 
                            OccupiedNeighborsIn5k <= 2 ~ 9, 
-                           .default = as.numeric(7)
+                           .default = as.numeric(10)
                          )) |>
     dplyr::slice_min(Rank, n = 1, by = 'ROW') |>
     dplyr::select(ROW, Rank) |>

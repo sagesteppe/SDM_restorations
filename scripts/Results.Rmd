@@ -33,9 +33,9 @@ scouting <- filter(scouting, taxa %in% f$species) |>
   st_transform(5070)
 
 # here are the ranked patches
-f_rp <- list.files('../results/rankedPatches', pattern = '.shp')
+f_rp <- list.files('../results/rankedPatches-manuscript', pattern = '.shp')
 f_rp <- data.frame(
-  f_rankedp = paste0('../results/rankedPatches/', f_rp), 
+  f_rankedp = paste0('../results/rankedPatches-manuscript/', f_rp), 
   species = gsub('[.]shp$', '', f_rp)
 )
 
@@ -104,7 +104,7 @@ extractR <- function(x){
     x, 
     suitability = suitability, 
     .before = geometry) |>
-    dplyr::select(-f_suitability, -f_rankedp, -f_patchMetrics, -f_classMetrics) |>
+    dplyr::select(-f_rankedp, -f_patchMetrics, -f_classMetrics) |>
     dplyr::left_join(lsm, by = c('PchIDComb' = 'id' ))
   
   return(wide)
@@ -114,7 +114,46 @@ extractR <- function(x){
 scouting <- lapply(scout_split, extractR) 
 scouting <- dplyr::bind_rows(scouting) 
 
+ # for manuscript 193 records are NA.
 ```
+
+
+Some of these visits undoubtedly arose due to revisits of known occurrences. 
+We will discard any point within 500m of an historic point which we know was distributed to the crews via QGIS. 
+```{r}
+p <- '../data/raw/occurrence/combined_records'
+f <- file.path(p, list.files(p, pattern = '.shp$'))
+
+f_occ <- data.frame(
+  f_rankedp = f, 
+  taxa = gsub('[.]shp$', '', basename(f))
+)
+
+files <- left_join(scouting, f_occ, by = 'taxa') 
+f <- split(files, f = files$f_rankedp)
+
+strip_occurrences <- function(x){
+  
+  occurrences <- sf::st_read(sf::st_drop_geometry(x$f_rankedp[1]), quiet = T) |>
+    sf::st_buffer(1000)
+  
+  ints <- sf::st_intersects(occurrences, x) # identify intersecting points
+  removals <- unique(unlist(ints[lengths(ints) > 0])) # remove them. 
+  
+  if(length(removals > 0)){
+    x <- x[-removals,]
+  } 
+  
+  return(dplyr::select(x, -f_rankedp))
+}
+
+files <- lapply(f, strip_occurrences) |>
+  bind_rows()
+
+
+rm(f, p, strip_occurrences)
+```
+
 
 
 ```{r write out some species for further data acquisition, eval = F}
@@ -152,6 +191,10 @@ prcntSuitable <- function(x){
   
 }
 
+scout_split <- split(files, files$taxa)
+# we are going to discard species with fewer than 3 observations. 
+scout_split <- scout_split[lapply(scout_split, nrow) >= 3]
+
 suitability_amounts <- lapply(scout_split, prcntSuitable)
 saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.rds')
 ```
@@ -161,8 +204,8 @@ saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.r
 
 ```{r}
 
-suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds')
-suitability_amounts <- bind_rows(suitability_amounts)
+suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds') |>
+  bind_rows(suitability_amounts)
 
 prctn <- split(suitability_amounts, f = suitability_amounts$Percent)
 suitability_means <- lapply(prctn, \(x)
