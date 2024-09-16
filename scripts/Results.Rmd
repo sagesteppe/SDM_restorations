@@ -104,7 +104,7 @@ extractR <- function(x){
     x, 
     suitability = suitability, 
     .before = geometry) |>
-    dplyr::select(-f_rankedp, -f_patchMetrics, -f_classMetrics) |>
+    dplyr::select(-f_patchMetrics, -f_classMetrics) |>
     dplyr::left_join(lsm, by = c('PchIDComb' = 'id' ))
   
   return(wide)
@@ -119,13 +119,13 @@ scouting <- dplyr::bind_rows(scouting)
 
 
 Some of these visits undoubtedly arose due to revisits of known occurrences. 
-We will discard any point within 500m of an historic point which we know was distributed to the crews via QGIS. 
+We will discard any point within 1000m of an historic point which we know was distributed to the crews via QGIS. 
 ```{r}
 p <- '../data/raw/occurrence/combined_records'
 f <- file.path(p, list.files(p, pattern = '.shp$'))
 
 f_occ <- data.frame(
-  f_rankedp = f, 
+  f_occ = f, 
   taxa = gsub('[.]shp$', '', basename(f))
 )
 
@@ -134,7 +134,7 @@ f <- split(files, f = files$f_rankedp)
 
 strip_occurrences <- function(x){
   
-  occurrences <- sf::st_read(sf::st_drop_geometry(x$f_rankedp[1]), quiet = T) |>
+  occurrences <- sf::st_read(sf::st_drop_geometry(x$f_occ[1]), quiet = T) |>
     sf::st_buffer(1000)
   
   ints <- sf::st_intersects(occurrences, x) # identify intersecting points
@@ -144,12 +144,11 @@ strip_occurrences <- function(x){
     x <- x[-removals,]
   } 
   
-  return(dplyr::select(x, -f_rankedp))
+  return(dplyr::select(x, -f_occ))
 }
 
 files <- lapply(f, strip_occurrences) |>
   bind_rows()
-
 
 rm(f, p, strip_occurrences)
 ```
@@ -205,7 +204,7 @@ saveRDS(suitability_amounts, file = '../data/processed/prcntSDMsurfaceSuitable.r
 ```{r}
 
 suitability_amounts <- readRDS('../data/processed/prcntSDMsurfaceSuitable.rds') |>
-  bind_rows(suitability_amounts)
+  bind_rows()
 
 prctn <- split(suitability_amounts, f = suitability_amounts$Percent)
 suitability_means <- lapply(prctn, \(x)
@@ -353,7 +352,6 @@ ggplot(suitability_amounts,
 
 ggsave('../plots/leafplot-trans.png', width = 9, height = 9, units = 'in')
 
-
 rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
 ```
 
@@ -366,9 +364,51 @@ Using empirical data (purple line) we show that crews mostly found populations i
 Where the purple line is above the orange line, it shows that crews found fewer populations than would be expected by our model; I wager most of this deviation is due to them simply not recording populations - a sampling artifact. 
 
 
-## Determine which points were used in training the models
+Connectivity analysis 
 
-These points will need to be removed because they are already known to be presences... 
+```{r}
+ggplot () + 
+  geom_bar(data = files, aes(Rank))
+
+# What distribution of these ranks exist within the data sets? - Let's show 
+# the proportion which is returned by all. 
+
+PatchSummary <- function(x){
+  
+  patches <- sf::st_read(x, quiet = TRUE)
+
+  area_rank <- patches |>
+    dplyr::group_by(Rank) |>
+    dplyr::summarise(geometry = sf::st_union(geometry)) 
+
+  area_rank <- data.frame(
+    Taxon = gsub('[.]shp$', '', basename(x)),
+    dplyr::select(sf::st_drop_geometry(area_rank), 'Rank'),
+    Area_ha = as.numeric(units::set_units(sf::st_area(area_rank), 'ha'))
+  )
+  
+  cts_rank <- patches |>
+    sf::st_drop_geometry() |> 
+    dplyr::select(Rank) |>
+    dplyr::count(Rank, name = 'Patches') |>
+    dplyr::left_join(area_rank, by = 'Rank') |>
+    
+    # now calculate as proportions
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      Patches = Patches/sum(Patches),
+      Area_ha = Area_ha/sum(Area_ha)
+    ) |>
+    dplyr::relocate(Taxon, .before = Rank)
+  
+  return(cts_rank)
+  
+}
+
+need_patches <- unique(files$f_rankedp)
+patch_summs <- lapply(need_patches, PatchSummary)
+
+```
 
 
 ## Analysis 
