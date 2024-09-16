@@ -366,9 +366,7 @@ Where the purple line is above the orange line, it shows that crews found fewer 
 
 Connectivity analysis 
 
-```{r}
-ggplot () + 
-  geom_bar(data = files, aes(Rank))
+```{r, eval = F}
 
 # What distribution of these ranks exist within the data sets? - Let's show 
 # the proportion which is returned by all. 
@@ -405,9 +403,42 @@ PatchSummary <- function(x){
   
 }
 
-need_patches <- unique(files$f_rankedp)
-patch_summs <- lapply(need_patches, PatchSummary)
+need_patches <- unique(files$f_rankedp) 
+patch_summs <- lapply(need_patches, PatchSummary)|> 
+  bind_rows() 
 
+
+ggplot() + 
+  geom_point(data = patch_summs, aes(x = Rank, y = Area_ha))
+
+ggplot() + 
+  geom_point(data = patch_summs, aes(x = Rank, y = Patches))
+
+ps <- patch_summs |>
+  ungroup() |>
+  group_by(Rank) |>
+  summarize(
+    meanP = mean(Patches),
+    meanA = mean(Area_ha)
+    ) 
+
+f1 <- files |>
+  sf::st_drop_geometry() |>
+  count(Rank) |>
+  drop_na() |>
+  left_join(ps, 'Rank') |>
+  mutate(
+    meanP_prop = (1 - meanP) * n,
+    meanA_prop = (1 - meanA) * n
+  )
+  
+ggplot () + 
+  geom_col(data = f1, aes(meanP_prop, x = Rank))
+
+ggplot () + 
+  geom_col(data = f1, aes(meanA_prop, x = Rank))
+
+saveRDS(patch_summs, file = '../data/processed/PatchCtsAreas.rds')
 ```
 
 
@@ -433,8 +464,6 @@ abline(v = quants[[2]], lwd = 2)
 
 2) What is the relationship between Patch Rank and presence of species? 
 
-
-- can we test moving the distance patches into their own categories ??? 
 ```{r}
 hist(fp$Rank)
 ```
