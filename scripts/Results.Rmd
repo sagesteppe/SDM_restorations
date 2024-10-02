@@ -335,7 +335,7 @@ ggplot(suitability_amounts,
                arrow = arrow(length = unit(0.25, "cm")), color = 'black') +
   
   geom_label(data = labs, aes(x = x, y = y, label = label), 
-             inherit.aes = F, size = 2.5 , 
+             inherit.aes = F, size = 3 , 
              
  ######        USE THIS TO MAKE THE PLOT TRANSPARENT FOR THE TALK        #####
              fill='transparent', color = 'white') +
@@ -354,7 +354,7 @@ ggplot(suitability_amounts,
 
 ggsave('../plots/leafplot-trans.png', width = 9, height = 9, units = 'in')
 
-rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
+# rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
 ```
 
 
