@@ -81,7 +81,7 @@ The spatial extent of modelling broadly encompasses the Western United States be
 This domain has tremendous variation in amounts of elevation, temperature, and precipitation. 
 
 ## Species Occurrence Records  
-Species presence records were collected from herbaria, citizen science initiatives (e.g. iNaturalist), and standardized ecological monitoring programmes (e.g. VegBank, Forest Inventory and Analysis) using R [@chamberlain2024rgbif; @maitner2023bien; @michonneau2023idigbio]. 
+Species presence records were collected from herbaria, citizen science initiatives (e.g. iNaturalist), and standardized ecological monitoring programs (e.g. VegBank, Forest Inventory and Analysis) using R [@chamberlain2024rgbif; @maitner2023bien; @michonneau2023idigbio]. 
 These records were filtered to only those collected after 1950, with coordinate uncertainty less than 250 meters, and only the most recent record per 90m cell was retained. 
 All of these records were then manually reviewed by species, where records with more 2 or more variables in the 1.5% quantiles of several environmental variables (BIO1, BIO4, BIO10, BIO12, & BIO19; see TABLE X) and distance were flagged.
 During subjective manual review all digitized herbarium specimens which were suspect were reviewed, while other records were dropped based on the analysts review of other occurrence records.   
