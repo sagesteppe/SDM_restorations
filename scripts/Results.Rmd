@@ -354,7 +354,7 @@ ggplot(suitability_amounts,
 
 ggsave('../plots/leafplot-trans.png', width = 9, height = 9, units = 'in')
 
-# rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
+rm(fp, fp_2, fp_5, fp_8, labs, prctn, sm50, sm80, linecols)
 ```
 
 
@@ -510,12 +510,23 @@ anova(pois.mod, pois.mod_int)
 
 4) What is the relationship between patch metrics and population size? 
 ```{r}
+write.csv(scout_long, '../data/SOS/LandscapeMetrics.csv')
 
 scout_long <- pivot_longer(scouting, cai:enn_mn)
+scout_long <- mutate(
+  scout_long, 
+  POP_CENSUS_SQRT = sqrt(POPULATION_SIZE),
+  POP_CENSUS_LOG = log(POPULATION_SIZE)
+  )
 
-ggplot(scout_long, aes(y = POPULATION_SIZE, x = value)) +
+write.csv(scout_long, '../data/SOS/LandscapeMetrics.csv')
+
+ggplot(scout_long, aes(y = POP_CENSUS_LOG, x = value)) +
   geom_point() +
-  facet_grid(. ~ name) 
+  facet_grid(. ~ name, scales = 'free') +
+  geom_smooth(aes(group=name)) 
+
+scout_long
 
 ```
 
