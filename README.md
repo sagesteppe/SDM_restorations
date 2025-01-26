@@ -93,6 +93,13 @@ Patches which have no contiguous neighbors, but which have neighbors within 5km 
 
 Multiple landscape metrics were calculated; the Class metrics Euclidean Nearest Neighbor of both mean and coefficient of variation, and the Patch metrics: Euclidean Nearest Neighbor, Core Area Index, PARA, Fractal Index (@hesselbarth2019lsm).
 
+
+# Update
+
+Unfortunately someone leaked some data (not me or anyone associated with our crews; actually a government employee) and we no longer have access to all of the data for evaluation. 
+If you want to see my final report on this project please look here https://sagesteppe.github.io/Modelling-Natural-History-to-Increase-Native-Seed-Collection-Efficiency/ModellingNaturalHistory.html#/title-slide . 
+
+
 ## Appendix 2
 
 Correlation between patch habitat suitable and abundance
